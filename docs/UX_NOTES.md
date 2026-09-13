@@ -45,3 +45,9 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 
 - Responsive layout; no separate mobile/desktop app.
 - System light/dark mode is followed through `prefers-color-scheme`.
+## v0.1.1 appearance and shortcut
+
+- `⋯ → 바로가기 추가`: browser/PWA install prompt when available; iPhone/iPad shows Safari `공유 → 홈 화면에 추가` instructions.
+- `⋯ → 화면 모드`: system / light / dark. System is the default, manual choice is stored locally.
+- Light appearance: warm beige parchment-inspired background with a subtle generated paper grain; no external texture image.
+

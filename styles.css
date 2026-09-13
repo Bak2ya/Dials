@@ -1,29 +1,51 @@
 :root {
-  color-scheme: light dark;
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-soft: #f0f2f5;
-  --surface-hover: #e9edf2;
-  --text: #17191c;
-  --muted: #68707a;
-  --border: #dfe3e8;
-  --accent: #1f6feb;
-  --accent-hover: #195fc8;
-  --accent-soft: #e8f1ff;
-  --danger: #c83d3d;
-  --warning: #d9a300;
-  --warning-bg: #fff4c2;
-  --success: #20835a;
-  --shadow: 0 12px 30px rgba(18, 25, 33, 0.08);
+  color-scheme: light;
+  --bg: #efe6d7;
+  --surface: #fffaf1;
+  --surface-soft: #f6eee1;
+  --surface-hover: #eee1cf;
+  --text: #2d2924;
+  --muted: #746b60;
+  --border: #d8cbbb;
+  --accent: #765437;
+  --accent-hover: #64472f;
+  --accent-soft: #eadcc9;
+  --danger: #a83e3e;
+  --warning: #9a6d00;
+  --warning-bg: #fff0bd;
+  --success: #3d765a;
+  --shadow: 0 12px 30px rgba(83, 64, 43, 0.10);
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
   --content-width: 1080px;
+  --paper-texture-opacity: 0.10;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111317;
+  --surface: #191c21;
+  --surface-soft: #22262c;
+  --surface-hover: #2b3037;
+  --text: #f2f4f7;
+  --muted: #a5adb8;
+  --border: #30353d;
+  --accent: #8db7e8;
+  --accent-hover: #a7c8ed;
+  --accent-soft: #203246;
+  --danger: #ff8585;
+  --warning: #ffd45f;
+  --warning-bg: #443a17;
+  --success: #78d8ad;
+  --shadow: 0 14px 36px rgba(0, 0, 0, 0.25);
+  --paper-texture-opacity: 0;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root[data-theme="system"] {
+    color-scheme: dark;
     --bg: #111317;
     --surface: #191c21;
     --surface-soft: #22262c;
@@ -31,20 +53,37 @@
     --text: #f2f4f7;
     --muted: #a5adb8;
     --border: #30353d;
-    --accent: #6da8ff;
-    --accent-hover: #8ab9ff;
-    --accent-soft: #1b2d47;
+    --accent: #8db7e8;
+    --accent-hover: #a7c8ed;
+    --accent-soft: #203246;
     --danger: #ff8585;
     --warning: #ffd45f;
     --warning-bg: #443a17;
     --success: #78d8ad;
     --shadow: 0 14px 36px rgba(0, 0, 0, 0.25);
+    --paper-texture-opacity: 0;
   }
 }
 
 * { box-sizing: border-box; }
 html { min-height: 100%; background: var(--bg); }
-body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+body { position: relative; margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--paper-texture-opacity);
+  background-image:
+    radial-gradient(circle at 16% 12%, rgba(255,255,255,0.85), transparent 34%),
+    radial-gradient(circle at 78% 82%, rgba(109,76,43,0.20), transparent 44%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");
+  background-size: auto, auto, 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+#app, .noscript { position: relative; z-index: 1; }
 button, input { font: inherit; }
 button { color: inherit; }
 a { color: inherit; }
@@ -240,3 +279,18 @@ input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in sr
   .modal-panel { border-radius: 18px 18px 12px 12px; max-height: 82vh; }
   .info-grid { grid-template-columns: 96px 1fr; }
 }
+
+
+.theme-choice-list { display: grid; gap: 9px; }
+.theme-choice { width: 100%; display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: center; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); padding: 13px 14px; text-align: left; cursor: pointer; }
+.theme-choice:hover { background: var(--surface-hover); }
+.theme-choice.selected { border-color: var(--accent); background: var(--accent-soft); }
+.theme-choice-radio { width: 16px; height: 16px; border: 2px solid var(--muted); border-radius: 50%; position: relative; }
+.theme-choice.selected .theme-choice-radio { border-color: var(--accent); }
+.theme-choice.selected .theme-choice-radio::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--accent); }
+.theme-choice strong, .theme-choice small { display: block; }
+.theme-choice small { margin-top: 3px; color: var(--muted); line-height: 1.45; }
+.install-guide strong { display: block; margin-bottom: 8px; }
+.install-guide p, .install-guide ol { margin: 0; color: var(--muted); line-height: 1.65; }
+.install-guide ol { padding-left: 22px; }
+.install-guide li + li { margin-top: 4px; }

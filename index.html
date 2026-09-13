@@ -3,8 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#111317" media="(prefers-color-scheme: dark)">
+  <meta id="themeColorMeta" name="theme-color" content="#efe6d7">
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("dialsThemePreference");
+        document.documentElement.dataset.theme = ["light", "dark"].includes(saved) ? saved : "system";
+      } catch {
+        document.documentElement.dataset.theme = "system";
+      }
+    })();
+  </script>
   <meta name="description" content="Web-based contact viewer with separately distributed local data files">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -99,6 +108,9 @@
                 <button type="button" role="menuitem" data-action="data-info">데이터 정보</button>
                 <button type="button" role="menuitem" data-action="replace-data">새 데이터 불러오기</button>
                 <button type="button" role="menuitem" data-action="contact-export">연락처 저장</button>
+                <div class="menu-separator"></div>
+                <button type="button" role="menuitem" data-action="install-app">바로가기 추가</button>
+                <button id="themeMenuButton" type="button" role="menuitem" data-action="theme">화면 모드 · 시스템</button>
                 <div class="menu-separator"></div>
                 <button type="button" role="menuitem" data-action="lock">잠금</button>
               </div>

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.1.1";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -9,6 +9,7 @@ const SAFE_META_KEY = "safeMeta";
 const LATEST_STATUS_STORAGE_KEY = "dialsLatestStatus";
 const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
+const THEME_STORAGE_KEY = "dialsThemePreference";
 
 const state = {
   encryptedText: "",
@@ -22,6 +23,8 @@ const state = {
   latestStatus: null,
   selectedPeople: new Set(),
   contactFilter: "",
+  deferredInstallPrompt: null,
+  themePreference: "system",
 };
 
 const el = {};
@@ -32,6 +35,7 @@ async function init() {
   cacheElements();
   bindEvents();
   registerServiceWorker();
+  initializeTheme();
   await loadLatestStatus();
 
   if (!window.crypto?.subtle || !window.indexedDB) {
@@ -70,10 +74,19 @@ function cacheElements() {
     "includeMobileOption", "includeExtensionOption", "includeAffiliationOption", "includeJobOption",
     "prefixEnabledOption", "namePrefixInput", "prefixPreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
+    "themeMenuButton", "themeColorMeta",
   ].forEach((id) => { el[id] = document.getElementById(id); });
 }
 
 function bindEvents() {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    state.deferredInstallPrompt = event;
+  });
+  window.addEventListener("appinstalled", () => {
+    state.deferredInstallPrompt = null;
+  });
+
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
   el.dataFileInput.addEventListener("change", handleDataFileSelection);
@@ -113,6 +126,9 @@ function bindEvents() {
   });
   el.overflowMenu.addEventListener("click", handleMenuAction);
   el.updateIndicator.addEventListener("click", showUpdateNotice);
+  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
+    if (state.themePreference === "system") updateThemeMetaColor();
+  });
 
   el.contactBackButton.addEventListener("click", leaveContactExport);
   el.contactSearchInput.addEventListener("input", () => {
@@ -546,7 +562,102 @@ function handleMenuAction(event) {
   if (action === "data-info") showDataInfo();
   else if (action === "replace-data") openFilePicker();
   else if (action === "contact-export") enterContactExport();
+  else if (action === "install-app") handleInstallRequest();
+  else if (action === "theme") showThemeChooser();
   else if (action === "lock") lockApp();
+}
+
+
+function initializeTheme() {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  state.themePreference = ["light", "dark"].includes(saved) ? saved : "system";
+  applyTheme(state.themePreference, false);
+}
+
+function applyTheme(mode, persist = true) {
+  const normalized = ["light", "dark"].includes(mode) ? mode : "system";
+  state.themePreference = normalized;
+  document.documentElement.dataset.theme = normalized;
+  if (persist) localStorage.setItem(THEME_STORAGE_KEY, normalized);
+  updateThemeMenuLabel();
+  updateThemeMetaColor();
+}
+
+function updateThemeMenuLabel() {
+  if (!el.themeMenuButton) return;
+  const label = state.themePreference === "light" ? "라이트" : state.themePreference === "dark" ? "다크" : "시스템";
+  el.themeMenuButton.textContent = `화면 모드 · ${label}`;
+}
+
+function resolvedTheme() {
+  if (state.themePreference === "light" || state.themePreference === "dark") return state.themePreference;
+  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+}
+
+function updateThemeMetaColor() {
+  if (!el.themeColorMeta) return;
+  el.themeColorMeta.setAttribute("content", resolvedTheme() === "dark" ? "#111317" : "#efe6d7");
+}
+
+function showThemeChooser() {
+  const current = state.themePreference;
+  const option = (value, title, description) => `
+    <button class="theme-choice${current === value ? " selected" : ""}" type="button" data-theme-choice="${value}">
+      <span class="theme-choice-radio" aria-hidden="true"></span>
+      <span><strong>${title}</strong><small>${description}</small></span>
+    </button>`;
+  showModal({
+    title: "화면 모드",
+    body: `<div class="theme-choice-list">
+      ${option("system", "시스템 설정", "기기의 라이트/다크 모드를 자동으로 따릅니다.")}
+      ${option("light", "라이트", "따뜻한 베이지와 은은한 종이 질감의 밝은 화면입니다.")}
+      ${option("dark", "다크", "어두운 환경에 맞춘 화면입니다.")}
+    </div>`,
+    actions: [{ label: "닫기", onClick: closeModal }],
+  });
+  el.modalBody.querySelectorAll("[data-theme-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyTheme(button.dataset.themeChoice);
+      closeModal();
+    });
+  });
+}
+
+function isStandaloneMode() {
+  return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
+}
+
+function isIosLike() {
+  const ua = navigator.userAgent || "";
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+async function handleInstallRequest() {
+  if (isStandaloneMode()) {
+    showModal({
+      title: "바로가기 추가",
+      body: `<p>Dials가 이미 홈 화면 또는 앱 모드로 실행되고 있습니다.</p>`,
+      actions: [{ label: "확인", primary: true, onClick: closeModal }],
+    });
+    return;
+  }
+
+  if (state.deferredInstallPrompt) {
+    const promptEvent = state.deferredInstallPrompt;
+    state.deferredInstallPrompt = null;
+    await promptEvent.prompt();
+    const result = await promptEvent.userChoice;
+    if (result?.outcome === "accepted") return;
+  }
+
+  const body = isIosLike()
+    ? `<div class="install-guide"><strong>iPhone / iPad</strong><ol><li>Safari의 <b>공유</b> 버튼을 누릅니다.</li><li><b>홈 화면에 추가</b>를 선택합니다.</li><li>추가하면 Dials를 앱처럼 바로 열 수 있습니다.</li></ol></div>`
+    : `<div class="install-guide"><strong>브라우저에서 바로가기 추가</strong><p>브라우저 메뉴에서 <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 선택해 주세요. 지원되는 Chrome/Edge에서는 설치 조건이 충족되면 브라우저의 설치 안내도 사용할 수 있습니다.</p></div>`;
+  showModal({
+    title: "바로가기 추가",
+    body,
+    actions: [{ label: "확인", primary: true, onClick: closeModal }],
+  });
 }
 
 function closeOverflowMenu() {
