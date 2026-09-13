@@ -1,2 +1,1 @@
-OurDial Web v0.1.0
-2026-09-13
+Dials v0.1.0

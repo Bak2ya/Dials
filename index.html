@@ -8,25 +8,25 @@
   <meta name="description" content="Web-based contact viewer with separately distributed local data files">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="OurDial">
+  <meta name="apple-mobile-web-app-title" content="Dials">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <title>OurDial</title>
+  <title>Dials</title>
 </head>
 <body>
   <noscript>
-    <div class="noscript">OurDial을 사용하려면 JavaScript가 필요합니다.</div>
+    <div class="noscript">Dials를 사용하려면 JavaScript가 필요합니다.</div>
   </noscript>
 
   <div id="app">
     <main id="startView" class="start-shell" aria-labelledby="startTitle">
       <section class="start-panel">
         <header class="brand-block">
-          <div class="brand-mark" aria-hidden="true">OD</div>
+          <div class="brand-mark" aria-hidden="true">D</div>
           <div>
-            <h1 id="startTitle">OurDial</h1>
+            <h1 id="startTitle">Dials</h1>
             <p>배포받은 연락처 데이터로 빠르게 조회하는 웹 전화번호부</p>
           </div>
         </header>
@@ -48,7 +48,7 @@
             <div class="connected-file-row">
               <div>
                 <span class="eyebrow">연결된 데이터</span>
-                <strong id="connectedFileName">OurDial 데이터</strong>
+                <strong id="connectedFileName">Dials 데이터</strong>
                 <span id="connectedMetaText" class="muted small"></span>
               </div>
               <button id="replaceDataStartButton" class="text-button" type="button">다른 데이터 연결</button>
@@ -64,13 +64,13 @@
             </form>
           </div>
 
-          <input id="dataFileInput" class="visually-hidden" type="file" accept=".ourdial,.json,application/json,text/plain">
+          <input id="dataFileInput" class="visually-hidden" type="file" accept=".dials,.json,application/json,text/plain">
         </section>
 
         <section class="surface guide-card" aria-labelledby="guideTitle">
           <h2 id="guideTitle">사용 방법</h2>
           <ol class="guide-list">
-            <li><span>1</span><div><strong>데이터 연결</strong><p>배포받은 <code>.ourdial</code> 파일을 한 번 불러옵니다.</p></div></li>
+            <li><span>1</span><div><strong>데이터 연결</strong><p>배포받은 <code>.dials</code> 파일을 한 번 불러옵니다.</p></div></li>
             <li><span>2</span><div><strong>암호 입력</strong><p>연결 후 암호를 입력하면 연락처가 열립니다.</p></div></li>
             <li><span>3</span><div><strong>바로 조회</strong><p>다음부터는 파일을 다시 고르지 않고 암호만 입력하면 됩니다.</p></div></li>
           </ol>
@@ -83,9 +83,9 @@
       <header class="app-header">
         <div class="header-inner">
           <button id="homeBrandButton" class="brand-button" type="button" aria-label="초기 화면으로 이동">
-            <span class="brand-mark small-mark" aria-hidden="true">OD</span>
+            <span class="brand-mark small-mark" aria-hidden="true">D</span>
             <span>
-              <strong>OurDial</strong>
+              <strong>Dials</strong>
               <small id="directoryTitle">전화번호부</small>
             </span>
           </button>
@@ -171,7 +171,7 @@
 
           <div class="required-note">
             <strong>메모에 항상 포함</strong>
-            <p>OurDial 데이터 기준일이 모든 연락처의 메모에 자동으로 기록됩니다.</p>
+            <p>Dials 데이터 기준일이 모든 연락처의 메모에 자동으로 기록됩니다.</p>
           </div>
 
           <button id="createVcardButton" class="primary-button wide-button" type="button">연락처 파일 만들기</button>

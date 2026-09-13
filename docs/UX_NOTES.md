@@ -1,53 +1,47 @@
-# OurDial UX notes
+# Dials UX notes
 
-OurDial is intentionally a **viewer**, not a management app.
+Dials is intentionally a **viewer**, not a management app.
 
-## Main flow
+## Start / lock screen
 
-1. Connect encrypted data.
-2. Enter password on the same start screen.
-3. Search or browse by organization.
-4. Tap a phone number to call.
-
-No editing or management controls are shown in the main viewer.
-
-## Start screen
-
-- First visit: data import button + short usage guide.
-- Returning visit: previously connected encrypted data is detected and only the password field is shown.
-- Selecting a new file never auto-unlocks it; the user explicitly enters the password.
+- No connected data: show data connection and short usage instructions.
+- After selecting a `.dials` file: stay on the same screen and reveal the password field.
+- Previously connected encrypted data is reused from IndexedDB.
+- Passwords are never persisted.
+- Decrypted contacts are never written back to persistent storage.
 
 ## Main viewer
 
-- Global search remains available at the top of every browsing screen.
-- Home categories: `행정부서`, `학과`, `기타시설` as provided by the data file.
-- The app preserves the order contained in the `.ourdial` payload.
-- Search results group multiple affiliations under one person when a reliable person identity is available.
-- Same-name people remain separate when their identity differs.
-- Missing phone-number lines are omitted.
-- Appearance follows the operating system light/dark setting automatically.
+- Sticky global search remains available while browsing.
+- Home categories: `행정부서`, `학과`, `기타시설`.
+- Organization/person order follows the payload, which build38 creates from Sheet1 output order.
+- Phone numbers are actionable `tel:` links.
 
-## Overflow menu
+## Search
 
-The top-right `⋯` contains infrequent tasks:
-
-- Data information
-- Import new data
-- Contact export
-- Lock
-
-A yellow `!` appears immediately beside the menu only when `data-status.json` reports a newer data version.
+- Multi-keyword AND matching.
+- Search targets name, organization, title, role, extension, and mobile.
+- One person with multiple affiliations appears as one result card through `personKey`.
+- Same-name people with different `personKey` values remain separate.
 
 ## Contact export
 
-Contact export is deliberately kept out of the normal lookup flow.
+Available through `⋯ → 연락처 저장` so the normal viewer stays uncluttered.
 
-Users can:
+- Multi-select people.
+- Name is mandatory.
+- Optional mobile / extension / affiliation / title-role fields.
+- Optional contact-name prefix, remembered locally.
+- One VCF may contain multiple VCARD entries.
+- Every VCARD note always contains the Dials `dataVersion` date.
 
-- Search and select one or multiple people.
-- Select all people in the current filtered list.
-- Choose whether to include mobile number, extension, affiliation, and title/role.
-- Optionally add a reusable prefix to every contact name, for example `혜)`.
-- Export one multi-contact `.vcf` file.
+## New-data indicator
 
-Name is always included. Every vCard note always includes the `.ourdial` **data version date** so users can later identify how current an imported contact was.
+- `data-status.json` is checked without sending contact data.
+- A small yellow `!` appears beside `⋯` only when the public latest date is newer than the connected data.
+- The indicator is informative and never blocks current data access.
+
+## Appearance
+
+- Responsive layout; no separate mobile/desktop app.
+- System light/dark mode is followed through `prefers-color-scheme`.

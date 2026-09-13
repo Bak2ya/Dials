@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "ourdial-app-v0.1.0";
+const CACHE_NAME = "dials-app-v0.1.0";
 const APP_SHELL = [
   "./",
   "./index.html",

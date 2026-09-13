@@ -1,14 +1,14 @@
 "use strict";
 
 const APP_VERSION = "0.1.0";
-const DB_NAME = "OurDialLocalStore";
+const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
 const DATA_RECORD_KEY = "encryptedData";
 const SAFE_META_KEY = "safeMeta";
-const LATEST_STATUS_STORAGE_KEY = "ourdialLatestStatus";
-const PREFIX_STORAGE_KEY = "ourdialContactPrefix";
-const PREFIX_ENABLED_STORAGE_KEY = "ourdialContactPrefixEnabled";
+const LATEST_STATUS_STORAGE_KEY = "dialsLatestStatus";
+const PREFIX_STORAGE_KEY = "dialsContactPrefix";
+const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
 
 const state = {
   encryptedText: "",
@@ -159,7 +159,7 @@ function showStartState(mode) {
     el.passwordInput.value = "";
     window.setTimeout(() => el.passwordInput.focus(), 20);
   } else {
-    el.connectStateText.textContent = "배포받은 OurDial 데이터 파일을 연결해 주세요.";
+    el.connectStateText.textContent = "배포받은 Dials 데이터 파일을 연결해 주세요.";
     setBadge("미연결", "neutral");
   }
 }
@@ -171,7 +171,7 @@ function setBadge(text, type) {
 
 function updateStartMeta() {
   if (!state.encryptedPackage) return;
-  el.connectedFileName.textContent = state.safeMeta?.fileName || "OurDial 데이터";
+  el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
   const parts = [];
   if (state.safeMeta?.dataVersion) parts.push(`${formatDate(state.safeMeta.dataVersion)} 기준`);
   if (hasNewerData(state.safeMeta?.dataVersion)) parts.push("새 데이터 있음");
@@ -202,7 +202,7 @@ async function handleDataFileSelection() {
     console.error(error);
     showModal({
       title: "데이터를 불러올 수 없습니다",
-      body: `<p>${escapeHtml(error.message || "지원하지 않는 OurDial 데이터 파일입니다.")}</p>`,
+      body: `<p>${escapeHtml(error.message || "지원하지 않는 Dials 데이터 파일입니다.")}</p>`,
       actions: [{ label: "확인", primary: true, onClick: closeModal }],
     });
   }
@@ -211,7 +211,7 @@ async function handleDataFileSelection() {
 function parseAndValidateEncryptedPackage(text) {
   let data;
   try { data = JSON.parse(text); } catch { throw new Error("파일 형식을 읽을 수 없습니다."); }
-  if (!data || data.format !== "OurDialEncryptedData") throw new Error("OurDial 데이터 파일이 아닙니다.");
+  if (!data || data.format !== "DialsEncryptedData") throw new Error("Dials 데이터 파일이 아닙니다.");
   if (Number(data.formatVersion) !== 1) throw new Error(`지원하지 않는 데이터 형식 버전입니다: ${data.formatVersion ?? "알 수 없음"}`);
   if (data.kdf?.name !== "PBKDF2-HMAC-SHA256" || !data.kdf?.salt || !data.kdf?.iterations) throw new Error("암호화 키 정보가 올바르지 않습니다.");
   if (data.cipher?.name !== "AES-256-GCM" || !data.cipher?.nonce || !data.cipher?.ciphertext) throw new Error("암호화 데이터가 올바르지 않습니다.");
@@ -229,12 +229,12 @@ async function handleUnlock(event) {
   el.unlockButton.disabled = true;
   setUnlockMessage("암호화 데이터를 여는 중입니다…", false);
   try {
-    const payload = await decryptOurDialPackage(state.encryptedPackage, password);
+    const payload = await decryptDialsPackage(state.encryptedPackage, password);
     validatePayload(payload);
     state.payload = payload;
     prepareDirectoryData(payload);
     state.safeMeta = {
-      fileName: state.safeMeta?.fileName || "OurDial 데이터",
+      fileName: state.safeMeta?.fileName || "Dials 데이터",
       dataVersion: String(payload.dataVersion || ""),
       generatedAt: String(payload.generatedAt || ""),
       title: String(payload.title || "전화번호부"),
@@ -252,7 +252,7 @@ async function handleUnlock(event) {
   }
 }
 
-async function decryptOurDialPackage(packageData, password) {
+async function decryptDialsPackage(packageData, password) {
   const salt = base64ToBytes(packageData.kdf.salt);
   const iv = base64ToBytes(packageData.cipher.nonce);
   const ciphertext = base64ToBytes(packageData.cipher.ciphertext);
@@ -340,7 +340,7 @@ function derivePersonKey(record, org, sourceIndex) {
   const explicit = String(record.personKey || record.person_key || "").trim();
   if (explicit) return `id:${explicit}`;
 
-  // build37 호환용 안전한 fallback입니다. 같은 이름+휴대폰이면 한 사람으로 묶고,
+  // personKey가 없는 비정상/구형 테스트 파일을 위한 보수적인 fallback입니다. 같은 이름+휴대폰이면 한 사람으로 묶고,
   // 휴대폰이 없으면 동명이인을 잘못 합치지 않기 위해 각 근무정보를 별도 사람으로 유지합니다.
   const name = normalizeText(record.name || "");
   const mobile = normalizePhoneKey(record.mobile || "");
@@ -596,7 +596,7 @@ function showUpdateNotice() {
     title: "새 전화번호부 데이터",
     body: `<div class="update-callout"><strong>새 데이터가 있습니다.</strong>${escapeHtml(message)}</div>
       <dl class="info-grid" style="margin-top:16px"><dt>현재 기준일</dt><dd>${escapeHtml(current)}</dd><dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd></dl>
-      <p class="muted">새로 배포받은 <code>.ourdial</code> 파일을 불러오면 현재 데이터가 교체됩니다.</p>`,
+      <p class="muted">새로 배포받은 <code>.dials</code> 파일을 불러오면 현재 데이터가 교체됩니다.</p>`,
     actions: [
       { label: "나중에", onClick: closeModal },
       { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); openFilePicker(); } },
@@ -617,8 +617,8 @@ function showDataInfo() {
         <dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd>
         <dt>기준월</dt><dd>${escapeHtml(state.payload?.period || "-")}</dd>
         <dt>데이터 생성</dt><dd>${escapeHtml(formatDateTime(state.payload?.generatedAt) || "-")}</dd>
-        <dt>연결 파일</dt><dd>${escapeHtml(state.safeMeta?.fileName || "OurDial 데이터")}</dd>
-        <dt>웹앱</dt><dd>OurDial ${APP_VERSION}</dd>
+        <dt>연결 파일</dt><dd>${escapeHtml(state.safeMeta?.fileName || "Dials 데이터")}</dd>
+        <dt>웹앱</dt><dd>Dials ${APP_VERSION}</dd>
       </dl>`,
     actions: [
       { label: "닫기", onClick: closeModal },
@@ -725,7 +725,7 @@ function createVcardFile() {
   };
   const cards = selected.map((person) => makeVcard(person, options)).join("\r\n");
   const blob = new Blob(["\ufeff", cards], { type: "text/vcard;charset=utf-8" });
-  const filename = `OurDial_Contacts_${state.payload?.dataVersion || todayIso()}.vcf`;
+  const filename = `Dials_Contacts_${state.payload?.dataVersion || todayIso()}.vcf`;
   downloadBlob(blob, filename);
   setVcardMessage(`${selected.length}명의 연락처 파일을 만들었습니다. 기기의 연락처 앱에서 가져와 주세요.`, false, true);
 }
@@ -752,7 +752,7 @@ function makeVcard(person, options) {
   }
   if (options.job && first?.job) lines.push(`TITLE:${vcardEscape(first.job)}`);
 
-  const noteLines = ["OurDial", `데이터 기준일: ${state.payload?.dataVersion || "알 수 없음"}`];
+  const noteLines = ["Dials", `데이터 기준일: ${state.payload?.dataVersion || "알 수 없음"}`];
   if (options.affiliation) {
     noteLines.push("", "소속:");
     person.affiliations.forEach((a) => {

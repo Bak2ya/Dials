@@ -1,6 +1,6 @@
 {
-  "name": "OurDial",
-  "short_name": "OurDial",
+  "name": "Dials",
+  "short_name": "Dials",
   "description": "Web-based contact viewer with separately distributed local data files",
   "start_url": "./",
   "scope": "./",
