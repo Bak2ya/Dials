@@ -45,9 +45,16 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 
 - Responsive layout; no separate mobile/desktop app.
 - System light/dark mode is followed through `prefers-color-scheme`.
-## v0.1.1 appearance and shortcut
+## v0.1.2 appearance and shortcut
 
 - `⋯ → 바로가기 추가`: browser/PWA install prompt when available; iPhone/iPad shows Safari `공유 → 홈 화면에 추가` instructions.
 - `⋯ → 화면 모드`: system / light / dark. System is the default, manual choice is stored locally.
 - Light appearance: warm beige parchment-inspired background with a subtle generated paper grain; no external texture image.
 
+
+## v0.1.2 iOS import compatibility
+
+- Do not use an HTML `accept` filter for the custom `.dials` extension. iOS Files can otherwise gray the file out and make it impossible to select.
+- Let the user pick the file first, then validate the internal `DialsEncryptedData` wrapper in JavaScript.
+- File reading uses `File.text()` when available with a `FileReader` fallback for broader Safari compatibility.
+- The final Dials icon is used in the app header, manifest icons, favicon, and Apple touch icon.

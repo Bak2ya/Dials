@@ -203,7 +203,7 @@ async function handleDataFileSelection() {
   const file = el.dataFileInput.files?.[0];
   if (!file) return;
   try {
-    const text = await file.text();
+    const text = await readFileAsText(file);
     const packageData = parseAndValidateEncryptedPackage(text);
     state.encryptedText = text;
     state.encryptedPackage = packageData;
@@ -222,6 +222,16 @@ async function handleDataFileSelection() {
       actions: [{ label: "확인", primary: true, onClick: closeModal }],
     });
   }
+}
+
+function readFileAsText(file) {
+  if (file && typeof file.text === "function") return file.text();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("파일을 읽을 수 없습니다."));
+    reader.readAsText(file);
+  });
 }
 
 function parseAndValidateEncryptedPackage(text) {
