@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.3.1";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -21,6 +21,7 @@ const state = {
   categories: [],
   currentView: { type: "home" },
   searchQuery: "",
+  searchComposing: false,
   latestStatus: null,
   selectedPeople: new Set(),
   contactFilter: "",
@@ -102,7 +103,17 @@ function bindEvents() {
     navigateToView({ type: "home" });
   });
 
-  el.globalSearchInput.addEventListener("input", handleGlobalSearchInput);
+  el.globalSearchInput.addEventListener("compositionstart", () => {
+    state.searchComposing = true;
+  });
+  el.globalSearchInput.addEventListener("compositionend", () => {
+    state.searchComposing = false;
+    handleGlobalSearchInput();
+  });
+  el.globalSearchInput.addEventListener("input", (event) => {
+    if (state.searchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
+    handleGlobalSearchInput();
+  });
   el.clearSearchButton.addEventListener("click", clearGlobalSearch);
 
   el.menuButton.addEventListener("click", (event) => {
@@ -434,8 +445,13 @@ function navigateToView(view) {
 }
 
 function handleGlobalSearchInput() {
+  if (state.searchComposing) return;
   const previous = state.searchQuery;
   const next = el.globalSearchInput.value.trim();
+  if (previous === next) {
+    el.clearSearchButton.classList.toggle("hidden", !next);
+    return;
+  }
   if (!previous && next) {
     saveCurrentHistoryScroll();
     state.searchQuery = next;

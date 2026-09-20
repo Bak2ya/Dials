@@ -77,3 +77,12 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Scroll position is saved into the current history entry and restored on Back/Forward.
 - Modals trap Tab focus, Esc closes them, and closing restores focus to the opener.
 - The `⋯` popover uses ordinary buttons; it does not claim `role=menu` without implementing full menu keyboard semantics.
+
+## v0.3.1 IME search composition
+
+- Global search must not rerender results while the browser IME is composing text.
+- `compositionstart` marks the search as composing; intermediate `input` events are ignored.
+- `compositionend` commits the completed query once. A following non-composing `input` event is harmless because unchanged queries are ignored.
+- This protects Korean first-character composition and also applies to Japanese/Chinese and other IME workflows.
+- Search History semantics from v0.3.0 remain unchanged: one History entry per search session, later query edits replace that entry.
+
