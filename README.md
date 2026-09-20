@@ -35,7 +35,7 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - 이름이 같은 다른 사람은 서로 다른 `personKey`로 별도 표시
 - 전화번호를 누르면 전화 앱 연결
 - HJU Phonebook에서 내선 연결 불가로 지정한 번호는 전체 번호 뒤에 **`(외부번호)`** 표시
-- `⋯ → 연락처 저장`에서 메인과 같은 `구분 → 소속 → 인물` 구조로 선택
+- `⋯ → 연락처 저장`에서 `구분 → 주요 소속 → 하위 소속 → 인물`을 필요할 때만 펼쳐 선택
 - 소속 전체 선택 및 일부 선택(혼합 상태) 지원
 - 다중소속 인물은 `personKey` 하나의 선택 상태를 공유하며 vCard에 중복 저장되지 않음
 - 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
@@ -45,6 +45,25 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - 생성되는 모든 연락처 메모에 **Dials 데이터 기준일을 항상 기록**
 - 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
 - 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
+
+## v0.4.2 연락처 저장 트리 · 선택 문법 정리
+
+- 연락처 저장 화면을 별도 페이지를 계속 들어가는 방식 대신 **한 화면의 펼침/접힘 트리**로 정리했습니다.
+- 처음에는 `행정부서 / 학과 / 기타시설`만 닫힌 상태로 보이고, 구분을 열면 `총무처 / 교무처 ...` 같은 주요 소속만 나타납니다. 주요 소속을 열면 직속 책임자/인물이 먼저 나오고 그 아래 하위 부서가 같은 위계로 이어지며, 하위 부서를 열면 인물이 표시됩니다.
+- 일반적인 트리 문법에 맞춰 **펼침/접힘은 왼쪽**, **선택 체크박스는 오른쪽**으로 분리했습니다. 두 조작 영역은 서로 독립되어 체크하다가 항목이 열리거나, 열다가 체크되는 오작동을 막습니다.
+- 주요 소속과 하위 소속의 체크박스는 해당 범위의 인물을 전체 선택하며, 일부만 선택되면 혼합 상태를 표시합니다. 다중소속 인물은 기존처럼 `personKey` 하나의 선택 상태를 공유합니다.
+- 부처 자체에 직접 속한 책임자/인물은 하위 부서보다 먼저 표시하면서 하위 부서와 같은 깊이에 둡니다.
+- 일반 조회 화면의 `시트1 기준의 소속 순서로 표시됩니다.` 문구는 제거했습니다. 실제 순서는 기존 데이터 순서를 계속 따릅니다.
+- 검색 결과도 선택 체크박스를 오른쪽에 두어 같은 선택 문법을 사용합니다.
+- 잠금 해제 성공 직후에는 전화번호부 준비/렌더링보다 먼저 모바일 키보드와 visual viewport 정리를 시작하도록 순서를 보강했습니다.
+
+## v0.4.1 모바일 첫 터치 · 안전한 데이터 교체 · 연락처 계층
+
+- 잠금 해제 직후 암호 입력 포커스와 모바일 키보드/visual viewport 전환을 정리해 상단 `⋯`의 첫 터치가 바로 동작하도록 보강했습니다. 실제 iPhone의 키보드 전환은 최종 실기기 확인 대상으로 남깁니다.
+- `⋯ → 새 데이터 불러오기`는 최초 데이터 연결 화면으로 돌아갑니다. 새 파일은 암호가 정상 확인된 뒤에만 기존 저장 데이터를 교체하므로 중간 취소·잘못된 파일·틀린 암호로 마지막 정상 데이터가 사라지지 않습니다.
+- 화면 내용이 실제 viewport보다 짧으면 불필요한 세로 스크롤/바운스를 억제하고, 길 때만 정상 스크롤합니다.
+- 연락처 저장의 소속 탐색에서 부처 자체에 직접 속한 책임자/인물은 `총무처 → 총무처` 같은 중복 소속 행 대신 부서들과 같은 위계의 인물 행으로 표시합니다. `.dials`에 들어온 조직/인물 순서는 그대로 유지합니다.
+- 직속 인물도 기존 `personKey` 선택 상태를 공유하므로 다중소속 인물 체크 동기화와 vCard 중복 제거가 그대로 적용됩니다.
 
 ## v0.4.0 연락처 저장 구조 · 자동 잠금 · 정보 계층
 
@@ -113,7 +132,7 @@ Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` �
 
 ## Windows 프로그램과의 관계
 
-Dials v0.4.0은 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
+Dials v0.4.2는 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
 
 현재 규격은 다음과 같습니다.
 
@@ -153,7 +172,7 @@ Dials는 공개 서버에서 최신 버전 여부를 별도로 조회하지 않�
 
 ## 연락처 저장
 
-`⋯ → 연락처 저장`에서 메인 화면과 같은 `구분 → 소속 → 인물` 구조로 필요한 사람을 선택할 수 있습니다. 소속 전체 선택도 가능하며, 여러 소속에 함께 등장하는 동일 인물의 체크 상태는 서로 동기화됩니다. **다중소속 인물은 vCard에 중복 저장되지 않습니다.**
+`⋯ → 연락처 저장`에서는 `행정부서 / 학과 / 기타시설`부터 시작해 필요한 소속만 단계적으로 펼쳐 사람을 선택할 수 있습니다. 펼침/접힘은 왼쪽, 선택 체크박스는 오른쪽으로 분리되어 있으며, 주요 소속/하위 소속 전체 선택과 일부 선택(혼합 상태)을 지원합니다. 여러 소속에 함께 등장하는 동일 인물의 체크 상태는 서로 동기화됩니다. **다중소속 인물은 vCard에 중복 저장되지 않습니다.**
 
 저장 항목은 다음 중 선택합니다.
 
@@ -221,7 +240,7 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Same-name people remain separate when their `personKey` differs
 - Tap-to-call phone numbers
 - Numbers marked as non-extension-callable by HJU Phonebook are shown with **`(외부번호)`** while keeping the full number callable
-- Contact export uses the same category → organization → person navigation pattern as the main viewer
+- Contact export uses an expandable category → major organization → child organization → person disclosure tree
 - Organization-wide selection with mixed/partial checkbox state
 - Multi-affiliation people share one `personKey` selection and are exported only once
 - Dedicated multi-select vCard (`.vcf`) contact-export screen
@@ -230,6 +249,23 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Data version date always written into every exported vCard note
 - Offline app-shell support after the first successful visit
 - No analytics, ads, external APIs, CDNs, or remote contact-data upload
+
+## v0.4.2 contact-export disclosure tree and selection grammar
+
+- Contact export now uses one expandable disclosure tree instead of repeatedly navigating into separate category/organization pages.
+- The initial state shows only top-level categories, all collapsed. Expanding a category shows major organizations; expanding a major organization shows direct major-level people first and child departments at the same depth; expanding a child department shows its people.
+- Familiar interaction grammar is restored: disclosure/navigation is on the left, while selection checkboxes are isolated on the right. Expanding never changes selection and checking never expands a row.
+- Major-organization and child-organization checkboxes select the unique people in their subtree and show the native mixed state for partial selection. Multi-affiliation people continue to share one `personKey` selection.
+- The normal viewer no longer displays the implementation-oriented Sheet1-order explanation, while still preserving source order internally.
+- Search results use the same right-side selection grammar.
+- Successful unlock starts soft-keyboard/visual-viewport settling before directory preparation/rendering to further protect the first overflow-menu tap on mobile.
+
+## v0.4.1 mobile first tap, safe replacement, overflow, and contact hierarchy
+
+- Unlock now explicitly releases password focus and allows a likely mobile keyboard/visual-viewport transition to settle before the main viewer is shown, targeting the first-tap overflow-menu issue observed on iPhone. Real-device validation remains necessary.
+- `⋯ → 새 데이터 불러오기` returns to the initial data-connection screen. A new encrypted package replaces the stored package only after successful decryption, preserving the last known-good package if selection is cancelled or validation fails.
+- Root scrolling/overscroll is suppressed only when the current page is shorter than the viewport; long pages continue to scroll normally.
+- In contact-export hierarchy browsing, people assigned directly to a major organization are expanded inline beside child department rows when both exist, preserving source order and the shared `personKey` selection model.
 
 ## v0.4.0 contact export navigation, auto-lock, and clearer privacy UI
 
@@ -286,7 +322,7 @@ For installation, Dials uses the browser/PWA installation prompt when the platfo
 
 ## Windows exporter compatibility
 
-Dials v0.4.0 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
+Dials v0.4.2 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
 
 Current format:
 

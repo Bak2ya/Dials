@@ -106,3 +106,22 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - The connected data date is intentionally more prominent; Dials no longer performs a separate public latest-data check.
 - About is user-facing. Technical storage/encryption details belong in README/data-format documentation.
 
+## v0.4.1 mobile entry, safe replacement, overflow, and contact hierarchy
+
+- After password unlock, the password field is explicitly blurred and Dials waits briefly for a likely mobile soft-keyboard/visual-viewport transition before presenting the main viewer. This targets the observed iPhone symptom where the first `⋯` tap could be consumed by focus/keyboard dismissal. Desktop/synthetic browser checks are not a substitute for final real-device validation.
+- `⋯ → 새 데이터 불러오기` returns to the initial unconnected data screen instead of immediately opening a file picker. The currently stored encrypted package is left untouched until a newly selected package is successfully decrypted; cancelling, choosing an invalid file, or entering a wrong password does not replace the last known-good stored package.
+- Short pages suppress root vertical scrolling/overscroll; overflow is re-evaluated after navigation, dynamic list rendering, resize, and visual-viewport changes. Long content continues to scroll normally.
+- In contact export category browsing, a major organization can contain both direct major-level people and child departments. When a direct organization record represents the major itself and sibling departments exist, its people are expanded inline at the same hierarchy level as department rows instead of showing a redundant organization row such as `총무처 → 총무처`. Source order is preserved.
+- Direct-person checkboxes use the same `personKey` selection source of truth as department/person/search rows, so multi-affiliation selection synchronization remains intact.
+
+## v0.4.2 contact-export disclosure tree
+
+- Contact export no longer drills through separate category/organization pages. It uses one expandable disclosure tree so users can keep context while selecting across multiple affiliations.
+- Initial state shows only top-level categories such as `행정부서 / 학과 / 기타시설`, all collapsed. Opening a category reveals only its major organizations; opening a major organization reveals direct major-level people first and child departments; opening a child department reveals its people.
+- Disclosure/navigation stays on the left using the familiar chevron pattern. Selection checkboxes stay on the far right with a separate hit target, so expanding/collapsing never changes selection and checking never expands/collapses.
+- Major and child-organization checkboxes select all unique `personKey` values in that subtree and use the native indeterminate state for partial selection. Person checkboxes remain keyed by `personKey`, so a multi-affiliation person stays synchronized everywhere.
+- Direct major-level leaders are shown before child departments at the same hierarchy depth, matching the intended Sheet1 ordering without exposing implementation wording in the UI.
+- The explanatory sentence `시트1 기준의 소속 순서로 표시됩니다.` was removed from the normal viewer; source-order behavior remains an implementation detail.
+- Search results use the same right-side checkbox grammar as the hierarchy.
+- The successful-unlock flow begins soft-keyboard/visual-viewport settling before preparing/rendering the directory, further reducing the chance that the first `⋯` tap is consumed by mobile keyboard dismissal. Real iPhone validation remains required.
+

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.4.0";
+const APP_VERSION = "0.4.2";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -30,12 +30,15 @@ const state = {
   contactFilter: "",
   contactView: { type: "home" },
   contactDepth: 0,
+  contactExpanded: new Set(),
   deferredInstallPrompt: null,
   themePreference: "system",
   modalReturnFocus: null,
   scrollSaveTimer: null,
   unlockStartedAt: 0,
   autoLockTimer: null,
+  connectionNeedsCommit: false,
+  pageOverflowFrame: null,
 };
 
 const el = {};
@@ -61,6 +64,7 @@ async function init() {
       state.encryptedText = saved.text;
       state.encryptedPackage = parseAndValidateEncryptedPackage(saved.text);
       state.safeMeta = meta || null;
+      state.connectionNeedsCommit = false;
       showStartState("locked");
       updateStartMeta();
       showAutoLockNoticeIfNeeded();
@@ -106,6 +110,8 @@ function bindEvents() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) checkAutoLock();
   });
+  window.addEventListener("resize", schedulePageOverflowSync, { passive: true });
+  window.visualViewport?.addEventListener?.("resize", schedulePageOverflowSync, { passive: true });
 
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
@@ -212,6 +218,7 @@ function showStartState(mode) {
     el.connectStateText.textContent = "배포받은 Dials 데이터 파일을 연결해 주세요.";
     setBadge("미연결", "neutral");
   }
+  schedulePageOverflowSync();
 }
 
 function setBadge(text, type) {
@@ -246,15 +253,15 @@ async function handleDataFileSelection() {
   try {
     const text = await readFileAsText(file);
     const packageData = parseAndValidateEncryptedPackage(text);
+    // 새 파일은 암호 확인이 끝날 때까지 메모리에만 보관합니다.
+    // 기존에 저장된 암호화 파일은 새 파일이 정상적으로 열린 뒤에만 교체됩니다.
     state.encryptedText = text;
     state.encryptedPackage = packageData;
     state.safeMeta = { fileName: file.name, dataVersion: "", generatedAt: "", title: "" };
-    await dbSet(DATA_RECORD_KEY, { text });
-    await dbSet(SAFE_META_KEY, state.safeMeta);
-    requestPersistentStorage();
+    state.connectionNeedsCommit = true;
     showStartState("locked");
     updateStartMeta();
-    setUnlockMessage("데이터가 연결되었습니다. 암호를 입력해 주세요.", false, true);
+    setUnlockMessage("데이터를 선택했습니다. 암호를 입력해 확인해 주세요.", false, true);
   } catch (error) {
     console.error(error);
     showModal({
@@ -263,6 +270,87 @@ async function handleDataFileSelection() {
       actions: [{ label: "확인", primary: true, onClick: closeModal }],
     });
   }
+}
+
+function beginDataReplacement() {
+  clearAutoLockTimer();
+  cancelGlobalSearchCommit();
+  cancelContactSearchCommit();
+  closeOverflowMenu();
+  closeModal();
+  document.activeElement instanceof HTMLElement && document.activeElement.blur();
+  state.payload = null;
+  state.people = [];
+  state.categories = [];
+  state.selectedPeople.clear();
+  state.searchQuery = "";
+  state.contactFilter = "";
+  state.currentView = { type: "home" };
+  state.contactView = { type: "home" };
+  state.contactDepth = 0;
+  state.contactExpanded.clear();
+  state.unlockStartedAt = 0;
+  state.encryptedText = "";
+  state.encryptedPackage = null;
+  state.safeMeta = null;
+  state.connectionNeedsCommit = false;
+  el.passwordInput.value = "";
+  setUnlockMessage("", false);
+  showStartState("empty");
+  history.replaceState(null, "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+  schedulePageOverflowSync();
+}
+
+async function settleAfterPasswordInput() {
+  const viewport = window.visualViewport;
+  const beforeHeight = viewport?.height || 0;
+  const keyboardWasLikelyOpen = Boolean(viewport && window.innerHeight - beforeHeight > 80);
+  el.passwordInput.blur();
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  await nextAnimationFrame();
+  await nextAnimationFrame();
+  if (!keyboardWasLikelyOpen || !viewport) return;
+  if (viewport.height >= window.innerHeight - 40) return;
+  await new Promise((resolve) => {
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      viewport.removeEventListener("resize", onResize);
+      window.clearTimeout(timeout);
+      resolve();
+    };
+    const onResize = () => {
+      if (viewport.height >= beforeHeight + 40 || viewport.height >= window.innerHeight - 40) finish();
+    };
+    const timeout = window.setTimeout(finish, 360);
+    viewport.addEventListener("resize", onResize, { passive: true });
+  });
+  await nextAnimationFrame();
+}
+
+function nextAnimationFrame() {
+  return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+function schedulePageOverflowSync() {
+  if (state.pageOverflowFrame) window.cancelAnimationFrame(state.pageOverflowFrame);
+  state.pageOverflowFrame = window.requestAnimationFrame(() => {
+    state.pageOverflowFrame = null;
+    syncPageOverflow();
+  });
+}
+
+function syncPageOverflow() {
+  document.documentElement.classList.remove("no-page-scroll");
+  document.body.classList.remove("no-page-scroll");
+  const viewportHeight = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight;
+  const contentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const needsScroll = contentHeight > viewportHeight + 2;
+  document.documentElement.classList.toggle("no-page-scroll", !needsScroll);
+  document.body.classList.toggle("no-page-scroll", !needsScroll);
+  if (!needsScroll && window.scrollY) window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function readFileAsText(file) {
@@ -298,6 +386,9 @@ async function handleUnlock(event) {
   try {
     const payload = await decryptDialsPackage(state.encryptedPackage, password);
     validatePayload(payload);
+    // 실제 모바일에서는 성공 판정 직후부터 소프트 키보드를 닫기 시작해
+    // 메인 화면의 첫 터치가 키보드/visualViewport 정리에 소비되지 않게 합니다.
+    await settleAfterPasswordInput();
     state.payload = payload;
     prepareDirectoryData(payload);
     state.safeMeta = {
@@ -307,6 +398,11 @@ async function handleUnlock(event) {
       title: String(payload.title || "전화번호부"),
       schemaVersion: String(payload.schemaVersion || ""),
     };
+    if (state.connectionNeedsCommit) {
+      await dbSet(DATA_RECORD_KEY, { text: state.encryptedText });
+      state.connectionNeedsCommit = false;
+      requestPersistentStorage();
+    }
     await dbSet(SAFE_META_KEY, state.safeMeta);
     el.passwordInput.value = "";
     setUnlockMessage("", false);
@@ -439,6 +535,7 @@ function enterMainView() {
   renderContent();
   history.replaceState(makeHistoryState({ scrollY: 0 }), "", window.location.href);
   window.scrollTo({ top: 0, behavior: "auto" });
+  schedulePageOverflowSync();
 }
 
 function makeHistoryState({ screen = "main", view = state.currentView, contactView = state.contactView, contactDepth = state.contactDepth, searchQuery = state.searchQuery, scrollY = window.scrollY, searchSession = false } = {}) {
@@ -593,12 +690,13 @@ function renderContent() {
   if (!state.payload) return;
   if (state.searchQuery) {
     renderSearchResults();
-    return;
+  } else {
+    const view = state.currentView;
+    if (view.type === "category") renderCategory(view.categoryId);
+    else if (view.type === "organization") renderOrganization(view.categoryId, view.orgIndex);
+    else renderHome();
   }
-  const view = state.currentView;
-  if (view.type === "category") renderCategory(view.categoryId);
-  else if (view.type === "organization") renderOrganization(view.categoryId, view.orgIndex);
-  else renderHome();
+  schedulePageOverflowSync();
 }
 
 function renderHome() {
@@ -657,7 +755,7 @@ function renderCategory(categoryId) {
 
   el.contentView.innerHTML = `
     ${breadcrumbsHtml([{ label: "처음으로", view: "home" }])}
-    <div class="page-heading"><h1>${escapeHtml(category.label)}</h1><p>시트1 기준의 소속 순서로 표시됩니다.</p></div>
+    <div class="page-heading"><h1>${escapeHtml(category.label)}</h1></div>
     ${groupsHtml || renderEmptyHtml("표시할 소속이 없습니다.")}`;
 
   el.contentView.querySelectorAll("[data-org-index]").forEach((button) => {
@@ -774,7 +872,7 @@ function handleMenuAction(event) {
   closeOverflowMenu();
   const action = button.dataset.action;
   if (action === "data-info") showDataInfo();
-  else if (action === "replace-data") openFilePicker();
+  else if (action === "replace-data") beginDataReplacement();
   else if (action === "contact-export") enterContactExport();
   else if (action === "install-app") handleInstallRequest();
   else if (action === "theme") showThemeChooser();
@@ -959,6 +1057,7 @@ function lockApp(reason = "manual") {
   state.selectedPeople.clear();
   state.searchQuery = "";
   state.contactFilter = "";
+  state.contactExpanded.clear();
   state.unlockStartedAt = 0;
   if (reason === "auto") {
     try { sessionStorage.setItem(AUTO_LOCK_NOTICE_KEY, "1"); } catch {}
@@ -980,7 +1079,7 @@ function showDataInfo() {
       </dl>`,
     actions: [
       { label: "닫기", onClick: closeModal },
-      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); openFilePicker(); } },
+      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); beginDataReplacement(); } },
     ],
   });
 }
@@ -991,6 +1090,7 @@ function enterContactExport() {
   state.contactFilter = "";
   state.contactView = { type: "home" };
   state.contactDepth = 0;
+  state.contactExpanded.clear();
   el.contactSearchInput.value = "";
   showContactExportView();
   history.pushState(makeHistoryState({ screen: "contact-export", contactView: state.contactView, contactDepth: state.contactDepth, scrollY: 0 }), "", window.location.href);
@@ -1003,6 +1103,7 @@ function showContactExportView() {
   restorePrefixSettings();
   renderContactBrowse();
   setVcardMessage("");
+  schedulePageOverflowSync();
 }
 
 function leaveContactExport() {
@@ -1042,25 +1143,17 @@ function renderContactBrowse() {
   if (!el.contactBrowseView) return;
   const searching = Boolean(state.contactFilter);
   el.selectFilteredButton.classList.toggle("hidden", !searching);
-  if (searching) {
-    renderContactSearchResults();
-  } else if (state.contactView.type === "category") {
-    renderContactCategory(state.contactView.categoryId);
-  } else if (state.contactView.type === "organization") {
-    renderContactOrganization(state.contactView.categoryId, state.contactView.orgIndex);
-  } else {
-    renderContactHome();
-  }
+  if (searching) renderContactSearchResults();
+  else renderContactHome();
   syncContactSelectionUI();
   updateSelectedCount();
+  schedulePageOverflowSync();
 }
 
 function renderContactHome() {
-  const cards = state.categories.map((category) => `<button class="contact-category-card" type="button" data-contact-category-id="${escapeAttr(category.id)}">
-      <span><strong>${escapeHtml(category.label)}</strong><small>${category.organizations.length}개 소속</small></span><span class="chevron">›</span>
-    </button>`).join("");
-  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>소속을 따라 들어가 필요한 인물을 선택하세요.</span></div>
-    <div class="contact-category-grid">${cards || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+  const rows = state.categories.map((category) => contactCategoryNodeHtml(category)).join("");
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>필요한 소속을 펼쳐 인물을 선택하세요.</span></div>
+    <div class="contact-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
 }
 
 function contactMajorGroups(category) {
@@ -1078,60 +1171,138 @@ function contactMajorGroups(category) {
   return groups;
 }
 
-function renderContactCategory(categoryId) {
-  const category = state.categories.find((item) => item.id === categoryId);
-  if (!category) {
-    state.contactView = { type: "home" };
-    renderContactHome();
-    return;
-  }
-  const groupsHtml = contactMajorGroups(category).map((group) => {
-    const rows = group.items.map(({ org, orgIndex }) => contactOrganizationRowHtml(category, org, orgIndex)).join("");
-    const hideRepeatedMajor = group.items.length === 1 && (group.items[0].org.minor === "" || group.items[0].org.minor === group.major);
-    return `<div class="contact-org-group">${hideRepeatedMajor ? "" : `<h3>${escapeHtml(group.major)}</h3>`}<div class="contact-organization-list">${rows}</div></div>`;
-  }).join("");
-  el.contactBrowseView.innerHTML = `${contactBreadcrumbsHtml([{ label: "처음으로", view: "home" }])}
-    <div class="contact-browse-heading"><strong>${escapeHtml(category.label)}</strong><span>소속 왼쪽 체크박스로 전체 선택할 수 있습니다.</span></div>
-    ${groupsHtml || renderEmptyHtml("표시할 소속이 없습니다.")}`;
+function isDirectMajorOrganization(groupMajor, org) {
+  const major = String(groupMajor || "").trim();
+  const minor = String(org?.minor || "").trim();
+  return !minor || minor === major;
 }
 
-function contactOrganizationRowHtml(category, org, orgIndex) {
-  const label = org.minor || org.major || "소속 없음";
-  const keys = orgPersonKeys(category.id, orgIndex);
+function categoryTreeKey(categoryId) {
+  return `category:${categoryId}`;
+}
+
+function majorTreeKey(categoryId, major) {
+  return `major:${categoryId}:${major}`;
+}
+
+function orgTreeKey(categoryId, orgIndex) {
+  return `org:${categoryId}:${orgIndex}`;
+}
+
+function contactCategoryNodeHtml(category) {
+  const treeKey = categoryTreeKey(category.id);
+  const expanded = state.contactExpanded.has(treeKey);
+  const groups = contactMajorGroups(category);
+  const children = expanded
+    ? `<div class="contact-tree-children">${groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`
+    : "";
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속`, checkboxHtml: "" })}
+    ${children}
+  </section>`;
+}
+
+function contactMajorNodeHtml(category, group) {
+  const treeKey = majorTreeKey(category.id, group.major);
+  const expanded = state.contactExpanded.has(treeKey);
+  const keys = majorPersonKeys(category.id, group.major);
   const selected = selectionStateForKeys(keys);
-  return `<div class="contact-org-row">
-    <label class="contact-org-check" title="${escapeAttr(label)} 전체 선택">
-      <input type="checkbox" data-org-select data-category-id="${escapeAttr(category.id)}" data-org-index="${orgIndex}" ${selected.all ? "checked" : ""} ${keys.length ? "" : "disabled"}>
-      <span class="visually-hidden">${escapeHtml(label)} 전체 선택</span>
-    </label>
-    <button class="contact-org-open" type="button" data-contact-org-open data-category-id="${escapeAttr(category.id)}" data-org-index="${orgIndex}">
-      <span><strong>${escapeHtml(label)}</strong><small>${keys.length}명</small></span><span class="chevron">›</span>
-    </button>
-  </div>`;
+  const directItems = group.items.filter(({ org }) => isDirectMajorOrganization(group.major, org));
+  const childItems = group.items.filter(({ org }) => !isDirectMajorOrganization(group.major, org));
+  const directPeople = [];
+  const directSeen = new Set();
+  directItems.forEach(({ org }) => {
+    uniqueOrgRecords(org).forEach((record) => {
+      const key = String(record._personKey || "");
+      if (!key || directSeen.has(key)) return;
+      directSeen.add(key);
+      directPeople.push(record);
+    });
+  });
+  const children = expanded
+    ? `<div class="contact-tree-children">
+        ${directPeople.map((record) => contactTreePersonRowHtml(record, 2, true)).join("")}
+        ${childItems.map(({ org, orgIndex }) => contactOrganizationNodeHtml(category, org, orgIndex)).join("")}
+        ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}
+      </div>`
+    : "";
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "major",
+    categoryId: category.id,
+    major: group.major,
+    label: `${group.major} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, checkboxHtml })}
+    ${children}
+  </section>`;
 }
 
-function renderContactOrganization(categoryId, orgIndex) {
-  const category = state.categories.find((item) => item.id === categoryId);
-  const org = category?.organizations?.[orgIndex];
-  if (!category || !org) {
-    state.contactView = { type: "home" };
-    renderContactHome();
-    return;
-  }
-  const title = org.minor || org.major || category.label;
+function contactOrganizationNodeHtml(category, org, orgIndex) {
+  const treeKey = orgTreeKey(category.id, orgIndex);
+  const expanded = state.contactExpanded.has(treeKey);
+  const label = org.minor || org.major || "소속 없음";
   const records = uniqueOrgRecords(org);
   const keys = records.map((record) => record._personKey).filter(Boolean);
   const selected = selectionStateForKeys(keys);
-  const rows = records.map((record) => contactPersonRowHtml(record._personKey, record.name, formatJob(record.title, record.role), record.extension, record.mobile)).join("");
-  el.contactBrowseView.innerHTML = `${contactBreadcrumbsHtml([
-      { label: "처음으로", view: "home" },
-      { label: category.label, view: "category", categoryId },
-    ])}
-    <div class="contact-org-title-row">
-      <div><strong>${escapeHtml(title)}</strong><span>${keys.length}명</span></div>
-      <label class="contact-select-all"><input type="checkbox" data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${orgIndex}" ${selected.all ? "checked" : ""} ${keys.length ? "" : "disabled"}><span>소속 전체 선택</span></label>
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "org",
+    categoryId: category.id,
+    orgIndex,
+    label: `${label} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  const children = expanded
+    ? `<div class="contact-tree-children">${records.map((record) => contactTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`
+    : "";
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${keys.length}명`, checkboxHtml })}
+    ${children}
+  </section>`;
+}
+
+function contactDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", checkboxHtml = "" }) {
+  return `<div class="contact-tree-row${checkboxHtml ? "" : " no-select"}" style="--tree-level:${Number(level) || 0}">
+    <button class="contact-tree-toggle" type="button" data-contact-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
+      <span class="contact-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
+      <span class="contact-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
+    </button>
+    ${checkboxHtml || `<span class="contact-tree-check-spacer" aria-hidden="true"></span>`}
+  </div>`;
+}
+
+function contactTreeCheckboxHtml({ type, categoryId, major = "", orgIndex = -1, label, selected, disabled = false }) {
+  const attrs = type === "major"
+    ? `data-major-select data-category-id="${escapeAttr(categoryId)}" data-major="${escapeAttr(major)}"`
+    : `data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${Number(orgIndex)}"`;
+  return `<label class="contact-tree-check" title="${escapeAttr(label)}">
+    <input type="checkbox" ${attrs} ${selected?.all ? "checked" : ""} ${disabled ? "disabled" : ""}>
+    <span class="visually-hidden">${escapeHtml(label)}</span>
+  </label>`;
+}
+
+function contactTreePersonRowHtml(record, level, directMajorPerson = false) {
+  const personKey = String(record?._personKey || "");
+  const selected = state.selectedPeople.has(personKey);
+  const name = String(record?.name || "").trim() || "이름 없음";
+  const job = formatJob(record?.title, record?.role);
+  const primary = directMajorPerson && job ? `${job} ${name}` : name;
+  const details = directMajorPerson
+    ? unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")
+    : [job, unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")].filter(Boolean).join(" · ");
+  return `<div class="contact-tree-row contact-tree-person" style="--tree-level:${Number(level) || 0}">
+    <div class="contact-tree-static">
+      <span class="contact-tree-chevron-spacer" aria-hidden="true"></span>
+      <span class="contact-tree-label"><strong>${escapeHtml(primary)}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ""}</span>
     </div>
-    <div class="contact-person-list">${rows || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`;
+    <label class="contact-tree-check" title="${escapeAttr(name)} 선택">
+      <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+      <span class="visually-hidden">${escapeHtml(name)} 선택</span>
+    </label>
+  </div>`;
 }
 
 function renderContactSearchResults() {
@@ -1145,44 +1316,31 @@ function contactPersonRowHtml(personKey, name, detail = "", extension = "", mobi
   const selected = state.selectedPeople.has(personKey);
   const numberText = unique([extension, mobile].filter(Boolean)).join(" · ");
   const secondary = [detail, numberText].filter(Boolean).join(" · ");
-  return `<label class="contact-person-row">
-    <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+  return `<div class="contact-person-row">
     <span><strong>${escapeHtml(name || "이름 없음")}</strong>${secondary ? `<small>${escapeHtml(secondary)}</small>` : ""}</span>
-  </label>`;
-}
-
-function contactBreadcrumbsHtml(items) {
-  return `<nav class="breadcrumbs contact-breadcrumbs">${items.map((item, index) => `${index ? "<span>›</span>" : ""}<button type="button" data-contact-breadcrumb='${escapeAttr(JSON.stringify(item))}'>${escapeHtml(item.label)}</button>`).join("")}</nav>`;
+    <label class="contact-person-check" title="${escapeAttr(name || "이름 없음")} 선택">
+      <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+      <span class="visually-hidden">${escapeHtml(name || "이름 없음")} 선택</span>
+    </label>
+  </div>`;
 }
 
 function handleContactBrowseClick(event) {
-  const categoryButton = event.target.closest("[data-contact-category-id]");
-  if (categoryButton && !categoryButton.matches("input")) {
-    navigateContactView({ type: "category", categoryId: categoryButton.dataset.contactCategoryId });
-    return;
-  }
-  const orgButton = event.target.closest("[data-contact-org-open]");
-  if (orgButton) {
-    navigateContactView({ type: "organization", categoryId: orgButton.dataset.categoryId, orgIndex: Number(orgButton.dataset.orgIndex) });
-    return;
-  }
-  const breadcrumb = event.target.closest("[data-contact-breadcrumb]");
-  if (breadcrumb) {
-    const item = JSON.parse(breadcrumb.dataset.contactBreadcrumb);
-    if (item.view === "category") navigateContactView({ type: "category", categoryId: item.categoryId });
-    else navigateContactView({ type: "home" });
-  }
+  const toggle = event.target.closest("[data-contact-tree-toggle]");
+  if (!toggle) return;
+  const treeKey = toggle.dataset.treeKey;
+  if (!treeKey) return;
+  if (state.contactExpanded.has(treeKey)) state.contactExpanded.delete(treeKey);
+  else state.contactExpanded.add(treeKey);
+  renderContactBrowse();
 }
 
-function navigateContactView(view) {
-  saveCurrentHistoryScroll(true);
-  state.contactView = { ...view };
-  state.contactDepth += 1;
-  state.contactFilter = "";
-  el.contactSearchInput.value = "";
-  history.pushState(makeHistoryState({ screen: "contact-export", contactView: state.contactView, contactDepth: state.contactDepth, scrollY: 0 }), "", window.location.href);
-  renderContactBrowse();
-  window.scrollTo({ top: 0, behavior: "auto" });
+function majorPersonKeys(categoryId, major) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  if (!category) return [];
+  const group = contactMajorGroups(category).find((item) => item.major === major);
+  if (!group) return [];
+  return unique(group.items.flatMap(({ org }) => org.people.map((record) => record._personKey)).filter(Boolean));
 }
 
 function handleContactSelectionChange(event) {
@@ -1190,6 +1348,16 @@ function handleContactSelectionChange(event) {
   if (personCheckbox) {
     if (personCheckbox.checked) state.selectedPeople.add(personCheckbox.dataset.personKey);
     else state.selectedPeople.delete(personCheckbox.dataset.personKey);
+    syncContactSelectionUI();
+    return;
+  }
+  const majorCheckbox = event.target.closest('input[data-major-select]');
+  if (majorCheckbox) {
+    const keys = majorPersonKeys(majorCheckbox.dataset.categoryId, majorCheckbox.dataset.major);
+    keys.forEach((key) => {
+      if (majorCheckbox.checked) state.selectedPeople.add(key);
+      else state.selectedPeople.delete(key);
+    });
     syncContactSelectionUI();
     return;
   }
@@ -1231,11 +1399,17 @@ function syncContactSelectionUI() {
   el.contactBrowseView.querySelectorAll('input[data-person-key]').forEach((checkbox) => {
     checkbox.checked = state.selectedPeople.has(checkbox.dataset.personKey);
   });
+  el.contactBrowseView.querySelectorAll('input[data-major-select]').forEach((checkbox) => {
+    const current = selectionStateForKeys(majorPersonKeys(checkbox.dataset.categoryId, checkbox.dataset.major));
+    checkbox.checked = current.all;
+    checkbox.indeterminate = current.some;
+    checkbox.setAttribute("aria-checked", current.some ? "mixed" : String(current.all));
+  });
   el.contactBrowseView.querySelectorAll('input[data-org-select]').forEach((checkbox) => {
-    const stateForOrg = selectionStateForKeys(orgPersonKeys(checkbox.dataset.categoryId, Number(checkbox.dataset.orgIndex)));
-    checkbox.checked = stateForOrg.all;
-    checkbox.indeterminate = stateForOrg.some;
-    checkbox.setAttribute("aria-checked", stateForOrg.some ? "mixed" : String(stateForOrg.all));
+    const current = selectionStateForKeys(orgPersonKeys(checkbox.dataset.categoryId, Number(checkbox.dataset.orgIndex)));
+    checkbox.checked = current.all;
+    checkbox.indeterminate = current.some;
+    checkbox.setAttribute("aria-checked", current.some ? "mixed" : String(current.all));
   });
   updateSelectedCount();
 }
