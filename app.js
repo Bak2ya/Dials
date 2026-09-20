@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.3.1";
+const APP_VERSION = "0.3.2";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -22,6 +22,9 @@ const state = {
   currentView: { type: "home" },
   searchQuery: "",
   searchComposing: false,
+  contactSearchComposing: false,
+  globalSearchDebounceTimer: null,
+  contactSearchDebounceTimer: null,
   latestStatus: null,
   selectedPeople: new Set(),
   contactFilter: "",
@@ -103,16 +106,21 @@ function bindEvents() {
     navigateToView({ type: "home" });
   });
 
+  el.globalSearchInput.addEventListener("focus", prepareGlobalSearchHistory);
   el.globalSearchInput.addEventListener("compositionstart", () => {
     state.searchComposing = true;
+    cancelGlobalSearchCommit();
   });
   el.globalSearchInput.addEventListener("compositionend", () => {
     state.searchComposing = false;
-    handleGlobalSearchInput();
+    scheduleGlobalSearchCommit(120);
   });
   el.globalSearchInput.addEventListener("input", (event) => {
     if (state.searchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
-    handleGlobalSearchInput();
+    scheduleGlobalSearchCommit();
+  });
+  el.globalSearchInput.addEventListener("blur", () => {
+    window.setTimeout(syncGlobalSearchHistoryState, 0);
   });
   el.clearSearchButton.addEventListener("click", clearGlobalSearch);
 
@@ -135,9 +143,17 @@ function bindEvents() {
   });
 
   el.contactBackButton.addEventListener("click", leaveContactExport);
-  el.contactSearchInput.addEventListener("input", () => {
-    state.contactFilter = el.contactSearchInput.value.trim();
-    renderContactPeople();
+  el.contactSearchInput.addEventListener("compositionstart", () => {
+    state.contactSearchComposing = true;
+    cancelContactSearchCommit();
+  });
+  el.contactSearchInput.addEventListener("compositionend", () => {
+    state.contactSearchComposing = false;
+    scheduleContactSearchCommit(120);
+  });
+  el.contactSearchInput.addEventListener("input", (event) => {
+    if (state.contactSearchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
+    scheduleContactSearchCommit();
   });
   el.selectFilteredButton.addEventListener("click", selectFilteredPeople);
   el.clearSelectionButton.addEventListener("click", () => {
@@ -399,30 +415,36 @@ function enterMainView() {
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
-function makeHistoryState({ screen = "main", view = state.currentView, searchQuery = state.searchQuery, scrollY = window.scrollY } = {}) {
+function makeHistoryState({ screen = "main", view = state.currentView, searchQuery = state.searchQuery, scrollY = window.scrollY, searchSession = false } = {}) {
   return {
     [HISTORY_STATE_KEY]: {
       screen,
       view: { ...view },
       searchQuery: String(searchQuery || ""),
       scrollY: Number.isFinite(Number(scrollY)) ? Number(scrollY) : 0,
+      searchSession: Boolean(searchSession),
     },
   };
 }
 
-function saveCurrentHistoryScroll() {
+function searchInputIsActive() {
+  return document.activeElement === el.globalSearchInput || state.searchComposing;
+}
+
+function saveCurrentHistoryScroll(force = false) {
   const route = history.state?.[HISTORY_STATE_KEY];
-  if (!route || !state.payload) return;
+  if (!route || !state.payload || (!force && searchInputIsActive())) return;
   history.replaceState(makeHistoryState({
     screen: route.screen || "main",
     view: route.view || state.currentView,
     searchQuery: route.searchQuery ?? state.searchQuery,
     scrollY: window.scrollY,
+    searchSession: Boolean(route.searchSession),
   }), "", window.location.href);
 }
 
 function scheduleHistoryScrollSave() {
-  if (!state.payload || !history.state?.[HISTORY_STATE_KEY]) return;
+  if (!state.payload || !history.state?.[HISTORY_STATE_KEY] || searchInputIsActive()) return;
   if (state.scrollSaveTimer) window.clearTimeout(state.scrollSaveTimer);
   state.scrollSaveTimer = window.setTimeout(() => {
     state.scrollSaveTimer = null;
@@ -444,46 +466,72 @@ function navigateToView(view) {
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
-function handleGlobalSearchInput() {
-  if (state.searchComposing) return;
+function prepareGlobalSearchHistory() {
+  if (!state.payload) return;
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.screen !== "main" || route.searchSession) return;
+  saveCurrentHistoryScroll(true);
+  history.pushState(makeHistoryState({
+    screen: "main",
+    view: state.currentView,
+    searchQuery: state.searchQuery,
+    scrollY: window.scrollY,
+    searchSession: true,
+  }), "", window.location.href);
+}
+
+function cancelGlobalSearchCommit() {
+  if (!state.globalSearchDebounceTimer) return;
+  window.clearTimeout(state.globalSearchDebounceTimer);
+  state.globalSearchDebounceTimer = null;
+}
+
+function scheduleGlobalSearchCommit(delay = 220) {
+  cancelGlobalSearchCommit();
+  state.globalSearchDebounceTimer = window.setTimeout(() => {
+    state.globalSearchDebounceTimer = null;
+    if (state.searchComposing) return;
+    commitGlobalSearchInput();
+  }, delay);
+}
+
+function commitGlobalSearchInput() {
   const previous = state.searchQuery;
   const next = el.globalSearchInput.value.trim();
   if (previous === next) {
     el.clearSearchButton.classList.toggle("hidden", !next);
     return;
   }
-  if (!previous && next) {
-    saveCurrentHistoryScroll();
-    state.searchQuery = next;
-    el.clearSearchButton.classList.remove("hidden");
-    history.pushState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: next, scrollY: 0 }), "", window.location.href);
-    renderContent();
-    window.scrollTo({ top: 0, behavior: "auto" });
-    return;
-  }
   state.searchQuery = next;
   el.clearSearchButton.classList.toggle("hidden", !next);
-  if (previous && next) {
-    const route = history.state?.[HISTORY_STATE_KEY];
-    if (route?.searchQuery !== undefined) history.replaceState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: next, scrollY: window.scrollY }), "", window.location.href);
-  }
-  if (previous && !next && history.state?.[HISTORY_STATE_KEY]?.searchQuery) {
-    history.back();
-    return;
-  }
   renderContent();
 }
 
+function syncGlobalSearchHistoryState() {
+  if (!state.payload || state.searchComposing) return;
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.screen !== "main" || !route.searchSession) return;
+  history.replaceState(makeHistoryState({
+    screen: "main",
+    view: state.currentView,
+    searchQuery: state.searchQuery,
+    scrollY: window.scrollY,
+    searchSession: true,
+  }), "", window.location.href);
+}
+
 function clearGlobalSearch() {
-  if (!state.searchQuery) return;
+  cancelGlobalSearchCommit();
+  if (!state.searchQuery && !el.globalSearchInput.value) return;
   el.globalSearchInput.value = "";
-  if (history.state?.[HISTORY_STATE_KEY]?.searchQuery) {
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.searchSession) {
     history.back();
-  } else {
-    state.searchQuery = "";
-    el.clearSearchButton.classList.add("hidden");
-    renderContent();
+    return;
   }
+  state.searchQuery = "";
+  el.clearSearchButton.classList.add("hidden");
+  renderContent();
   window.setTimeout(() => el.globalSearchInput.focus(), 0);
 }
 
@@ -696,6 +744,7 @@ function handleMenuAction(event) {
   else if (action === "contact-export") enterContactExport();
   else if (action === "install-app") handleInstallRequest();
   else if (action === "theme") showThemeChooser();
+  else if (action === "about") showAboutInfo();
   else if (action === "lock") lockApp();
 }
 
@@ -795,6 +844,29 @@ async function handleInstallRequest() {
     title: "바로가기 추가",
     body,
     actions: [{ label: "확인", primary: true, onClick: closeModal }],
+  });
+}
+
+function showAboutInfo() {
+  showModal({
+    title: "정보",
+    body: `<div class="about-info">
+      <p><strong>Dials</strong>는 배포받은 교내 전화번호부 데이터를 빠르게 조회하고 연락할 수 있는 웹 전화번호부입니다.</p>
+      <section class="about-section" aria-labelledby="privacySecurityTitle">
+        <h3 id="privacySecurityTitle">개인정보 보호 및 보안</h3>
+        <ul>
+          <li>전화번호부 연락처 데이터를 외부 서버에 업로드하거나 자동 전송하지 않습니다.</li>
+          <li><code>.dials</code> 파일은 암호화된 상태로 이 기기의 브라우저 저장소에 보관됩니다.</li>
+          <li>데이터 암호는 저장하지 않습니다.</li>
+          <li>암호를 입력해 연 전화번호부는 현재 페이지를 사용하는 동안에만 메모리에서 사용됩니다.</li>
+        </ul>
+      </section>
+      <div class="about-footer">
+        <span>Dials v${APP_VERSION}</span>
+        <a class="github-link" href="https://github.com/Bak2ya/Dials" target="_blank" rel="noopener noreferrer">GitHub에서 보기</a>
+      </div>
+    </div>`,
+    actions: [{ label: "닫기", onClick: closeModal }],
   });
 }
 
@@ -902,6 +974,23 @@ function leaveContactExport() {
   el.contactExportView.classList.add("hidden");
   el.mainView.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function cancelContactSearchCommit() {
+  if (!state.contactSearchDebounceTimer) return;
+  window.clearTimeout(state.contactSearchDebounceTimer);
+  state.contactSearchDebounceTimer = null;
+}
+
+function scheduleContactSearchCommit(delay = 220) {
+  cancelContactSearchCommit();
+  state.contactSearchDebounceTimer = window.setTimeout(() => {
+    state.contactSearchDebounceTimer = null;
+    const next = el.contactSearchInput.value.trim();
+    if (state.contactFilter === next) return;
+    state.contactFilter = next;
+    renderContactPeople();
+  }, delay);
 }
 
 function filteredContactPeople() {

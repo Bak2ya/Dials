@@ -78,6 +78,16 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Modals trap Tab focus, Esc closes them, and closing restores focus to the opener.
 - The `⋯` popover uses ordinary buttons; it does not claim `role=menu` without implementing full menu keyboard semantics.
 
+## v0.3.2 mobile IME and overflow menu
+
+- The v0.3.1 composition-only guard was insufficient on real mobile Korean keyboards because event ordering differs across browser/IME combinations. Synthetic composition tests alone are not evidence of real-device IME correctness.
+- Global search now treats the input field as browser/IME-owned: it avoids History/scroll-state writes while the search field is active and debounces result rendering after input stabilizes.
+- A search-session History entry is prepared when the field receives focus, before text composition starts, so Back can still leave search without changing History on each keystroke.
+- Contact-export search uses the same debounced/composition-safe policy, without adding a History route.
+- Do not assign to the search input value during normal typing. Programmatic value changes remain limited to explicit navigation/clear/restore operations.
+- The overflow `⋯` keeps its visual weight but uses a 48×48px hit target; action rows are at least 48px high for mobile use.
+- `⋯ → 정보` explains user-relevant privacy/security behavior, shows the app version, and links to GitHub. Cryptographic algorithm details remain in technical documentation rather than the general About view.
+
 ## v0.3.1 IME search composition
 
 - Global search must not rerender results while the browser IME is composing text.
