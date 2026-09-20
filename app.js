@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.1.1";
+const APP_VERSION = "0.3.0";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -10,6 +10,7 @@ const LATEST_STATUS_STORAGE_KEY = "dialsLatestStatus";
 const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
 const THEME_STORAGE_KEY = "dialsThemePreference";
+const HISTORY_STATE_KEY = "dialsRoute";
 
 const state = {
   encryptedText: "",
@@ -25,6 +26,8 @@ const state = {
   contactFilter: "",
   deferredInstallPrompt: null,
   themePreference: "system",
+  modalReturnFocus: null,
+  scrollSaveTimer: null,
 };
 
 const el = {};
@@ -86,6 +89,9 @@ function bindEvents() {
   window.addEventListener("appinstalled", () => {
     state.deferredInstallPrompt = null;
   });
+  window.addEventListener("popstate", handleHistoryNavigation);
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.addEventListener("scroll", scheduleHistoryScrollSave, { passive: true });
 
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
@@ -93,24 +99,11 @@ function bindEvents() {
   el.unlockForm.addEventListener("submit", handleUnlock);
 
   el.homeBrandButton.addEventListener("click", () => {
-    state.searchQuery = "";
-    el.globalSearchInput.value = "";
-    state.currentView = { type: "home" };
-    renderContent();
+    navigateToView({ type: "home" });
   });
 
-  el.globalSearchInput.addEventListener("input", () => {
-    state.searchQuery = el.globalSearchInput.value.trim();
-    el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
-    renderContent();
-  });
-  el.clearSearchButton.addEventListener("click", () => {
-    el.globalSearchInput.value = "";
-    state.searchQuery = "";
-    el.globalSearchInput.focus();
-    el.clearSearchButton.classList.add("hidden");
-    renderContent();
-  });
+  el.globalSearchInput.addEventListener("input", handleGlobalSearchInput);
+  el.clearSearchButton.addEventListener("click", clearGlobalSearch);
 
   el.menuButton.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -153,6 +146,10 @@ function bindEvents() {
     if (event.key === "Escape") {
       closeOverflowMenu();
       closeModal();
+      return;
+    }
+    if (event.key === "Tab" && !el.modalBackdrop.classList.contains("hidden")) {
+      trapModalFocus(event);
     }
   });
 }
@@ -354,6 +351,7 @@ function buildUniquePeople(categories) {
           job: String(record.job || formatJob(record.title, record.role)),
           extension: String(record.extension || ""),
           mobile: String(record.mobile || ""),
+          externalNumber: Boolean(record.externalNumber),
         });
         sourceIndex += 1;
       }
@@ -386,6 +384,111 @@ function enterMainView() {
   el.clearSearchButton.classList.add("hidden");
   updateUpdateIndicator();
   renderContent();
+  history.replaceState(makeHistoryState({ scrollY: 0 }), "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function makeHistoryState({ screen = "main", view = state.currentView, searchQuery = state.searchQuery, scrollY = window.scrollY } = {}) {
+  return {
+    [HISTORY_STATE_KEY]: {
+      screen,
+      view: { ...view },
+      searchQuery: String(searchQuery || ""),
+      scrollY: Number.isFinite(Number(scrollY)) ? Number(scrollY) : 0,
+    },
+  };
+}
+
+function saveCurrentHistoryScroll() {
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (!route || !state.payload) return;
+  history.replaceState(makeHistoryState({
+    screen: route.screen || "main",
+    view: route.view || state.currentView,
+    searchQuery: route.searchQuery ?? state.searchQuery,
+    scrollY: window.scrollY,
+  }), "", window.location.href);
+}
+
+function scheduleHistoryScrollSave() {
+  if (!state.payload || !history.state?.[HISTORY_STATE_KEY]) return;
+  if (state.scrollSaveTimer) window.clearTimeout(state.scrollSaveTimer);
+  state.scrollSaveTimer = window.setTimeout(() => {
+    state.scrollSaveTimer = null;
+    saveCurrentHistoryScroll();
+  }, 80);
+}
+
+function navigateToView(view) {
+  if (!state.payload) return;
+  saveCurrentHistoryScroll();
+  state.currentView = { ...view };
+  state.searchQuery = "";
+  el.globalSearchInput.value = "";
+  el.clearSearchButton.classList.add("hidden");
+  el.contactExportView.classList.add("hidden");
+  el.mainView.classList.remove("hidden");
+  history.pushState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: "", scrollY: 0 }), "", window.location.href);
+  renderContent();
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function handleGlobalSearchInput() {
+  const previous = state.searchQuery;
+  const next = el.globalSearchInput.value.trim();
+  if (!previous && next) {
+    saveCurrentHistoryScroll();
+    state.searchQuery = next;
+    el.clearSearchButton.classList.remove("hidden");
+    history.pushState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: next, scrollY: 0 }), "", window.location.href);
+    renderContent();
+    window.scrollTo({ top: 0, behavior: "auto" });
+    return;
+  }
+  state.searchQuery = next;
+  el.clearSearchButton.classList.toggle("hidden", !next);
+  if (previous && next) {
+    const route = history.state?.[HISTORY_STATE_KEY];
+    if (route?.searchQuery !== undefined) history.replaceState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: next, scrollY: window.scrollY }), "", window.location.href);
+  }
+  if (previous && !next && history.state?.[HISTORY_STATE_KEY]?.searchQuery) {
+    history.back();
+    return;
+  }
+  renderContent();
+}
+
+function clearGlobalSearch() {
+  if (!state.searchQuery) return;
+  el.globalSearchInput.value = "";
+  if (history.state?.[HISTORY_STATE_KEY]?.searchQuery) {
+    history.back();
+  } else {
+    state.searchQuery = "";
+    el.clearSearchButton.classList.add("hidden");
+    renderContent();
+  }
+  window.setTimeout(() => el.globalSearchInput.focus(), 0);
+}
+
+function handleHistoryNavigation(event) {
+  const route = event.state?.[HISTORY_STATE_KEY];
+  if (!route || !state.payload) return;
+  closeOverflowMenu();
+  closeModal();
+  state.currentView = route.view && typeof route.view === "object" ? { ...route.view } : { type: "home" };
+  state.searchQuery = String(route.searchQuery || "");
+  el.globalSearchInput.value = state.searchQuery;
+  el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
+  if (route.screen === "contact-export") {
+    el.startView.classList.add("hidden");
+    showContactExportView();
+  } else {
+    el.contactExportView.classList.add("hidden");
+    el.mainView.classList.remove("hidden");
+    renderContent();
+  }
+  window.requestAnimationFrame(() => window.scrollTo({ top: Number(route.scrollY) || 0, behavior: "auto" }));
 }
 
 function renderContent() {
@@ -416,9 +519,7 @@ function renderHome() {
     <div class="category-grid">${cards || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
   el.contentView.querySelectorAll("[data-category-id]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.currentView = { type: "category", categoryId: button.dataset.categoryId };
-      renderContent();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      navigateToView({ type: "category", categoryId: button.dataset.categoryId });
     });
   });
 }
@@ -463,9 +564,7 @@ function renderCategory(categoryId) {
 
   el.contentView.querySelectorAll("[data-org-index]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.currentView = { type: "organization", categoryId, orgIndex: Number(button.dataset.orgIndex) };
-      renderContent();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      navigateToView({ type: "organization", categoryId, orgIndex: Number(button.dataset.orgIndex) });
     });
   });
   bindBreadcrumbs();
@@ -491,7 +590,7 @@ function renderOrganization(categoryId, orgIndex) {
 function personCardHtml(person) {
   const job = String(person.job || formatJob(person.title, person.role));
   const lines = [];
-  if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension));
+  if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension, person.externalNumber));
   if (person.mobile) lines.push(phoneLineHtml("개인번호", person.mobile));
   return `<article class="person-card">
     <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${job ? `<span class="person-job">${escapeHtml(job)}</span>` : ""}</div>
@@ -499,8 +598,9 @@ function personCardHtml(person) {
   </article>`;
 }
 
-function phoneLineHtml(label, number) {
-  return `<div class="phone-line"><span>${escapeHtml(label)}</span><a href="tel:${escapeAttr(telHref(number))}">${escapeHtml(number)}</a></div>`;
+function phoneLineHtml(label, number, externalNumber = false) {
+  const display = externalNumber ? `${number} (외부번호)` : number;
+  return `<div class="phone-line"><span>${escapeHtml(label)}</span><a href="tel:${escapeAttr(telHref(number))}">${escapeHtml(display)}</a></div>`;
 }
 
 function renderSearchResults() {
@@ -518,7 +618,11 @@ function searchPersonCardHtml(person) {
   const affiliationHtml = person.affiliations.map((a) => {
     const orgPath = affiliationPath(a);
     const phones = [];
-    if (a.extension) phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">내선 ${escapeHtml(a.extension)}</a>`);
+    if (a.extension) {
+      const label = "내선";
+      const display = a.externalNumber ? `${a.extension} (외부번호)` : a.extension;
+      phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">${label} ${escapeHtml(display)}</a>`);
+    }
     if (a.mobile && a.mobile !== commonMobile) phones.push(`<a href="tel:${escapeAttr(telHref(a.mobile))}">개인 ${escapeHtml(a.mobile)}</a>`);
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.job ? `<span>${escapeHtml(a.job)}</span>` : ""}</div>
@@ -535,7 +639,10 @@ function searchPersonCardHtml(person) {
 function personMatchesTokens(person, tokens) {
   if (!tokens.length) return true;
   const textParts = [person.name];
-  person.affiliations.forEach((a) => textParts.push(a.categoryLabel, a.major, a.minor, a.title, a.role, a.job, a.extension, a.mobile));
+  person.affiliations.forEach((a) => textParts.push(
+    a.categoryLabel, a.major, a.minor, a.title, a.role, a.job, a.extension, a.mobile,
+    a.externalNumber ? "외부번호" : "",
+  ));
   const haystack = normalizeText(textParts.filter(Boolean).join(" "));
   const digits = textParts.filter(Boolean).join(" ").replace(/\D/g, "");
   return tokens.every((token) => {
@@ -553,9 +660,8 @@ function bindBreadcrumbs() {
   el.contentView.querySelectorAll("[data-breadcrumb]").forEach((button) => {
     button.addEventListener("click", () => {
       const item = JSON.parse(button.dataset.breadcrumb);
-      if (item.view === "category") state.currentView = { type: "category", categoryId: item.categoryId };
-      else state.currentView = { type: "home" };
-      renderContent();
+      if (item.view === "category") navigateToView({ type: "category", categoryId: item.categoryId });
+      else navigateToView({ type: "home" });
     });
   });
 }
@@ -580,12 +686,12 @@ function handleMenuAction(event) {
 
 function initializeTheme() {
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  state.themePreference = ["light", "dark"].includes(saved) ? saved : "system";
+  state.themePreference = ["light", "dark", "black"].includes(saved) ? saved : "system";
   applyTheme(state.themePreference, false);
 }
 
 function applyTheme(mode, persist = true) {
-  const normalized = ["light", "dark"].includes(mode) ? mode : "system";
+  const normalized = ["light", "dark", "black"].includes(mode) ? mode : "system";
   state.themePreference = normalized;
   document.documentElement.dataset.theme = normalized;
   if (persist) localStorage.setItem(THEME_STORAGE_KEY, normalized);
@@ -595,40 +701,46 @@ function applyTheme(mode, persist = true) {
 
 function updateThemeMenuLabel() {
   if (!el.themeMenuButton) return;
-  const label = state.themePreference === "light" ? "라이트" : state.themePreference === "dark" ? "다크" : "시스템";
-  el.themeMenuButton.textContent = `화면 모드 · ${label}`;
+  const labels = { system: "시스템", light: "라이트", dark: "다크", black: "블랙" };
+  el.themeMenuButton.textContent = `화면 모드 · ${labels[state.themePreference] || "시스템"}`;
 }
 
 function resolvedTheme() {
-  if (state.themePreference === "light" || state.themePreference === "dark") return state.themePreference;
+  if (["light", "dark", "black"].includes(state.themePreference)) return state.themePreference;
   return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
 }
 
 function updateThemeMetaColor() {
   if (!el.themeColorMeta) return;
-  el.themeColorMeta.setAttribute("content", resolvedTheme() === "dark" ? "#111317" : "#efe6d7");
+  const colors = { light: "#F6F1E8", dark: "#0D1117", black: "#000000" };
+  el.themeColorMeta.setAttribute("content", colors[resolvedTheme()] || colors.light);
 }
 
 function showThemeChooser() {
   const current = state.themePreference;
   const option = (value, title, description) => `
-    <button class="theme-choice${current === value ? " selected" : ""}" type="button" data-theme-choice="${value}">
-      <span class="theme-choice-radio" aria-hidden="true"></span>
+    <label class="theme-choice${current === value ? " selected" : ""}" data-theme-value="${value}">
+      <input type="radio" name="dials-theme" value="${value}" ${current === value ? "checked" : ""}>
       <span><strong>${title}</strong><small>${description}</small></span>
-    </button>`;
+    </label>`;
   showModal({
     title: "화면 모드",
-    body: `<div class="theme-choice-list">
+    body: `<fieldset class="theme-choice-list">
+      <legend class="visually-hidden">화면 모드 선택</legend>
       ${option("system", "시스템 설정", "기기의 라이트/다크 모드를 자동으로 따릅니다.")}
-      ${option("light", "라이트", "따뜻한 베이지와 은은한 종이 질감의 밝은 화면입니다.")}
-      ${option("dark", "다크", "어두운 환경에 맞춘 화면입니다.")}
-    </div>`,
+      ${option("light", "라이트", "따뜻한 뉴트럴 계열의 밝은 화면입니다.")}
+      ${option("dark", "다크", "차분한 개발자 도구 계열의 어두운 화면입니다.")}
+      ${option("black", "블랙 (OLED)", "넓은 배경을 순수 검정으로 표시해 OLED 발광 면적을 줄입니다.")}
+    </fieldset>`,
     actions: [{ label: "닫기", onClick: closeModal }],
   });
-  el.modalBody.querySelectorAll("[data-theme-choice]").forEach((button) => {
-    button.addEventListener("click", () => {
-      applyTheme(button.dataset.themeChoice);
-      closeModal();
+  el.modalBody.querySelectorAll('input[name="dials-theme"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (!radio.checked) return;
+      applyTheme(radio.value);
+      el.modalBody.querySelectorAll("[data-theme-value]").forEach((label) => {
+        label.classList.toggle("selected", label.dataset.themeValue === radio.value);
+      });
     });
   });
 }
@@ -749,21 +861,31 @@ function showDataInfo() {
 }
 
 function enterContactExport() {
+  saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.contactFilter = "";
   el.contactSearchInput.value = "";
+  showContactExportView();
+  history.pushState(makeHistoryState({ screen: "contact-export", scrollY: 0 }), "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function showContactExportView() {
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
   restorePrefixSettings();
   renderContactPeople();
   setVcardMessage("");
-  window.scrollTo({ top: 0 });
 }
 
 function leaveContactExport() {
+  if (history.state?.[HISTORY_STATE_KEY]?.screen === "contact-export") {
+    history.back();
+    return;
+  }
   el.contactExportView.classList.add("hidden");
   el.mainView.classList.remove("hidden");
-  window.scrollTo({ top: 0 });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function filteredContactPeople() {
@@ -920,6 +1042,9 @@ function setVcardMessage(message, isError = false, isSuccess = false) {
 }
 
 function showModal({ title, body, actions = [] }) {
+  if (el.modalBackdrop.classList.contains("hidden")) {
+    state.modalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
   el.modalTitle.textContent = title;
   el.modalBody.innerHTML = body;
   el.modalActions.innerHTML = "";
@@ -933,12 +1058,43 @@ function showModal({ title, body, actions = [] }) {
   });
   el.modalBackdrop.classList.remove("hidden");
   el.modalBackdrop.setAttribute("aria-hidden", "false");
-  window.setTimeout(() => el.modalCloseButton.focus(), 10);
+  window.setTimeout(() => {
+    const target = el.modalBody.querySelector('input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]')
+      || el.modalActions.querySelector('button:not([disabled])')
+      || el.modalCloseButton;
+    target?.focus();
+  }, 10);
 }
 
 function closeModal() {
+  if (el.modalBackdrop.classList.contains("hidden")) return;
   el.modalBackdrop.classList.add("hidden");
   el.modalBackdrop.setAttribute("aria-hidden", "true");
+  const returnFocus = state.modalReturnFocus;
+  state.modalReturnFocus = null;
+  const visibleReturnFocus = returnFocus?.isConnected && returnFocus.offsetParent !== null ? returnFocus : null;
+  const fallbackFocus = el.menuButton?.isConnected && el.menuButton.offsetParent !== null ? el.menuButton : null;
+  const target = visibleReturnFocus || fallbackFocus;
+  if (target) window.setTimeout(() => target.focus(), 0);
+}
+
+function trapModalFocus(event) {
+  const focusable = [...el.modalPanel.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter((node) => node.offsetParent !== null);
+  if (!focusable.length) {
+    event.preventDefault();
+    el.modalPanel.focus?.();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function setUnlockMessage(message, isError = false, isSuccess = false) {

@@ -21,8 +21,8 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - iPhone / iPad / Android / Windows / macOS 브라우저 반응형 화면
 - 확정된 Dials 공식 아이콘을 웹 헤더 / PWA / iPhone 홈 화면 아이콘에 공통 적용
 - iOS 파일 선택기에서 `.dials` 파일이 비활성화되던 문제 수정
-- `⋯ → 화면 모드`에서 시스템 / 라이트 / 다크 선택 (기본값은 시스템)
-- 라이트 모드의 따뜻한 베이지 배경과 매우 은은한 종이 질감
+- `⋯ → 화면 모드`에서 시스템 / 라이트 / 다크 / 블랙(OLED) 선택 (기본값은 시스템)
+- House Palette 기준 라이트 / 다크 / 블랙(OLED) 테마
 - `⋯ → 바로가기 추가`에서 지원 브라우저의 앱 설치 안내를 사용하고, iPhone/iPad에서는 `공유 → 홈 화면에 추가` 방법 안내
 - 암호화 `.dials` 파일 불러오기 및 IndexedDB 재사용
 - 암호 미저장
@@ -32,6 +32,7 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - `personKey` 기준으로 동일인의 여러 소속을 검색 결과 한 카드에 통합
 - 이름이 같은 다른 사람은 서로 다른 `personKey`로 별도 표시
 - 전화번호를 누르면 전화 앱 연결
+- HJU Phonebook에서 내선 연결 불가로 지정한 번호는 전체 번호 뒤에 **`(외부번호)`** 표시
 - `⋯ → 연락처 저장` 전용 화면
 - 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
 - vCard에 넣을 개인번호 / 내선번호 / 소속 / 직책·역할 선택
@@ -44,6 +45,24 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
 - 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
 
+## v0.3.0 웹 내비게이션 · 접근성 · OLED
+
+- 브라우저/Android 시스템 **뒤로가기**가 Dials 내부의 `홈 → 분류 → 소속` 이동과 자연스럽게 연결됩니다.
+- 검색 진입은 History에 한 번만 기록되며, 뒤로가기를 누르면 검색 이전 화면과 스크롤 위치로 돌아갑니다.
+- `연락처 저장`도 History에 연결되어 브라우저/시스템 뒤로가기로 전화번호부에 복귀합니다.
+- 목록으로 돌아왔을 때 이전 스크롤 위치를 복원합니다.
+- 모달은 Tab 포커스를 내부에 유지하고 닫을 때 원래 조작하던 컨트롤로 포커스를 돌려줍니다.
+- `⋯`는 ARIA menu 역할을 억지로 선언하지 않고 일반 popover 버튼 목록으로 정리했습니다.
+- 화면 모드는 실제 radio group이며 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 제공합니다.
+- 라이트/다크/블랙은 공통 House Palette 기준으로 정리했습니다.
+- `내선번호`라는 익숙한 전화번호부 용어는 유지합니다. 외부번호도 같은 번호 자리에서 `(외부번호)`만 덧붙여 표시합니다.
+
+## v0.2.0 외부번호 표시
+
+HJU Phonebook의 `번호 기반`에서 `내선 연결 가능`을 끈 번호는 Dials에서 전체 번호를 그대로 유지하면서 뒤에 **`(외부번호)`**를 표시합니다. 이 표시는 번호의 성격을 알려주는 정보이며 전화 링크 자체는 전체 번호를 그대로 사용합니다.
+
+기존 schema 1.1 데이터에는 이 필드가 없으므로 일반 내선번호와 동일하게 표시됩니다.
+
 ## iPhone / iPad 데이터 파일 선택
 
 Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` 파일이 회색으로 비활성화되어 선택되지 않던 문제를 수정했습니다. 브라우저의 파일 형식 필터에 의존하지 않고 파일을 선택한 뒤, Dials가 내부의 `DialsEncryptedData` 형식을 직접 검사합니다.
@@ -52,13 +71,20 @@ Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` �
 
 ## 화면 모드와 바로가기
 
-상단 `⋯` 메뉴의 **화면 모드**에서 `시스템 / 라이트 / 다크`를 선택할 수 있습니다. 기본값은 시스템이며, 사용자가 직접 선택한 모드는 현재 브라우저에 기억됩니다. 라이트 모드는 고급스러운 베이지 계열을 기본으로 하며 외부 이미지 파일 없이 생성한 매우 은은한 종이 질감을 사용합니다.
+상단 `⋯` 메뉴의 **화면 모드**에서 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 선택할 수 있습니다. 기본값은 시스템이며, 사용자가 직접 선택한 모드는 현재 브라우저에 기억됩니다.
+
+- 라이트: House Palette의 warm-neutral 기준 (`#F6F1E8` 배경)
+- 다크: developer-neutral 기준 (`#0D1117` 배경)
+- 블랙(OLED): 넓은 배경과 surface를 `#000000`으로 유지하여 OLED 발광 면적을 줄이는 모드
+- Accent: 웹 fallback `#3478F6`
+
+화면 모드 선택은 실제 radio group을 사용합니다.
 
 `⋯ → 바로가기 추가`는 설치를 직접 지원하는 브라우저에서는 PWA 설치 안내를 사용합니다. iPhone/iPad에서는 웹페이지가 홈 화면 추가 창을 직접 실행할 수 없기 때문에 **Safari 공유 → 홈 화면에 추가** 순서를 화면에서 안내합니다.
 
 ## Windows 프로그램과의 관계
 
-Dials v0.1.2는 **HJU Phonebook V0.8.1 build38**에서 생성한 `.dials` 파일을 기준으로 제작되었습니다.
+Dials v0.3.0은 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
 
 현재 규격은 다음과 같습니다.
 
@@ -67,7 +93,8 @@ Dials v0.1.2는 **HJU Phonebook V0.8.1 build38**에서 생성한 `.dials` 파일
 - 포맷 버전: `1`
 - 암호 키 파생: PBKDF2-HMAC-SHA256, 310,000회
 - 암호화: AES-256-GCM
-- payload 스키마: `1.1`
+- payload 스키마: `1.2` (`1.1`도 읽기 호환)
+- 외부번호 표시: `externalNumber: true`이면 전체 번호 뒤에 `(외부번호)` 표시
 - 동일인 식별: 실제 DB ID가 아닌 비표시 `personKey`
 - 소속 및 인물 순서: Windows의 시트1 출력순서
 
@@ -161,8 +188,8 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Responsive viewer for iPhone, iPad, Android, Windows, and macOS browsers
 - Final Dials icon applied consistently to the web header, PWA, and iPhone Home Screen icon
 - Fixed iOS file-picker compatibility for custom `.dials` files
-- System/light/dark appearance selector, with system mode as the default
-- Warm parchment-inspired beige light theme with a subtle paper texture
+- System/light/dark/Black(OLED) appearance selector, with system mode as the default
+- House Palette themes: warm-neutral Light, developer-neutral Dark, and true-black OLED
 - `⋯ → Add shortcut` flow using the browser install prompt when available, with iPhone/iPad home-screen instructions as fallback
 - Local encrypted `.dials` import and IndexedDB reuse
 - Password never stored by Dials
@@ -172,6 +199,7 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Search results grouped by `personKey`, so one person with multiple affiliations appears once
 - Same-name people remain separate when their `personKey` differs
 - Tap-to-call phone numbers
+- Numbers marked as non-extension-callable by HJU Phonebook are shown with **`(외부번호)`** while keeping the full number callable
 - Dedicated multi-select vCard (`.vcf`) contact-export screen
 - Selectable vCard fields: mobile, extension, affiliation, title/role
 - Optional contact-name prefix such as `혜)`
@@ -181,6 +209,20 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Offline app-shell support after the first successful visit
 - No analytics, ads, external APIs, CDNs, or remote contact-data upload
 
+## v0.3.0 navigation, accessibility, and OLED
+
+- Browser/Android system Back now follows Dials internal navigation.
+- Search adds only one history entry per search session; Back restores the previous view and scroll position.
+- Contact export participates in browser history.
+- Dialogs trap keyboard focus and restore it to the control that opened the dialog.
+- The overflow list uses ordinary buttons instead of incomplete ARIA menu semantics.
+- Appearance uses a real radio group and adds a true-black OLED mode alongside System/Light/Dark.
+- Light/Dark/Black palettes now follow the shared House Palette.
+
+## v0.2.0 external-number display
+
+When HJU Phonebook marks a number as not reachable through the internal extension system, Dials keeps the full number callable and appends **`(외부번호)`** to its display. Schema 1.1 files without this field continue to behave as ordinary extension-callable numbers.
+
 ## iPhone / iPad data-file selection
 
 Dials v0.1.2 fixes an iOS file-picker issue where the custom `.dials` extension could appear disabled and could not be selected. The web app no longer relies on the browser file-type filter. It allows file selection first and then validates the internal `DialsEncryptedData` wrapper itself.
@@ -189,13 +231,13 @@ This lets iPhone/iPad users select a distributed `.dials` file directly from Fil
 
 ## Appearance and shortcut
 
-The overflow menu includes **Add shortcut** and **Appearance**. Appearance can follow the system setting or be fixed to light/dark mode. The light palette uses a warm beige, parchment-inspired background with a very subtle generated paper texture and no external image resource.
+The overflow menu includes **Add shortcut** and **Appearance**. Appearance can follow the system setting or be fixed to Light, Dark, or Black (OLED). The themes follow the shared House Palette: warm-neutral Light, developer-neutral Dark, and true-black large surfaces for Black/OLED.
 
 For installation, Dials uses the browser/PWA installation prompt when the platform exposes it. On iPhone/iPad, where a web page cannot directly trigger Home Screen installation, Dials shows the standard **Share → Add to Home Screen** instructions.
 
 ## Windows exporter compatibility
 
-Dials v0.1.2 is designed for `.dials` files generated by **HJU Phonebook V0.8.1 build38**.
+Dials v0.3.0 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
 
 Current format:
 
@@ -204,7 +246,8 @@ Current format:
 - `formatVersion`: `1`
 - KDF: PBKDF2-HMAC-SHA256, 310,000 iterations
 - Cipher: AES-256-GCM
-- Payload `schemaVersion`: `1.1`
+- Payload `schemaVersion`: `1.2` (reader remains compatible with `1.1`)
+- External-number marker: `externalNumber: true` adds `(외부번호)` to the displayed full number
 - Person identity: opaque `personKey`
 - Organization and person order: Windows Sheet1 output order
 
