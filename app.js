@@ -1,16 +1,17 @@
 "use strict";
 
-const APP_VERSION = "0.3.2";
+const APP_VERSION = "0.4.0";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
 const DATA_RECORD_KEY = "encryptedData";
 const SAFE_META_KEY = "safeMeta";
-const LATEST_STATUS_STORAGE_KEY = "dialsLatestStatus";
 const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
 const THEME_STORAGE_KEY = "dialsThemePreference";
 const HISTORY_STATE_KEY = "dialsRoute";
+const AUTO_LOCK_MS = 10 * 60 * 1000;
+const AUTO_LOCK_NOTICE_KEY = "dialsAutoLockNotice";
 
 const state = {
   encryptedText: "",
@@ -25,13 +26,16 @@ const state = {
   contactSearchComposing: false,
   globalSearchDebounceTimer: null,
   contactSearchDebounceTimer: null,
-  latestStatus: null,
   selectedPeople: new Set(),
   contactFilter: "",
+  contactView: { type: "home" },
+  contactDepth: 0,
   deferredInstallPrompt: null,
   themePreference: "system",
   modalReturnFocus: null,
   scrollSaveTimer: null,
+  unlockStartedAt: 0,
+  autoLockTimer: null,
 };
 
 const el = {};
@@ -43,7 +47,7 @@ async function init() {
   bindEvents();
   registerServiceWorker();
   initializeTheme();
-  await loadLatestStatus();
+  try { localStorage.removeItem("dialsLatestStatus"); } catch {}
 
   if (!window.crypto?.subtle || !window.indexedDB) {
     showStartState("unsupported");
@@ -59,6 +63,7 @@ async function init() {
       state.safeMeta = meta || null;
       showStartState("locked");
       updateStartMeta();
+      showAutoLockNoticeIfNeeded();
     } else {
       showStartState("empty");
     }
@@ -75,9 +80,9 @@ function cacheElements() {
     "noDataActions", "lockedDataActions", "connectDataButton", "replaceDataStartButton",
     "dataFileInput", "unlockForm", "passwordInput", "unlockButton", "unlockMessage",
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
-    "updateIndicator", "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
+    "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
-    "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactPeopleList",
+    "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "includeAffiliationOption", "includeJobOption",
     "prefixEnabledOption", "namePrefixInput", "prefixPreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
@@ -96,6 +101,11 @@ function bindEvents() {
   window.addEventListener("popstate", handleHistoryNavigation);
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   window.addEventListener("scroll", scheduleHistoryScrollSave, { passive: true });
+  window.addEventListener("focus", checkAutoLock);
+  window.addEventListener("pageshow", checkAutoLock);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkAutoLock();
+  });
 
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
@@ -137,7 +147,6 @@ function bindEvents() {
     if (!el.overflowMenu.contains(event.target) && event.target !== el.menuButton) closeOverflowMenu();
   });
   el.overflowMenu.addEventListener("click", handleMenuAction);
-  el.updateIndicator.addEventListener("click", showUpdateNotice);
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
     if (state.themePreference === "system") updateThemeMetaColor();
   });
@@ -158,9 +167,10 @@ function bindEvents() {
   el.selectFilteredButton.addEventListener("click", selectFilteredPeople);
   el.clearSelectionButton.addEventListener("click", () => {
     state.selectedPeople.clear();
-    renderContactPeople();
+    syncContactSelectionUI();
   });
-  el.contactPeopleList.addEventListener("change", handleContactSelectionChange);
+  el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
+  el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
   el.prefixEnabledOption.addEventListener("change", updatePrefixControls);
   el.namePrefixInput.addEventListener("input", updatePrefixControls);
   el.createVcardButton.addEventListener("click", createVcardFile);
@@ -195,7 +205,7 @@ function showStartState(mode) {
     setBadge("지원 안 됨", "warning");
   } else if (mode === "locked") {
     el.connectStateText.textContent = "데이터가 연결되어 있습니다. 암호를 입력해 전화번호부를 여세요.";
-    setBadge("연결됨", hasNewerData(state.safeMeta?.dataVersion) ? "warning" : "connected");
+    setBadge("연결됨", "connected");
     el.passwordInput.value = "";
     window.setTimeout(() => el.passwordInput.focus(), 20);
   } else {
@@ -212,10 +222,17 @@ function setBadge(text, type) {
 function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
-  const parts = [];
-  if (state.safeMeta?.dataVersion) parts.push(`${formatDate(state.safeMeta.dataVersion)} 기준`);
-  if (hasNewerData(state.safeMeta?.dataVersion)) parts.push("새 데이터 있음");
-  el.connectedMetaText.textContent = parts.join(" · ");
+  const dataVersion = String(state.safeMeta?.dataVersion || "");
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준` : "암호 입력 후 기준일을 확인할 수 있습니다.";
+  el.connectedMetaText.classList.toggle("placeholder", !dataVersion);
+}
+
+function showAutoLockNoticeIfNeeded() {
+  try {
+    if (sessionStorage.getItem(AUTO_LOCK_NOTICE_KEY) !== "1") return;
+    sessionStorage.removeItem(AUTO_LOCK_NOTICE_KEY);
+    setUnlockMessage("개인정보 보호를 위해 10분이 지나 자동으로 잠겼습니다.", false);
+  } catch {}
 }
 
 function openFilePicker() {
@@ -293,6 +310,7 @@ async function handleUnlock(event) {
     await dbSet(SAFE_META_KEY, state.safeMeta);
     el.passwordInput.value = "";
     setUnlockMessage("", false);
+    startAutoLockSession();
     enterMainView();
   } catch (error) {
     console.error(error);
@@ -349,6 +367,15 @@ function prepareDirectoryData(payload) {
     })),
   }));
 
+  let sourceIndex = 0;
+  for (const category of state.categories) {
+    for (const org of category.organizations) {
+      for (const record of org.people) {
+        record._personKey = derivePersonKey(record, org, sourceIndex);
+        sourceIndex += 1;
+      }
+    }
+  }
   state.people = buildUniquePeople(state.categories);
 }
 
@@ -358,7 +385,7 @@ function buildUniquePeople(categories) {
   for (const category of categories) {
     for (const org of category.organizations) {
       for (const record of org.people) {
-        const personKey = derivePersonKey(record, org, sourceIndex);
+        const personKey = String(record._personKey || derivePersonKey(record, org, sourceIndex));
         if (!peopleMap.has(personKey)) {
           peopleMap.set(personKey, {
             key: personKey,
@@ -409,17 +436,18 @@ function enterMainView() {
   state.searchQuery = "";
   el.globalSearchInput.value = "";
   el.clearSearchButton.classList.add("hidden");
-  updateUpdateIndicator();
   renderContent();
   history.replaceState(makeHistoryState({ scrollY: 0 }), "", window.location.href);
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
-function makeHistoryState({ screen = "main", view = state.currentView, searchQuery = state.searchQuery, scrollY = window.scrollY, searchSession = false } = {}) {
+function makeHistoryState({ screen = "main", view = state.currentView, contactView = state.contactView, contactDepth = state.contactDepth, searchQuery = state.searchQuery, scrollY = window.scrollY, searchSession = false } = {}) {
   return {
     [HISTORY_STATE_KEY]: {
       screen,
       view: { ...view },
+      contactView: { ...contactView },
+      contactDepth: Number.isFinite(Number(contactDepth)) ? Number(contactDepth) : 0,
       searchQuery: String(searchQuery || ""),
       scrollY: Number.isFinite(Number(scrollY)) ? Number(scrollY) : 0,
       searchSession: Boolean(searchSession),
@@ -437,6 +465,8 @@ function saveCurrentHistoryScroll(force = false) {
   history.replaceState(makeHistoryState({
     screen: route.screen || "main",
     view: route.view || state.currentView,
+    contactView: route.contactView || state.contactView,
+    contactDepth: route.contactDepth ?? state.contactDepth,
     searchQuery: route.searchQuery ?? state.searchQuery,
     scrollY: window.scrollY,
     searchSession: Boolean(route.searchSession),
@@ -546,6 +576,10 @@ function handleHistoryNavigation(event) {
   el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
   if (route.screen === "contact-export") {
     el.startView.classList.add("hidden");
+    state.contactView = route.contactView && typeof route.contactView === "object" ? { ...route.contactView } : { type: "home" };
+    state.contactDepth = Number(route.contactDepth) || 0;
+    state.contactFilter = "";
+    el.contactSearchInput.value = "";
     showContactExportView();
   } else {
     el.contactExportView.classList.add("hidden");
@@ -851,18 +885,18 @@ function showAboutInfo() {
   showModal({
     title: "정보",
     body: `<div class="about-info">
-      <p><strong>Dials</strong>는 배포받은 교내 전화번호부 데이터를 빠르게 조회하고 연락할 수 있는 웹 전화번호부입니다.</p>
+      <p><strong>Dials</strong><br>배포받은 전화번호부를 빠르게 찾아보고 필요한 연락처를 저장할 수 있습니다.</p>
       <section class="about-section" aria-labelledby="privacySecurityTitle">
-        <h3 id="privacySecurityTitle">개인정보 보호 및 보안</h3>
-        <ul>
-          <li>전화번호부 연락처 데이터를 외부 서버에 업로드하거나 자동 전송하지 않습니다.</li>
-          <li><code>.dials</code> 파일은 암호화된 상태로 이 기기의 브라우저 저장소에 보관됩니다.</li>
-          <li>데이터 암호는 저장하지 않습니다.</li>
-          <li>암호를 입력해 연 전화번호부는 현재 페이지를 사용하는 동안에만 메모리에서 사용됩니다.</li>
-        </ul>
+        <h3 id="privacySecurityTitle">개인정보 보호</h3>
+        <div class="privacy-feature-list">
+          <div class="privacy-feature">${uiIcon("shield")}<span>연락처 데이터는 <strong>이 기기에만 보관되며 외부로 전송되지 않습니다.</strong></span></div>
+          <div class="privacy-feature">${uiIcon("lock")}<span>입력한 암호는 저장하지 않습니다.</span></div>
+          <div class="privacy-feature">${uiIcon("clock")}<span>개인정보 보호를 위해 <strong>10분이 지나면 자동으로 잠깁니다.</strong></span></div>
+        </div>
+        <p class="about-tech-note">자세한 기술 정보는 GitHub에서 확인할 수 있습니다.</p>
       </section>
       <div class="about-footer">
-        <span>Dials v${APP_VERSION}</span>
+        <span>v${APP_VERSION}</span>
         <a class="github-link" href="https://github.com/Bak2ya/Dials" target="_blank" rel="noopener noreferrer">GitHub에서 보기</a>
       </div>
     </div>`,
@@ -870,72 +904,75 @@ function showAboutInfo() {
   });
 }
 
+function uiIcon(name) {
+  const paths = {
+    shield: '<path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3z"/><path d="M9.5 12.2l1.7 1.7 3.7-4"/>',
+    lock: '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  };
+  return `<svg class="ui-line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
+}
+
 function closeOverflowMenu() {
   el.overflowMenu.classList.add("hidden");
   el.menuButton.setAttribute("aria-expanded", "false");
 }
 
-function lockApp() {
-  // 복호화된 payload와 암호를 브라우저 메모리에서 가장 확실하게 내려놓기 위해 새로고침합니다.
-  window.location.reload();
+function startAutoLockSession() {
+  state.unlockStartedAt = Date.now();
+  scheduleAutoLock();
 }
 
-async function loadLatestStatus() {
-  let cached = null;
-  try { cached = JSON.parse(localStorage.getItem(LATEST_STATUS_STORAGE_KEY) || "null"); } catch { cached = null; }
-  state.latestStatus = cached;
-  try {
-    const response = await fetch(`./data-status.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return;
-    const status = await response.json();
-    if (status && typeof status.latestDataVersion === "string") {
-      state.latestStatus = status;
-      localStorage.setItem(LATEST_STATUS_STORAGE_KEY, JSON.stringify(status));
-    }
-  } catch {
-    // 오프라인에서는 마지막으로 확인한 공개 상태값을 사용합니다.
+function clearAutoLockTimer() {
+  if (!state.autoLockTimer) return;
+  window.clearTimeout(state.autoLockTimer);
+  state.autoLockTimer = null;
+}
+
+function scheduleAutoLock() {
+  clearAutoLockTimer();
+  if (!state.payload || !state.unlockStartedAt) return;
+  const remaining = AUTO_LOCK_MS - (Date.now() - state.unlockStartedAt);
+  if (remaining <= 0) {
+    lockApp("auto");
+    return;
   }
+  state.autoLockTimer = window.setTimeout(() => checkAutoLock(), remaining + 25);
 }
 
-function hasNewerData(currentVersion) {
-  const current = String(currentVersion || "");
-  const latest = String(state.latestStatus?.latestDataVersion || "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(current) || !/^\d{4}-\d{2}-\d{2}$/.test(latest)) return false;
-  return latest > current;
+function checkAutoLock() {
+  if (!state.payload || !state.unlockStartedAt) return;
+  if (Date.now() - state.unlockStartedAt >= AUTO_LOCK_MS) {
+    lockApp("auto");
+    return;
+  }
+  scheduleAutoLock();
 }
 
-function updateUpdateIndicator() {
-  el.updateIndicator.classList.toggle("hidden", !hasNewerData(state.payload?.dataVersion));
-}
-
-function showUpdateNotice() {
-  if (!hasNewerData(state.payload?.dataVersion)) return;
-  const current = formatDate(state.payload?.dataVersion);
-  const latest = formatDate(state.latestStatus?.latestDataVersion);
-  const message = String(state.latestStatus?.message || "새 전화번호부 데이터가 배포되었습니다.");
-  showModal({
-    title: "새 전화번호부 데이터",
-    body: `<div class="update-callout"><strong>새 데이터가 있습니다.</strong>${escapeHtml(message)}</div>
-      <dl class="info-grid" style="margin-top:16px"><dt>현재 기준일</dt><dd>${escapeHtml(current)}</dd><dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd></dl>
-      <p class="muted">새로 배포받은 <code>.dials</code> 파일을 불러오면 현재 데이터가 교체됩니다.</p>`,
-    actions: [
-      { label: "나중에", onClick: closeModal },
-      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); openFilePicker(); } },
-    ],
-  });
+function lockApp(reason = "manual") {
+  clearAutoLockTimer();
+  cancelGlobalSearchCommit();
+  cancelContactSearchCommit();
+  state.payload = null;
+  state.people = [];
+  state.categories = [];
+  state.selectedPeople.clear();
+  state.searchQuery = "";
+  state.contactFilter = "";
+  state.unlockStartedAt = 0;
+  if (reason === "auto") {
+    try { sessionStorage.setItem(AUTO_LOCK_NOTICE_KEY, "1"); } catch {}
+  }
+  // 새로고침으로 페이지 메모리의 복호화 데이터와 파생 상태를 함께 내려놓습니다.
+  window.location.reload();
 }
 
 function showDataInfo() {
   const current = formatDate(state.payload?.dataVersion) || "알 수 없음";
-  const latestRaw = state.latestStatus?.latestDataVersion || "";
-  const latest = latestRaw ? formatDate(latestRaw) : "확인할 수 없음";
-  const isOld = hasNewerData(state.payload?.dataVersion);
   showModal({
     title: "전화번호부 데이터",
-    body: `${isOld ? `<div class="update-callout"><strong>새 전화번호부 데이터가 있습니다.</strong>${escapeHtml(state.latestStatus?.message || "새 데이터 파일로 교체해 주세요.")}</div>` : ""}
-      <dl class="info-grid" style="margin-top:${isOld ? 16 : 0}px">
-        <dt>현재 기준일</dt><dd>${escapeHtml(current)}</dd>
-        <dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd>
+    body: `<dl class="info-grid">
+        <dt>기준일</dt><dd>${escapeHtml(current)}</dd>
         <dt>기준월</dt><dd>${escapeHtml(state.payload?.period || "-")}</dd>
         <dt>데이터 생성</dt><dd>${escapeHtml(formatDateTime(state.payload?.generatedAt) || "-")}</dd>
         <dt>연결 파일</dt><dd>${escapeHtml(state.safeMeta?.fileName || "Dials 데이터")}</dd>
@@ -952,9 +989,11 @@ function enterContactExport() {
   saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.contactFilter = "";
+  state.contactView = { type: "home" };
+  state.contactDepth = 0;
   el.contactSearchInput.value = "";
   showContactExportView();
-  history.pushState(makeHistoryState({ screen: "contact-export", scrollY: 0 }), "", window.location.href);
+  history.pushState(makeHistoryState({ screen: "contact-export", contactView: state.contactView, contactDepth: state.contactDepth, scrollY: 0 }), "", window.location.href);
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
@@ -962,13 +1001,13 @@ function showContactExportView() {
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
   restorePrefixSettings();
-  renderContactPeople();
+  renderContactBrowse();
   setVcardMessage("");
 }
 
 function leaveContactExport() {
   if (history.state?.[HISTORY_STATE_KEY]?.screen === "contact-export") {
-    history.back();
+    history.go(-(state.contactDepth + 1));
     return;
   }
   el.contactExportView.classList.add("hidden");
@@ -989,7 +1028,7 @@ function scheduleContactSearchCommit(delay = 220) {
     const next = el.contactSearchInput.value.trim();
     if (state.contactFilter === next) return;
     state.contactFilter = next;
-    renderContactPeople();
+    renderContactBrowse();
   }, delay);
 }
 
@@ -999,30 +1038,211 @@ function filteredContactPeople() {
   return state.people.filter((person) => personMatchesTokens(person, tokens));
 }
 
-function renderContactPeople() {
-  const people = filteredContactPeople();
-  el.contactPeopleList.innerHTML = people.map((person) => {
-    const selected = state.selectedPeople.has(person.key);
-    const affiliationText = summarizeAffiliations(person);
-    return `<label class="contact-person-row">
-      <input type="checkbox" value="${escapeAttr(person.key)}" ${selected ? "checked" : ""}>
-      <span><strong>${escapeHtml(person.name || "이름 없음")}</strong><small>${escapeHtml(affiliationText || "소속 정보 없음")}</small></span>
-    </label>`;
-  }).join("") || renderEmptyHtml("검색 결과가 없습니다.");
+function renderContactBrowse() {
+  if (!el.contactBrowseView) return;
+  const searching = Boolean(state.contactFilter);
+  el.selectFilteredButton.classList.toggle("hidden", !searching);
+  if (searching) {
+    renderContactSearchResults();
+  } else if (state.contactView.type === "category") {
+    renderContactCategory(state.contactView.categoryId);
+  } else if (state.contactView.type === "organization") {
+    renderContactOrganization(state.contactView.categoryId, state.contactView.orgIndex);
+  } else {
+    renderContactHome();
+  }
+  syncContactSelectionUI();
   updateSelectedCount();
 }
 
+function renderContactHome() {
+  const cards = state.categories.map((category) => `<button class="contact-category-card" type="button" data-contact-category-id="${escapeAttr(category.id)}">
+      <span><strong>${escapeHtml(category.label)}</strong><small>${category.organizations.length}개 소속</small></span><span class="chevron">›</span>
+    </button>`).join("");
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>소속을 따라 들어가 필요한 인물을 선택하세요.</span></div>
+    <div class="contact-category-grid">${cards || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+}
+
+function contactMajorGroups(category) {
+  const groups = [];
+  const map = new Map();
+  category.organizations.forEach((org, orgIndex) => {
+    const major = org.major || category.label;
+    if (!map.has(major)) {
+      const entry = { major, items: [] };
+      map.set(major, entry);
+      groups.push(entry);
+    }
+    map.get(major).items.push({ org, orgIndex });
+  });
+  return groups;
+}
+
+function renderContactCategory(categoryId) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  if (!category) {
+    state.contactView = { type: "home" };
+    renderContactHome();
+    return;
+  }
+  const groupsHtml = contactMajorGroups(category).map((group) => {
+    const rows = group.items.map(({ org, orgIndex }) => contactOrganizationRowHtml(category, org, orgIndex)).join("");
+    const hideRepeatedMajor = group.items.length === 1 && (group.items[0].org.minor === "" || group.items[0].org.minor === group.major);
+    return `<div class="contact-org-group">${hideRepeatedMajor ? "" : `<h3>${escapeHtml(group.major)}</h3>`}<div class="contact-organization-list">${rows}</div></div>`;
+  }).join("");
+  el.contactBrowseView.innerHTML = `${contactBreadcrumbsHtml([{ label: "처음으로", view: "home" }])}
+    <div class="contact-browse-heading"><strong>${escapeHtml(category.label)}</strong><span>소속 왼쪽 체크박스로 전체 선택할 수 있습니다.</span></div>
+    ${groupsHtml || renderEmptyHtml("표시할 소속이 없습니다.")}`;
+}
+
+function contactOrganizationRowHtml(category, org, orgIndex) {
+  const label = org.minor || org.major || "소속 없음";
+  const keys = orgPersonKeys(category.id, orgIndex);
+  const selected = selectionStateForKeys(keys);
+  return `<div class="contact-org-row">
+    <label class="contact-org-check" title="${escapeAttr(label)} 전체 선택">
+      <input type="checkbox" data-org-select data-category-id="${escapeAttr(category.id)}" data-org-index="${orgIndex}" ${selected.all ? "checked" : ""} ${keys.length ? "" : "disabled"}>
+      <span class="visually-hidden">${escapeHtml(label)} 전체 선택</span>
+    </label>
+    <button class="contact-org-open" type="button" data-contact-org-open data-category-id="${escapeAttr(category.id)}" data-org-index="${orgIndex}">
+      <span><strong>${escapeHtml(label)}</strong><small>${keys.length}명</small></span><span class="chevron">›</span>
+    </button>
+  </div>`;
+}
+
+function renderContactOrganization(categoryId, orgIndex) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  const org = category?.organizations?.[orgIndex];
+  if (!category || !org) {
+    state.contactView = { type: "home" };
+    renderContactHome();
+    return;
+  }
+  const title = org.minor || org.major || category.label;
+  const records = uniqueOrgRecords(org);
+  const keys = records.map((record) => record._personKey).filter(Boolean);
+  const selected = selectionStateForKeys(keys);
+  const rows = records.map((record) => contactPersonRowHtml(record._personKey, record.name, formatJob(record.title, record.role), record.extension, record.mobile)).join("");
+  el.contactBrowseView.innerHTML = `${contactBreadcrumbsHtml([
+      { label: "처음으로", view: "home" },
+      { label: category.label, view: "category", categoryId },
+    ])}
+    <div class="contact-org-title-row">
+      <div><strong>${escapeHtml(title)}</strong><span>${keys.length}명</span></div>
+      <label class="contact-select-all"><input type="checkbox" data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${orgIndex}" ${selected.all ? "checked" : ""} ${keys.length ? "" : "disabled"}><span>소속 전체 선택</span></label>
+    </div>
+    <div class="contact-person-list">${rows || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`;
+}
+
+function renderContactSearchResults() {
+  const people = filteredContactPeople();
+  const rows = people.map((person) => contactPersonRowHtml(person.key, person.name, summarizeAffiliations(person))).join("");
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>검색 결과</strong><span>${people.length}명 · 여러 소속의 동일 인물은 하나의 선택 상태를 공유합니다.</span></div>
+    <div class="contact-person-list">${rows || renderEmptyHtml("검색 결과가 없습니다.")}</div>`;
+}
+
+function contactPersonRowHtml(personKey, name, detail = "", extension = "", mobile = "") {
+  const selected = state.selectedPeople.has(personKey);
+  const numberText = unique([extension, mobile].filter(Boolean)).join(" · ");
+  const secondary = [detail, numberText].filter(Boolean).join(" · ");
+  return `<label class="contact-person-row">
+    <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+    <span><strong>${escapeHtml(name || "이름 없음")}</strong>${secondary ? `<small>${escapeHtml(secondary)}</small>` : ""}</span>
+  </label>`;
+}
+
+function contactBreadcrumbsHtml(items) {
+  return `<nav class="breadcrumbs contact-breadcrumbs">${items.map((item, index) => `${index ? "<span>›</span>" : ""}<button type="button" data-contact-breadcrumb='${escapeAttr(JSON.stringify(item))}'>${escapeHtml(item.label)}</button>`).join("")}</nav>`;
+}
+
+function handleContactBrowseClick(event) {
+  const categoryButton = event.target.closest("[data-contact-category-id]");
+  if (categoryButton && !categoryButton.matches("input")) {
+    navigateContactView({ type: "category", categoryId: categoryButton.dataset.contactCategoryId });
+    return;
+  }
+  const orgButton = event.target.closest("[data-contact-org-open]");
+  if (orgButton) {
+    navigateContactView({ type: "organization", categoryId: orgButton.dataset.categoryId, orgIndex: Number(orgButton.dataset.orgIndex) });
+    return;
+  }
+  const breadcrumb = event.target.closest("[data-contact-breadcrumb]");
+  if (breadcrumb) {
+    const item = JSON.parse(breadcrumb.dataset.contactBreadcrumb);
+    if (item.view === "category") navigateContactView({ type: "category", categoryId: item.categoryId });
+    else navigateContactView({ type: "home" });
+  }
+}
+
+function navigateContactView(view) {
+  saveCurrentHistoryScroll(true);
+  state.contactView = { ...view };
+  state.contactDepth += 1;
+  state.contactFilter = "";
+  el.contactSearchInput.value = "";
+  history.pushState(makeHistoryState({ screen: "contact-export", contactView: state.contactView, contactDepth: state.contactDepth, scrollY: 0 }), "", window.location.href);
+  renderContactBrowse();
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
 function handleContactSelectionChange(event) {
-  const checkbox = event.target.closest('input[type="checkbox"]');
-  if (!checkbox) return;
-  if (checkbox.checked) state.selectedPeople.add(checkbox.value);
-  else state.selectedPeople.delete(checkbox.value);
+  const personCheckbox = event.target.closest('input[data-person-key]');
+  if (personCheckbox) {
+    if (personCheckbox.checked) state.selectedPeople.add(personCheckbox.dataset.personKey);
+    else state.selectedPeople.delete(personCheckbox.dataset.personKey);
+    syncContactSelectionUI();
+    return;
+  }
+  const orgCheckbox = event.target.closest('input[data-org-select]');
+  if (orgCheckbox) {
+    const keys = orgPersonKeys(orgCheckbox.dataset.categoryId, Number(orgCheckbox.dataset.orgIndex));
+    keys.forEach((key) => {
+      if (orgCheckbox.checked) state.selectedPeople.add(key);
+      else state.selectedPeople.delete(key);
+    });
+    syncContactSelectionUI();
+  }
+}
+
+function orgPersonKeys(categoryId, orgIndex) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  const org = category?.organizations?.[orgIndex];
+  if (!org) return [];
+  return unique(org.people.map((record) => record._personKey).filter(Boolean));
+}
+
+function uniqueOrgRecords(org) {
+  const map = new Map();
+  for (const record of org.people || []) {
+    const key = String(record._personKey || "");
+    if (key && !map.has(key)) map.set(key, record);
+  }
+  return [...map.values()];
+}
+
+function selectionStateForKeys(keys) {
+  const total = keys.length;
+  const count = keys.reduce((sum, key) => sum + (state.selectedPeople.has(key) ? 1 : 0), 0);
+  return { total, count, all: total > 0 && count === total, some: count > 0 && count < total };
+}
+
+function syncContactSelectionUI() {
+  if (!el.contactBrowseView) return;
+  el.contactBrowseView.querySelectorAll('input[data-person-key]').forEach((checkbox) => {
+    checkbox.checked = state.selectedPeople.has(checkbox.dataset.personKey);
+  });
+  el.contactBrowseView.querySelectorAll('input[data-org-select]').forEach((checkbox) => {
+    const stateForOrg = selectionStateForKeys(orgPersonKeys(checkbox.dataset.categoryId, Number(checkbox.dataset.orgIndex)));
+    checkbox.checked = stateForOrg.all;
+    checkbox.indeterminate = stateForOrg.some;
+    checkbox.setAttribute("aria-checked", stateForOrg.some ? "mixed" : String(stateForOrg.all));
+  });
   updateSelectedCount();
 }
 
 function selectFilteredPeople() {
   filteredContactPeople().forEach((person) => state.selectedPeople.add(person.key));
-  renderContactPeople();
+  syncContactSelectionUI();
 }
 
 function updateSelectedCount() {

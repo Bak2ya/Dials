@@ -35,12 +35,6 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - One VCF may contain multiple VCARD entries.
 - Every VCARD note always contains the Dials `dataVersion` date.
 
-## New-data indicator
-
-- `data-status.json` is checked without sending contact data.
-- A small yellow `!` appears beside `⋯` only when the public latest date is newer than the connected data.
-- The indicator is informative and never blocks current data access.
-
 ## Appearance
 
 - Responsive layout; no separate mobile/desktop app.
@@ -95,4 +89,20 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - `compositionend` commits the completed query once. A following non-composing `input` event is harmless because unchanged queries are ignored.
 - This protects Korean first-character composition and also applies to Japanese/Chinese and other IME workflows.
 - Search History semantics from v0.3.0 remain unchanged: one History entry per search session, later query edits replace that entry.
+
+
+## v0.4.0 contact export and auto-lock
+
+- Contact export reuses the main viewer's information architecture: category → organization → person. Do not return to one flat full-directory list.
+- Category/organization rows are intentionally more compact than normal viewer cards because the task is selection, not reading full contact details.
+- Organization checkboxes select every unique `personKey` in that organization. If only some are selected, the organization checkbox uses the native indeterminate/mixed state.
+- Selection is keyed by `personKey`, never by visible row. A person with multiple affiliations must stay checked everywhere that person appears, including search results.
+- VCF generation uses the same unique-person set, so a multi-affiliation person is exported once.
+- Search and hierarchy navigation share the same selection state; browsing never clears previous selections.
+- Existing contact-export field options and name-prefix settings persist while moving between categories and organizations.
+- Unlock starts a fixed 10-minute privacy session. User activity does not extend it. Timer throttling in the background is handled by checking absolute elapsed time again on focus, visibility return, and pageshow.
+- Automatic lock uses the same locked start screen as the existing manual `잠금` action and clears decrypted/derived in-memory state by reloading the page.
+- The start screen tells users, in plain language, that contact data stays on the device and the view locks after 10 minutes.
+- The connected data date is intentionally more prominent; Dials no longer performs a separate public latest-data check.
+- About is user-facing. Technical storage/encryption details belong in README/data-format documentation.
 

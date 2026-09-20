@@ -28,23 +28,34 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - 암호화 `.dials` 파일 불러오기 및 IndexedDB 재사용
 - 암호 미저장
 - 복호화된 연락처 데이터는 현재 열린 페이지 메모리에서만 사용
+- 잠금 해제 시점부터 10분이 지나면 자동 잠금(백그라운드 복귀 시에도 만료 여부 재확인)
 - 여러 검색어를 AND 조건으로 처리하는 통합 검색
 - Windows 프로그램의 시트1 출력순서를 그대로 사용하는 소속/인물 조회
 - `personKey` 기준으로 동일인의 여러 소속을 검색 결과 한 카드에 통합
 - 이름이 같은 다른 사람은 서로 다른 `personKey`로 별도 표시
 - 전화번호를 누르면 전화 앱 연결
 - HJU Phonebook에서 내선 연결 불가로 지정한 번호는 전체 번호 뒤에 **`(외부번호)`** 표시
-- `⋯ → 연락처 저장` 전용 화면
+- `⋯ → 연락처 저장`에서 메인과 같은 `구분 → 소속 → 인물` 구조로 선택
+- 소속 전체 선택 및 일부 선택(혼합 상태) 지원
+- 다중소속 인물은 `personKey` 하나의 선택 상태를 공유하며 vCard에 중복 저장되지 않음
 - 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
 - vCard에 넣을 개인번호 / 내선번호 / 소속 / 직책·역할 선택
 - 이름은 항상 포함
 - `혜)` 같은 이름 접두어 옵션 및 마지막 사용값 기억
 - 생성되는 모든 연락처 메모에 **Dials 데이터 기준일을 항상 기록**
-- 공개 `data-status.json`으로 최신 전화번호부 데이터 여부 확인
-- 새 데이터가 있으면 `⋯` 옆에 작게 노란 `!` 표시
-- 새 데이터 알림이 있어도 기존 전화번호부 조회는 차단하지 않음
 - 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
 - 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
+
+## v0.4.0 연락처 저장 구조 · 자동 잠금 · 정보 계층
+
+- 연락처 저장 화면을 긴 전체 인물 목록에서 메인 화면과 같은 `구분 → 소속 → 인물` 탐색 구조로 변경했습니다.
+- 소속 행과 소속 상세 화면에서 전체 선택할 수 있으며, 일부만 선택되면 체크박스가 혼합 상태로 표시됩니다.
+- 동일한 `personKey`를 가진 다중소속 인물은 어느 소속/검색 결과에서 체크해도 같은 선택 상태를 공유하고 vCard에는 한 번만 저장됩니다.
+- 연락처 저장 화면의 행 높이를 줄여 모바일에서 더 많은 항목을 한눈에 볼 수 있게 했습니다.
+- 잠금 해제 시점부터 10분이 지나면 활동 여부와 관계없이 자동으로 잠기며, 모바일 브라우저가 백그라운드에서 타이머를 늦춰도 화면 복귀 시 만료 여부를 다시 확인합니다.
+- 시작 화면에 사용자 친화적인 보안 안내를 추가하고, 연결된 데이터의 기준일을 더 잘 보이게 표시합니다.
+- `⋯ → 정보`는 사용자에게 필요한 보호 원칙만 간단히 보여주고 암호화/저장 방식의 기술 세부사항은 GitHub 문서에서 확인하도록 정리했습니다.
+- 공개 최신 데이터 확인 기능과 `data-status.json` 의존성을 제거했습니다. 기준일은 연결된 `.dials` 데이터 자체의 `dataVersion`을 표시합니다.
 
 ## v0.3.2 모바일 IME · 메뉴 사용성 · 정보 화면
 
@@ -102,7 +113,7 @@ Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` �
 
 ## Windows 프로그램과의 관계
 
-Dials v0.3.2는 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
+Dials v0.4.0은 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
 
 현재 규격은 다음과 같습니다.
 
@@ -138,21 +149,11 @@ Dials는 Windows 관리용 SQLite DB를 직접 읽지 않습니다. 관리 프�
 
 실제 운영 `.dials` 파일은 **공개 GitHub 저장소에 올리지 않습니다.** 기관 내부 게시판 등 기존 비공개 배포 경로를 통해 별도로 전달합니다.
 
-새 데이터를 배포한 뒤 GitHub에는 `data-status.json`의 날짜만 갱신하면 됩니다.
-
-```json
-{
-  "schemaVersion": 1,
-  "latestDataVersion": "2026-09-13",
-  "message": "새 전화번호부 데이터가 배포되었습니다."
-}
-```
-
-현재 연결한 데이터보다 최신 날짜가 등록되어 있으면 Dials 상단의 `⋯` 옆에 작은 노란 `!`가 나타납니다. 느낌표를 누르면 현재 기준일과 최신 기준일을 비교해서 보여주고 새 데이터 연결 방법을 안내합니다.
+Dials는 공개 서버에서 최신 버전 여부를 별도로 조회하지 않습니다. 사용자는 연결 화면과 전화번호부 데이터 정보에서 `.dials` 파일 자체에 포함된 **기준일(`dataVersion`)**을 확인할 수 있습니다. 새 전화번호부가 배포되면 `⋯ → 새 데이터 불러오기`로 교체합니다.
 
 ## 연락처 저장
 
-`⋯ → 연락처 저장`에서 필요한 사람을 하나 또는 여러 명 선택할 수 있습니다.
+`⋯ → 연락처 저장`에서 메인 화면과 같은 `구분 → 소속 → 인물` 구조로 필요한 사람을 선택할 수 있습니다. 소속 전체 선택도 가능하며, 여러 소속에 함께 등장하는 동일 인물의 체크 상태는 서로 동기화됩니다. **다중소속 인물은 vCard에 중복 저장되지 않습니다.**
 
 저장 항목은 다음 중 선택합니다.
 
@@ -181,7 +182,7 @@ Dials
 - 데이터 암호는 저장하지 않습니다.
 - 복호화된 전화번호부는 브라우저 영구 저장소에 저장하지 않습니다.
 - `잠금`을 누르면 페이지를 다시 불러와 현재 페이지 메모리에 있는 복호화 데이터를 내려놓습니다.
-- `data-status.json`에는 최신 기준일 같은 공개 가능한 메타데이터만 포함하고 실제 연락처는 포함하지 않습니다.
+- 잠금 해제 후 10분이 지나면 자동으로 같은 잠금 상태로 돌아가며, 복호화 데이터와 선택/검색 상태가 함께 내려갑니다.
 
 ---
 
@@ -213,20 +214,33 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Local encrypted `.dials` import and IndexedDB reuse
 - Password never stored by Dials
 - Decrypted contact data kept only in the active page memory
+- Fixed 10-minute auto-lock measured from unlock time, with expiry rechecked when returning from the background
 - Unified multi-keyword AND search
 - Organization browsing in the exact order supplied by the Windows exporter
 - Search results grouped by `personKey`, so one person with multiple affiliations appears once
 - Same-name people remain separate when their `personKey` differs
 - Tap-to-call phone numbers
 - Numbers marked as non-extension-callable by HJU Phonebook are shown with **`(외부번호)`** while keeping the full number callable
+- Contact export uses the same category → organization → person navigation pattern as the main viewer
+- Organization-wide selection with mixed/partial checkbox state
+- Multi-affiliation people share one `personKey` selection and are exported only once
 - Dedicated multi-select vCard (`.vcf`) contact-export screen
 - Selectable vCard fields: mobile, extension, affiliation, title/role
 - Optional contact-name prefix such as `혜)`
 - Data version date always written into every exported vCard note
-- Public `data-status.json` check for a newer distributed data version
-- Small non-blocking yellow update indicator when newer contact data exists
 - Offline app-shell support after the first successful visit
 - No analytics, ads, external APIs, CDNs, or remote contact-data upload
+
+## v0.4.0 contact export navigation, auto-lock, and clearer privacy UI
+
+- Contact export now follows the same category → organization → person hierarchy as the main viewer instead of showing one very long list.
+- Organization-level checkboxes select all people in that organization and show a mixed state when only some are selected.
+- The same `personKey` shares selection across multiple affiliations and search results, and each person is written to the VCF only once.
+- Contact-selection rows are more compact on mobile.
+- Dials auto-locks 10 minutes after unlock, regardless of interaction; the expiry is rechecked when a suspended mobile browser returns to the foreground.
+- The start screen has a clearer privacy/security notice and emphasizes the connected data date.
+- About now presents user-facing privacy facts, while detailed encryption/storage information remains in the GitHub documentation.
+- The public latest-data check and `data-status.json` dependency were removed; the viewer displays the `dataVersion` embedded in the connected `.dials` file.
 
 ## v0.3.2 mobile IME, touch targets, and About
 
@@ -272,7 +286,7 @@ For installation, Dials uses the browser/PWA installation prompt when the platfo
 
 ## Windows exporter compatibility
 
-Dials v0.3.2 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
+Dials v0.4.0 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
 
 Current format:
 
@@ -308,17 +322,11 @@ All app asset paths are relative, so the app works from the `/Dials/` project pa
 
 Actual `.dials` files must **not** be uploaded to this public repository. Distribute them through the organization's private/internal channel.
 
-After distributing a newer data file, update only `data-status.json`:
+Dials does not query a public service to decide whether a newer directory exists. The connection screen and data-info view display the **`dataVersion` embedded in the connected `.dials` file**. When a newer file is distributed, users replace it through the app's data-replacement action.
 
-```json
-{
-  "schemaVersion": 1,
-  "latestDataVersion": "2026-09-13",
-  "message": "새 전화번호부 데이터가 배포되었습니다."
-}
-```
+## Contact export
 
-When the connected file has an older `dataVersion`, Dials shows a small yellow `!` next to the overflow menu. The warning never blocks access to the currently connected data.
+Contact export mirrors the main category → organization → person hierarchy. Organization-wide selection is supported, selection follows the shared `personKey` across multiple affiliations and search results, and one person is written to the generated VCF only once. The existing field-selection and optional name-prefix controls remain available.
 
 ## Privacy and security model
 
@@ -328,7 +336,7 @@ When the connected file has an older `dataVersion`, Dials shows a small yellow `
 - The password is not saved.
 - The decrypted payload is not written to persistent browser storage.
 - Locking Dials reloads the page, releasing the decrypted payload from the active page state.
-- `data-status.json` contains only public update metadata and no contact records.
+- Dials automatically locks 10 minutes after unlock and rechecks expiry when a mobile browser returns from the background.
 
 ## Repository description
 

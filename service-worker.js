@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "dials-app-v0.3.2";
+const CACHE_NAME = "dials-app-v0.4.0";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -30,8 +30,6 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.endsWith("/data-status.json")) return;
-
   event.respondWith(
     fetch(request)
       .then((response) => {

@@ -59,7 +59,7 @@
               <div>
                 <span class="eyebrow">연결된 데이터</span>
                 <strong id="connectedFileName">Dials 데이터</strong>
-                <span id="connectedMetaText" class="muted small"></span>
+                <span id="connectedMetaText" class="connected-data-date"></span>
               </div>
               <button id="replaceDataStartButton" class="text-button" type="button">다른 데이터 연결</button>
             </div>
@@ -84,7 +84,12 @@
             <li><span>2</span><div><strong>암호 입력</strong><p>연결 후 암호를 입력하면 연락처가 열립니다.</p></div></li>
             <li><span>3</span><div><strong>바로 조회</strong><p>다음부터는 파일을 다시 고르지 않고 암호만 입력하면 됩니다.</p></div></li>
           </ol>
-          <p class="privacy-note">연락처 데이터와 암호는 서버로 전송하지 않습니다. 연결한 암호화 데이터는 이 기기의 브라우저 저장소에 보관됩니다.</p>
+          <div class="security-note" role="note" aria-label="보안 안내">
+            <span class="security-note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3z"/><path d="M9.5 12.2l1.7 1.7 3.7-4"/></svg>
+            </span>
+            <div><strong>보안</strong><p>연락처 데이터는 <b>이 기기에만 보관되며 외부로 전송되지 않습니다.</b><br>개인정보 보호를 위해 <b>10분이 지나면 자동으로 잠깁니다.</b></p></div>
+          </div>
         </section>
       </section>
     </main>
@@ -102,7 +107,6 @@
 
           <div class="header-actions">
             <span id="dataDateLabel" class="data-date"></span>
-            <button id="updateIndicator" class="update-indicator hidden" type="button" aria-label="새 전화번호부 데이터 알림" title="새 전화번호부 데이터가 있습니다">!</button>
             <div class="menu-wrap">
               <button id="menuButton" class="icon-button" type="button" aria-haspopup="true" aria-controls="overflowMenu" aria-expanded="false" aria-label="메뉴">⋯</button>
               <div id="overflowMenu" class="overflow-menu hidden">
@@ -160,11 +164,11 @@
           </div>
 
           <div class="selection-tools">
-            <button id="selectFilteredButton" class="text-button" type="button">현재 목록 모두 선택</button>
+            <button id="selectFilteredButton" class="text-button hidden" type="button">검색 결과 모두 선택</button>
             <button id="clearSelectionButton" class="text-button" type="button">선택 해제</button>
           </div>
 
-          <div id="contactPeopleList" class="contact-people-list"></div>
+          <div id="contactBrowseView" class="contact-browse-view"></div>
         </section>
 
         <aside class="surface contact-options-panel">
@@ -188,6 +192,7 @@
             <p>Dials 데이터 기준일이 모든 연락처의 메모에 자동으로 기록됩니다.</p>
           </div>
 
+          <p class="dedupe-note">다중소속 인물은 중복 저장되지 않습니다.</p>
           <button id="createVcardButton" class="primary-button wide-button" type="button">연락처 파일 만들기</button>
           <p id="vcardMessage" class="form-message" role="status"></p>
         </aside>
