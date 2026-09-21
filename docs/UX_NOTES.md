@@ -150,6 +150,12 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Main browse and contact export share grouping/direct-major interpretation so ordering and hierarchy do not drift, while each keeps its own rendering and interaction rules.
 
 
+## v0.5.3 expanded-card background continuity
+
+- When a disclosure card expands, the revealed body inherits the parent card background instead of introducing another surface tint.
+- A top-level Surface card therefore stays Surface throughout its expanded body; a nested Secondary Surface card stays Secondary Surface throughout its expanded body.
+- Child cards retain their own existing hierarchy surfaces. No spacing, animation, selection, or data behavior changed.
+
 ## v0.5.2 nested-card hierarchy
 
 - Normal browse and contact export use the same nested-card presentation: expanding a parent grows that card and reveals child cards inside it.

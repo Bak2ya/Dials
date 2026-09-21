@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.5.2";
+const APP_VERSION = "0.5.3";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";

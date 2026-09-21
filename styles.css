@@ -510,7 +510,7 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   display: grid;
   gap: 6px;
   padding: 8px;
-  background: color-mix(in srgb, var(--surface-soft) 72%, var(--surface));
+  background: transparent;
 }
 
 .browse-tree-node .browse-tree-node .browse-tree-children,
