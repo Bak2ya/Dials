@@ -178,9 +178,18 @@
 
           <div class="option-divider"></div>
 
-          <label class="check-row prefix-toggle"><input id="prefixEnabledOption" type="checkbox"><span>이름 앞에 글자 추가</span></label>
-          <input id="namePrefixInput" class="full-input" type="text" maxlength="24" placeholder="예: 혜)" disabled>
-          <p id="prefixPreview" class="prefix-preview muted">미리보기: 홍길동</p>
+          <div class="name-decoration-group">
+            <label class="check-row name-decoration-toggle"><input id="prefixEnabledOption" type="checkbox"><span>이름 앞에 글자 추가</span></label>
+            <input id="namePrefixInput" class="full-input" type="text" maxlength="24" placeholder="예: 직장" disabled>
+
+            <label class="check-row name-decoration-toggle suffix-toggle"><input id="suffixEnabledOption" type="checkbox"><span>이름 뒤에 글자 추가</span></label>
+            <input id="nameSuffixInput" class="full-input" type="text" maxlength="24" placeholder="예: 교수" disabled>
+
+            <div class="name-preview-block">
+              <strong>미리보기</strong>
+              <span id="namePreview">박주성</span>
+            </div>
+          </div>
 
           <div class="required-note">
             <strong>메모에 항상 포함</strong>

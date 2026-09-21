@@ -33,7 +33,7 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Multi-select people.
 - Name is mandatory.
 - Optional mobile / extension / affiliation / title-role fields.
-- Optional contact-name prefix, remembered locally.
+- Optional literal contact-name prefix and suffix, each remembered locally.
 - One VCF may contain multiple VCARD entries.
 - Every VCARD note always contains the Dials `dataVersion` date.
 
@@ -101,7 +101,7 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Selection is keyed by `personKey`, never by visible row. A person with multiple affiliations must stay checked everywhere that person appears, including search results.
 - VCF generation uses the same unique-person set, so a multi-affiliation person is exported once.
 - Search and hierarchy navigation share the same selection state; browsing never clears previous selections.
-- Existing contact-export field options and name-prefix settings persist while moving between categories and organizations.
+- Existing contact-export field options and name prefix/suffix settings persist while moving between categories and organizations.
 - Unlock starts a fixed 10-minute privacy session. User activity does not extend it. Timer throttling in the background is handled by checking absolute elapsed time again on focus, visibility return, and pageshow.
 - Automatic lock uses the same locked start screen as the existing manual `잠금` action and clears decrypted/derived in-memory state by reloading the page.
 - The start screen tells users, in plain language, that contact data stays on the device and the view locks after 10 minutes.
@@ -163,3 +163,17 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Top-level nodes use the House Surface token; nested organization cards use Secondary Surface. Deeper levels are distinguished by containment, borders, spacing and typography rather than additional invented colors.
 - Expansion/collapse motion is short (~180 ms), CSS-driven and only runs during disclosure changes. `prefers-reduced-motion` disables it.
 - Contact export keeps disclosure on the left and selection controls in a stable right-side checkbox lane.
+
+## v0.5.4 disclosure/open-state visual separation
+
+- Expanded/open is not treated as a selected state. It is communicated by chevron rotation and revealed child content, without a persistent background tint.
+- Tree disclosure hover backgrounds are capability-gated to `(hover: hover) and (pointer: fine)` so touch Safari/Chrome do not retain a hover tint after tapping and make an open node look selected.
+- Contact-export selection remains represented only by the right-side checkbox/indeterminate state.
+
+
+## v0.5.5 contact export name decoration and iOS download
+
+- Name decoration is one compact setting group: prefix control, suffix control, then one combined preview directly below them.
+- Preview base name is `박주성`. Example placeholders are `직장` for the prefix and `교수` for the suffix.
+- Prefix/suffix are literal. Do not auto-insert, trim, or normalize spaces. Users control spaces and punctuation themselves.
+- iOS-like WebKit gets a download-compatibility wrapper (`application/octet-stream`) for generated `.vcf` Blob downloads; filename and vCard contents stay unchanged. Other browsers keep the original MIME path.

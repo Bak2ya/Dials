@@ -259,9 +259,13 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 .check-row small { color: var(--muted); margin-left: 4px; }
 .disabled-check { cursor: default; }
 .option-divider { height: 1px; background: var(--border); margin: 15px 0; }
-.prefix-toggle { margin-bottom: 6px; }
-.full-input { margin-top: 3px; }
-.prefix-preview { margin: 7px 0 0; font-size: 0.86rem; }
+.name-decoration-group { display: grid; gap: 6px; }
+.name-decoration-toggle { margin-bottom: 0; }
+.suffix-toggle { margin-top: 8px; }
+.full-input { margin-top: 0; }
+.name-preview-block { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+.name-preview-block strong { display: block; color: var(--muted); font-size: 0.78rem; font-weight: 650; margin-bottom: 5px; }
+.name-preview-block span { display: block; color: var(--text); font-size: 0.96rem; line-height: 1.45; overflow-wrap: anywhere; }
 .required-note { margin: 18px 0; padding: 13px; border-radius: 11px; background: var(--surface-soft); }
 .required-note strong { display: block; font-size: 0.9rem; }
 .required-note p { margin: 5px 0 0; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
@@ -458,8 +462,10 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   touch-action: manipulation;
 }
 
-.browse-tree-toggle:hover,
-.contact-tree-toggle:hover { background: var(--surface-hover); }
+@media (hover: hover) and (pointer: fine) {
+  .browse-tree-toggle:hover,
+  .contact-tree-toggle:hover { background: var(--surface-hover); }
+}
 
 .browse-tree-chevron,
 .browse-tree-chevron-spacer,

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.5.3";
+const APP_VERSION = "0.5.5";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -8,6 +8,8 @@ const DATA_RECORD_KEY = "encryptedData";
 const SAFE_META_KEY = "safeMeta";
 const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
+const SUFFIX_STORAGE_KEY = "dialsContactSuffix";
+const SUFFIX_ENABLED_STORAGE_KEY = "dialsContactSuffixEnabled";
 const THEME_STORAGE_KEY = "dialsThemePreference";
 const HISTORY_STATE_KEY = "dialsRoute";
 const AUTO_LOCK_MS = 10 * 60 * 1000;
@@ -102,7 +104,7 @@ function cacheElements() {
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
     "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "includeAffiliationOption", "includeJobOption",
-    "prefixEnabledOption", "namePrefixInput", "prefixPreview", "createVcardButton", "vcardMessage",
+    "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
     "themeMenuButton", "themeColorMeta", "startVersion",
   ].forEach((id) => { el[id] = document.getElementById(id); });
@@ -192,8 +194,10 @@ function bindEvents() {
   el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
   el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
   el.contentView.addEventListener("click", handleBrowseTreeClick);
-  el.prefixEnabledOption.addEventListener("change", updatePrefixControls);
-  el.namePrefixInput.addEventListener("input", updatePrefixControls);
+  el.prefixEnabledOption.addEventListener("change", updateNameDecorationControls);
+  el.namePrefixInput.addEventListener("input", updateNameDecorationControls);
+  el.suffixEnabledOption.addEventListener("change", updateNameDecorationControls);
+  el.nameSuffixInput.addEventListener("input", updateNameDecorationControls);
   el.createVcardButton.addEventListener("click", createVcardFile);
 
   el.modalCloseButton.addEventListener("click", closeModal);
@@ -1378,7 +1382,7 @@ function enterContactExport() {
 function showContactExportView() {
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
-  restorePrefixSettings();
+  restoreNameDecorationSettings();
   renderContactBrowse();
   setVcardMessage("");
   schedulePageOverflowSync();
@@ -1730,27 +1734,34 @@ function summarizeAffiliations(person) {
   return `${paths[0]} · ${paths[1]} 외 ${paths.length - 2}개 소속`;
 }
 
-function restorePrefixSettings() {
+function restoreNameDecorationSettings() {
   const savedPrefix = localStorage.getItem(PREFIX_STORAGE_KEY) || "";
-  const enabled = localStorage.getItem(PREFIX_ENABLED_STORAGE_KEY) === "true";
+  const prefixEnabled = localStorage.getItem(PREFIX_ENABLED_STORAGE_KEY) === "true";
+  const savedSuffix = localStorage.getItem(SUFFIX_STORAGE_KEY) || "";
+  const suffixEnabled = localStorage.getItem(SUFFIX_ENABLED_STORAGE_KEY) === "true";
   el.namePrefixInput.value = savedPrefix;
-  el.prefixEnabledOption.checked = enabled;
-  updatePrefixControls();
+  el.prefixEnabledOption.checked = prefixEnabled;
+  el.nameSuffixInput.value = savedSuffix;
+  el.suffixEnabledOption.checked = suffixEnabled;
+  updateNameDecorationControls();
 }
 
-function updatePrefixControls() {
-  const enabled = el.prefixEnabledOption.checked;
-  el.namePrefixInput.disabled = !enabled;
+function updateNameDecorationControls() {
+  const prefixEnabled = el.prefixEnabledOption.checked;
+  const suffixEnabled = el.suffixEnabledOption.checked;
+  el.namePrefixInput.disabled = !prefixEnabled;
+  el.nameSuffixInput.disabled = !suffixEnabled;
   const prefix = el.namePrefixInput.value;
-  el.prefixPreview.textContent = `미리보기: ${applyNamePrefix("홍길동", enabled ? prefix : "")}`;
+  const suffix = el.nameSuffixInput.value;
+  el.namePreview.textContent = `미리보기: ${applyNameDecorations("박주성", prefixEnabled ? prefix : "", suffixEnabled ? suffix : "")}`;
   localStorage.setItem(PREFIX_STORAGE_KEY, prefix);
-  localStorage.setItem(PREFIX_ENABLED_STORAGE_KEY, String(enabled));
+  localStorage.setItem(PREFIX_ENABLED_STORAGE_KEY, String(prefixEnabled));
+  localStorage.setItem(SUFFIX_STORAGE_KEY, suffix);
+  localStorage.setItem(SUFFIX_ENABLED_STORAGE_KEY, String(suffixEnabled));
 }
 
-function applyNamePrefix(name, prefix) {
-  const cleanPrefix = String(prefix || "");
-  if (!cleanPrefix) return name;
-  return /\s$/.test(cleanPrefix) ? `${cleanPrefix}${name}` : `${cleanPrefix} ${name}`;
+function applyNameDecorations(name, prefix, suffix) {
+  return `${String(prefix || "")}${name}${String(suffix || "")}`;
 }
 
 function createVcardFile() {
@@ -1765,6 +1776,7 @@ function createVcardFile() {
     affiliation: el.includeAffiliationOption.checked,
     job: el.includeJobOption.checked,
     prefix: el.prefixEnabledOption.checked ? el.namePrefixInput.value : "",
+    suffix: el.suffixEnabledOption.checked ? el.nameSuffixInput.value : "",
   };
   const cards = selected.map((person) => makeVcard(person, options)).join("\r\n");
   const blob = new Blob(["\ufeff", cards], { type: "text/vcard;charset=utf-8" });
@@ -1774,7 +1786,7 @@ function createVcardFile() {
 }
 
 function makeVcard(person, options) {
-  const displayName = applyNamePrefix(person.name || "이름 없음", options.prefix);
+  const displayName = applyNameDecorations(person.name || "이름 없음", options.prefix, options.suffix);
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -1825,15 +1837,29 @@ function vcardEscape(value) {
     .replace(/,/g, "\\,");
 }
 
+function isIOSLikeBrowser() {
+  const ua = navigator.userAgent || "";
+  const iOSDevice = /iPad|iPhone|iPod/.test(ua);
+  const iPadDesktopMode = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iOSDevice || iPadDesktopMode;
+}
+
 function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
+  // Recent iOS Safari/WebKit can reject client-generated Blob downloads for
+  // otherwise valid MIME types. Re-wrapping only on iOS-like WebKit as a
+  // generic binary download preserves the .vcf filename while avoiding that
+  // download path. Other browsers keep the original vCard MIME type.
+  const downloadBlob = isIOSLikeBrowser()
+    ? new Blob([blob], { type: "application/octet-stream" })
+    : blob;
+  const url = URL.createObjectURL(downloadBlob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  window.setTimeout(() => URL.revokeObjectURL(url), isIOSLikeBrowser() ? 60000 : 1500);
 }
 
 function setVcardMessage(message, isError = false, isSuccess = false) {
