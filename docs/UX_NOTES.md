@@ -149,3 +149,11 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - The `소속별 조회` heading is removed; the only home helper text is `소속을 선택하거나 검색창에서 바로 찾아보세요.`
 - Main browse and contact export share grouping/direct-major interpretation so ordering and hierarchy do not drift, while each keeps its own rendering and interaction rules.
 
+
+## v0.5.2 nested-card hierarchy
+
+- Normal browse and contact export use the same nested-card presentation: expanding a parent grows that card and reveals child cards inside it.
+- Nesting uses small internal padding rather than large cumulative left indentation so long organization names keep usable width on phones.
+- Top-level nodes use the House Surface token; nested organization cards use Secondary Surface. Deeper levels are distinguished by containment, borders, spacing and typography rather than additional invented colors.
+- Expansion/collapse motion is short (~180 ms), CSS-driven and only runs during disclosure changes. `prefers-reduced-motion` disables it.
+- Contact export keeps disclosure on the left and selection controls in a stable right-side checkbox lane.

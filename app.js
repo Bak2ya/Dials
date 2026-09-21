@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.5.1";
+const APP_VERSION = "0.5.2";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -34,7 +34,9 @@ const state = {
   contactView: { type: "home" },
   contactDepth: 0,
   contactExpanded: new Set(),
+  contactAnimateKey: "",
   browseExpanded: new Set(),
+  browseAnimateKey: "",
   deferredInstallPrompt: null,
   themePreference: "system",
   modalReturnFocus: null,
@@ -874,6 +876,14 @@ function renderHome() {
   el.contentView.innerHTML = `
     <p class="lookup-intro">소속을 선택하거나 검색창에서 바로 찾아보세요.</p>
     <div class="browse-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+  state.browseAnimateKey = "";
+}
+
+function browseChildrenShellHtml(treeKey, childrenHtml) {
+  const animate = state.browseAnimateKey === treeKey ? " is-expanding" : "";
+  return `<div class="browse-tree-children-shell${animate}" data-tree-children-for="${escapeAttr(treeKey)}">
+    <div class="browse-tree-children">${childrenHtml}</div>
+  </div>`;
 }
 
 function browseCategoryNodeHtml(category) {
@@ -881,9 +891,9 @@ function browseCategoryNodeHtml(category) {
   const expanded = state.browseExpanded.has(treeKey);
   const groups = contactMajorGroups(category);
   const children = expanded
-    ? `<div class="browse-tree-children">${groups.map((group) => browseMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`
+    ? browseChildrenShellHtml(treeKey, groups.map((group) => browseMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다."))
     : "";
-  return `<section class="browse-tree-node">
+  return `<section class="browse-tree-node level-0${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
     ${browseDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속` })}
     ${children}
   </section>`;
@@ -905,14 +915,11 @@ function browseMajorNodeHtml(category, group) {
     });
   });
   const keys = unique(group.items.flatMap(({ org }) => org.people.map((record) => record._personKey)).filter(Boolean));
-  const children = expanded
-    ? `<div class="browse-tree-children">
-        ${directPeople.map((record) => browseTreePersonRowHtml(record, 2, true)).join("")}
-        ${childItems.map(({ org, orgIndex }) => browseOrganizationNodeHtml(category, org, orgIndex)).join("")}
-        ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}
-      </div>`
-    : "";
-  return `<section class="browse-tree-node">
+  const childHtml = `${directPeople.map((record) => browseTreePersonRowHtml(record, 2, true)).join("")}
+    ${childItems.map(({ org, orgIndex }) => browseOrganizationNodeHtml(category, org, orgIndex)).join("")}
+    ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}`;
+  const children = expanded ? browseChildrenShellHtml(treeKey, childHtml) : "";
+  return `<section class="browse-tree-node level-1${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
     ${browseDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명` })}
     ${children}
   </section>`;
@@ -923,17 +930,16 @@ function browseOrganizationNodeHtml(category, org, orgIndex) {
   const expanded = state.browseExpanded.has(treeKey);
   const label = org.minor || org.major || "소속 없음";
   const records = uniqueOrgRecords(org);
-  const children = expanded
-    ? `<div class="browse-tree-children">${records.map((record) => browseTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`
-    : "";
-  return `<section class="browse-tree-node">
+  const childHtml = records.map((record) => browseTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.");
+  const children = expanded ? browseChildrenShellHtml(treeKey, childHtml) : "";
+  return `<section class="browse-tree-node level-2${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
     ${browseDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${records.length}명` })}
     ${children}
   </section>`;
 }
 
 function browseDisclosureRowHtml({ treeKey, expanded, level, label, detail = "" }) {
-  return `<div class="browse-tree-row" style="--tree-level:${Number(level) || 0}">
+  return `<div class="browse-tree-row" data-tree-level="${Number(level) || 0}">
     <button class="browse-tree-toggle" type="button" data-browse-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
       <span class="browse-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
       <span class="browse-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
@@ -948,7 +954,7 @@ function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("내선번호", record.extension, record.externalNumber));
   if (record?.mobile) lines.push(phoneLineHtml("개인번호", record.mobile));
-  return `<article class="browse-tree-row browse-tree-person" style="--tree-level:${Number(level) || 0}">
+  return `<article class="browse-tree-person" data-tree-level="${Number(level) || 0}">
     <div class="browse-tree-static">
       <span class="browse-tree-chevron-spacer" aria-hidden="true"></span>
       <div class="browse-tree-person-content">
@@ -961,13 +967,34 @@ function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
 
 function handleBrowseTreeClick(event) {
   const toggle = event.target.closest("[data-browse-tree-toggle]");
-  if (!toggle) return;
+  if (!toggle || toggle.dataset.treeBusy === "true") return;
   const treeKey = toggle.dataset.treeKey;
   if (!treeKey) return;
-  if (state.browseExpanded.has(treeKey)) state.browseExpanded.delete(treeKey);
-  else state.browseExpanded.add(treeKey);
-  renderHome();
-  schedulePageOverflowSync();
+  if (!state.browseExpanded.has(treeKey)) {
+    state.browseExpanded.add(treeKey);
+    state.browseAnimateKey = treeKey;
+    renderHome();
+    schedulePageOverflowSync();
+    return;
+  }
+
+  const node = toggle.closest("[data-browse-node-key]");
+  const shell = node?.querySelector(":scope > .browse-tree-children-shell");
+  if (!shell || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+    state.browseExpanded.delete(treeKey);
+    renderHome();
+    schedulePageOverflowSync();
+    return;
+  }
+  toggle.dataset.treeBusy = "true";
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.querySelector(".browse-tree-chevron")?.classList.remove("open");
+  shell.classList.add("is-collapsing");
+  window.setTimeout(() => {
+    state.browseExpanded.delete(treeKey);
+    renderHome();
+    schedulePageOverflowSync();
+  }, 180);
 }
 
 function renderCategory(categoryId) {
@@ -1405,6 +1432,7 @@ function renderContactHome() {
   const rows = state.categories.map((category) => contactCategoryNodeHtml(category)).join("");
   el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>필요한 소속을 펼쳐 인물을 선택하세요.</span></div>
     <div class="contact-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+  state.contactAnimateKey = "";
 }
 
 function contactMajorGroups(category) {
@@ -1440,14 +1468,21 @@ function orgTreeKey(categoryId, orgIndex) {
   return `org:${categoryId}:${orgIndex}`;
 }
 
+function contactChildrenShellHtml(treeKey, childrenHtml) {
+  const animate = state.contactAnimateKey === treeKey ? " is-expanding" : "";
+  return `<div class="contact-tree-children-shell${animate}" data-contact-tree-children-for="${escapeAttr(treeKey)}">
+    <div class="contact-tree-children">${childrenHtml}</div>
+  </div>`;
+}
+
 function contactCategoryNodeHtml(category) {
   const treeKey = categoryTreeKey(category.id);
   const expanded = state.contactExpanded.has(treeKey);
   const groups = contactMajorGroups(category);
   const children = expanded
-    ? `<div class="contact-tree-children">${groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`
+    ? contactChildrenShellHtml(treeKey, groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다."))
     : "";
-  return `<section class="contact-tree-node">
+  return `<section class="contact-tree-node level-0${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
     ${contactDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속`, checkboxHtml: "" })}
     ${children}
   </section>`;
@@ -1470,13 +1505,10 @@ function contactMajorNodeHtml(category, group) {
       directPeople.push(record);
     });
   });
-  const children = expanded
-    ? `<div class="contact-tree-children">
-        ${directPeople.map((record) => contactTreePersonRowHtml(record, 2, true)).join("")}
-        ${childItems.map(({ org, orgIndex }) => contactOrganizationNodeHtml(category, org, orgIndex)).join("")}
-        ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}
-      </div>`
-    : "";
+  const childHtml = `${directPeople.map((record) => contactTreePersonRowHtml(record, 2, true)).join("")}
+    ${childItems.map(({ org, orgIndex }) => contactOrganizationNodeHtml(category, org, orgIndex)).join("")}
+    ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}`;
+  const children = expanded ? contactChildrenShellHtml(treeKey, childHtml) : "";
   const checkboxHtml = contactTreeCheckboxHtml({
     type: "major",
     categoryId: category.id,
@@ -1485,7 +1517,7 @@ function contactMajorNodeHtml(category, group) {
     selected,
     disabled: !keys.length,
   });
-  return `<section class="contact-tree-node">
+  return `<section class="contact-tree-node level-1${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
     ${contactDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, checkboxHtml })}
     ${children}
   </section>`;
@@ -1506,17 +1538,16 @@ function contactOrganizationNodeHtml(category, org, orgIndex) {
     selected,
     disabled: !keys.length,
   });
-  const children = expanded
-    ? `<div class="contact-tree-children">${records.map((record) => contactTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`
-    : "";
-  return `<section class="contact-tree-node">
+  const childHtml = records.map((record) => contactTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.");
+  const children = expanded ? contactChildrenShellHtml(treeKey, childHtml) : "";
+  return `<section class="contact-tree-node level-2${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
     ${contactDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${keys.length}명`, checkboxHtml })}
     ${children}
   </section>`;
 }
 
 function contactDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", checkboxHtml = "" }) {
-  return `<div class="contact-tree-row${checkboxHtml ? "" : " no-select"}" style="--tree-level:${Number(level) || 0}">
+  return `<div class="contact-tree-row${checkboxHtml ? "" : " no-select"}" data-tree-level="${Number(level) || 0}">
     <button class="contact-tree-toggle" type="button" data-contact-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
       <span class="contact-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
       <span class="contact-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
@@ -1544,7 +1575,7 @@ function contactTreePersonRowHtml(record, level, directMajorPerson = false) {
   const details = directMajorPerson
     ? unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")
     : [job, unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")].filter(Boolean).join(" · ");
-  return `<div class="contact-tree-row contact-tree-person" style="--tree-level:${Number(level) || 0}">
+  return `<div class="contact-tree-person" data-tree-level="${Number(level) || 0}">
     <div class="contact-tree-static">
       <span class="contact-tree-chevron-spacer" aria-hidden="true"></span>
       <span class="contact-tree-label"><strong>${escapeHtml(primary)}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ""}</span>
@@ -1578,12 +1609,31 @@ function contactPersonRowHtml(personKey, name, detail = "", extension = "", mobi
 
 function handleContactBrowseClick(event) {
   const toggle = event.target.closest("[data-contact-tree-toggle]");
-  if (!toggle) return;
+  if (!toggle || toggle.dataset.treeBusy === "true") return;
   const treeKey = toggle.dataset.treeKey;
   if (!treeKey) return;
-  if (state.contactExpanded.has(treeKey)) state.contactExpanded.delete(treeKey);
-  else state.contactExpanded.add(treeKey);
-  renderContactBrowse();
+  if (!state.contactExpanded.has(treeKey)) {
+    state.contactExpanded.add(treeKey);
+    state.contactAnimateKey = treeKey;
+    renderContactBrowse();
+    return;
+  }
+
+  const node = toggle.closest("[data-contact-node-key]");
+  const shell = node?.querySelector(":scope > .contact-tree-children-shell");
+  if (!shell || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+    state.contactExpanded.delete(treeKey);
+    renderContactBrowse();
+    return;
+  }
+  toggle.dataset.treeBusy = "true";
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.querySelector(".contact-tree-chevron")?.classList.remove("open");
+  shell.classList.add("is-collapsing");
+  window.setTimeout(() => {
+    state.contactExpanded.delete(treeKey);
+    renderContactBrowse();
+  }, 180);
 }
 
 function majorPersonKeys(categoryId, major) {

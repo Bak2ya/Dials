@@ -1,1 +1,1 @@
-Dials v0.5.1
+Dials v0.5.2
