@@ -35,3 +35,8 @@ Cross-browser/device synchronization was explicitly considered and rejected beca
 - decrypted directory not written to persistent browser storage
 - fixed 10-minute auto-lock from unlock time
 - encrypted package may be retained in IndexedDB for convenience
+
+
+## Password visibility control (v0.6.0)
+
+The inline eye button only switches the password input between hidden and visible presentation in the active page. It does not persist, transmit, copy, or otherwise store the password. Entering a new locked/data-replacement state restores hidden presentation. Unlock backoff continues to disable password entry and the visibility control together while retry is blocked.

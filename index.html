@@ -58,7 +58,21 @@
             <form id="unlockForm" class="unlock-form">
               <label for="passwordInput">데이터 암호</label>
               <div class="password-row">
-                <input id="passwordInput" type="password" autocomplete="current-password" placeholder="암호 입력" required>
+                <div class="password-input-wrap">
+                  <input id="passwordInput" type="password" autocomplete="current-password" placeholder="암호 입력" required>
+                  <button id="passwordVisibilityButton" class="password-visibility-button" type="button" aria-label="암호 표시" aria-pressed="false">
+                    <svg class="password-eye-icon" data-password-icon="show" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                      <path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7"/>
+                    </svg>
+                    <svg class="password-eye-icon hidden" data-password-icon="hide" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M3 3l18 18"/>
+                      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>
+                      <path d="M9.9 4.24a9.6 9.6 0 0 1 2.1 -.24c4 0 7.333 2.333 10 7a15.3 15.3 0 0 1 -2.05 2.95"/>
+                      <path d="M6.61 6.61c-1.75 1.06 -3.29 2.86 -4.61 5.39c2.667 4.667 6 7 10 7a9.7 9.7 0 0 0 5.39 -1.61"/>
+                    </svg>
+                  </button>
+                </div>
                 <button id="unlockButton" class="primary-button" type="submit">전화번호부 열기</button>
               </div>
               <p id="unlockMessage" class="form-message" role="status"></p>
@@ -144,11 +158,11 @@
       </header>
 
       <section class="content-wrap contact-export-layout">
-        <section class="surface contact-select-panel">
+        <section class="surface contact-select-panel" aria-label="저장할 사람 선택">
           <div class="section-heading-row export-heading">
-            <div>
-              <h2>저장할 사람</h2>
-              <p class="muted">이름이나 소속으로 찾은 뒤 필요한 사람을 선택하세요.</p>
+            <div class="contact-select-copy">
+              <p class="contact-select-instruction">저장할 사람을 선택하세요.</p>
+              <p class="contact-representative-help"><span class="representative-button-sample">처장</span> 같은 버튼을 누르면 해당 소속과 직위/역할이 연락처에 함께 저장됩니다.</p>
             </div>
             <strong id="selectedPeopleCount" class="selected-count">0명 선택</strong>
           </div>
@@ -172,8 +186,7 @@
             <label class="check-row disabled-check"><input type="checkbox" checked disabled><span>이름 <small>필수</small></span></label>
             <label class="check-row"><input id="includeMobileOption" type="checkbox" checked><span>개인번호</span></label>
             <label class="check-row"><input id="includeExtensionOption" type="checkbox" checked><span>내선번호</span></label>
-            <label class="check-row"><input id="includeAffiliationOption" type="checkbox" checked><span>소속</span></label>
-            <label class="check-row"><input id="includeJobOption" type="checkbox" checked><span>직책 / 역할</span></label>
+            <label class="check-row organization-option-row"><input id="includeOrganizationOption" type="checkbox" checked><span>직장 / 기관 <small id="organizationOptionName"></small></span></label>
           </div>
 
           <div class="option-divider"></div>
@@ -191,10 +204,14 @@
             </div>
           </div>
 
-          <div class="required-note">
-            <strong>메모에 항상 포함</strong>
-            <p>Dials 데이터 기준일이 모든 연락처의 메모에 자동으로 기록됩니다.</p>
-          </div>
+          <section class="memo-options-card" aria-labelledby="memoOptionsTitle">
+            <strong id="memoOptionsTitle">메모에 기록할 내용</strong>
+            <div class="memo-option-stack">
+              <label class="check-row"><input id="noteDataDateOption" type="checkbox" checked><span>데이터 기준일</span></label>
+              <label class="check-row"><input id="noteAffiliationsOption" type="checkbox" checked><span>소속</span></label>
+              <label class="check-row"><input id="noteJobsOption" type="checkbox" checked><span>직책 / 역할</span></label>
+            </div>
+          </section>
 
           <p class="dedupe-note">다중소속 인물은 중복 저장되지 않습니다.</p>
           <button id="createVcardButton" class="primary-button wide-button" type="button">연락처 파일 만들기</button>
