@@ -14,7 +14,9 @@ Dials is intentionally a **viewer**, not a management app.
 
 - Sticky global search remains available while browsing.
 - Home categories: `행정부서`, `학과`, `기타시설`.
-- Organization/person order follows the payload, which build38 creates from Sheet1 output order.
+- The normal viewer uses one progressive disclosure tree: category → major organization → child organization → people. Fresh unlock starts fully collapsed, and multiple branches may remain open.
+- Direct major-level people/leaders appear before child departments at the same hierarchy depth.
+- Organization/person order follows the payload generated from HJU Phonebook Sheet1 output order.
 - Phone numbers are actionable `tel:` links.
 
 ## Search
@@ -35,21 +37,16 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - One VCF may contain multiple VCARD entries.
 - Every VCARD note always contains the Dials `dataVersion` date.
 
-## New-data indicator
-
-- `data-status.json` is checked without sending contact data.
-- A small yellow `!` appears beside `⋯` only when the public latest date is newer than the connected data.
-- The indicator is informative and never blocks current data access.
-
 ## Appearance
 
 - Responsive layout; no separate mobile/desktop app.
-- System light/dark mode is followed through `prefers-color-scheme`.
+- System light/dark mode is followed through `prefers-color-scheme`. Manual Light / Dark / Black(OLED) overrides are available.
 ## v0.1.2 appearance and shortcut
 
 - `⋯ → 바로가기 추가`: browser/PWA install prompt when available; iPhone/iPad shows Safari `공유 → 홈 화면에 추가` instructions.
-- `⋯ → 화면 모드`: system / light / dark. System is the default, manual choice is stored locally.
-- Light appearance: warm beige parchment-inspired background with a subtle generated paper grain; no external texture image.
+- `⋯ → 화면 모드`: system / light / dark / black(OLED). System is the default, manual choice is stored locally.
+- Theme selector uses native radio semantics.
+- Light / Dark / Black use the shared House Palette. Black keeps large surfaces at true `#000000`.
 
 
 ## v0.1.2 iOS import compatibility
@@ -58,3 +55,97 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Let the user pick the file first, then validate the internal `DialsEncryptedData` wrapper in JavaScript.
 - File reading uses `File.text()` when available with a `FileReader` fallback for broader Safari compatibility.
 - The final Dials icon is used in the app header, manifest icons, favicon, and Apple touch icon.
+## v0.2.0 external numbers
+
+- HJU Phonebook remains the source of truth for whether a number can be reached through the internal extension system.
+- `externalNumber: true` does not create a new phone field. Dials keeps the same full number and appends `(외부번호)` in the viewer.
+- The familiar `내선번호` / `내선` wording remains in the viewer. External numbers keep the same slot and append `(외부번호)` rather than introducing a second phone-number vocabulary.
+- Schema 1.1 files without the field continue to behave as ordinary extension-callable numbers.
+
+
+
+## v0.3.0 navigation and accessibility
+
+- Internal navigation writes meaningful browser history entries: home → category → organization.
+- Browser/Android Back restores the previous Dials view rather than unexpectedly leaving the app.
+- A search session creates one history entry; editing the query replaces that same entry. Back clears the search by returning to the previous route.
+- Contact export is a history route; Back returns to the viewer.
+- Scroll position is saved into the current history entry and restored on Back/Forward.
+- Modals trap Tab focus, Esc closes them, and closing restores focus to the opener.
+- The `⋯` popover uses ordinary buttons; it does not claim `role=menu` without implementing full menu keyboard semantics.
+
+## v0.3.2 mobile IME and overflow menu
+
+- The v0.3.1 composition-only guard was insufficient on real mobile Korean keyboards because event ordering differs across browser/IME combinations. Synthetic composition tests alone are not evidence of real-device IME correctness.
+- Global search now treats the input field as browser/IME-owned: it avoids History/scroll-state writes while the search field is active and debounces result rendering after input stabilizes.
+- A search-session History entry is prepared when the field receives focus, before text composition starts, so Back can still leave search without changing History on each keystroke.
+- Contact-export search uses the same debounced/composition-safe policy, without adding a History route.
+- Do not assign to the search input value during normal typing. Programmatic value changes remain limited to explicit navigation/clear/restore operations.
+- The overflow `⋯` keeps its visual weight but uses a 48×48px hit target; action rows are at least 48px high for mobile use.
+- `⋯ → 정보` explains user-relevant privacy/security behavior, shows the app version, and links to GitHub. Cryptographic algorithm details remain in technical documentation rather than the general About view.
+
+## v0.3.1 IME search composition
+
+- Global search must not rerender results while the browser IME is composing text.
+- `compositionstart` marks the search as composing; intermediate `input` events are ignored.
+- `compositionend` commits the completed query once. A following non-composing `input` event is harmless because unchanged queries are ignored.
+- This protects Korean first-character composition and also applies to Japanese/Chinese and other IME workflows.
+- Search History semantics from v0.3.0 remain unchanged: one History entry per search session, later query edits replace that entry.
+
+
+## v0.4.0 contact export and auto-lock
+
+- Contact export reuses the main viewer's information architecture: category → organization → person. Do not return to one flat full-directory list.
+- Category/organization rows are intentionally more compact than normal viewer cards because the task is selection, not reading full contact details.
+- Organization checkboxes select every unique `personKey` in that organization. If only some are selected, the organization checkbox uses the native indeterminate/mixed state.
+- Selection is keyed by `personKey`, never by visible row. A person with multiple affiliations must stay checked everywhere that person appears, including search results.
+- VCF generation uses the same unique-person set, so a multi-affiliation person is exported once.
+- Search and hierarchy navigation share the same selection state; browsing never clears previous selections.
+- Existing contact-export field options and name-prefix settings persist while moving between categories and organizations.
+- Unlock starts a fixed 10-minute privacy session. User activity does not extend it. Timer throttling in the background is handled by checking absolute elapsed time again on focus, visibility return, and pageshow.
+- Automatic lock uses the same locked start screen as the existing manual `잠금` action and clears decrypted/derived in-memory state by reloading the page.
+- The start screen tells users, in plain language, that contact data stays on the device and the view locks after 10 minutes.
+- The connected data date is intentionally more prominent; Dials no longer performs a separate public latest-data check.
+- About is user-facing. Technical storage/encryption details belong in README/data-format documentation.
+
+## v0.4.1 mobile entry, safe replacement, overflow, and contact hierarchy
+
+- After password unlock, the password field is explicitly blurred and Dials waits briefly for a likely mobile soft-keyboard/visual-viewport transition before presenting the main viewer. This targets the observed iPhone symptom where the first `⋯` tap could be consumed by focus/keyboard dismissal. Desktop/synthetic browser checks are not a substitute for final real-device validation.
+- `⋯ → 새 데이터 불러오기` returns to the initial unconnected data screen instead of immediately opening a file picker. The currently stored encrypted package is left untouched until a newly selected package is successfully decrypted; cancelling, choosing an invalid file, or entering a wrong password does not replace the last known-good stored package.
+- Short pages suppress root vertical scrolling/overscroll; overflow is re-evaluated after navigation, dynamic list rendering, resize, and visual-viewport changes. Long content continues to scroll normally.
+- In contact export category browsing, a major organization can contain both direct major-level people and child departments. When a direct organization record represents the major itself and sibling departments exist, its people are expanded inline at the same hierarchy level as department rows instead of showing a redundant organization row such as `총무처 → 총무처`. Source order is preserved.
+- Direct-person checkboxes use the same `personKey` selection source of truth as department/person/search rows, so multi-affiliation selection synchronization remains intact.
+
+## v0.4.2 contact-export disclosure tree
+
+- Contact export no longer drills through separate category/organization pages. It uses one expandable disclosure tree so users can keep context while selecting across multiple affiliations.
+- Initial state shows only top-level categories such as `행정부서 / 학과 / 기타시설`, all collapsed. Opening a category reveals only its major organizations; opening a major organization reveals direct major-level people first and child departments; opening a child department reveals its people.
+- Disclosure/navigation stays on the left using the familiar chevron pattern. Selection checkboxes stay on the far right with a separate hit target, so expanding/collapsing never changes selection and checking never expands/collapses.
+- Major and child-organization checkboxes select all unique `personKey` values in that subtree and use the native indeterminate state for partial selection. Person checkboxes remain keyed by `personKey`, so a multi-affiliation person stays synchronized everywhere.
+- Direct major-level leaders are shown before child departments at the same hierarchy depth, matching the intended Sheet1 ordering without exposing implementation wording in the UI.
+- The explanatory sentence `시트1 기준의 소속 순서로 표시됩니다.` was removed from the normal viewer; source-order behavior remains an implementation detail.
+- Search results use the same right-side checkbox grammar as the hierarchy.
+- The successful-unlock flow begins soft-keyboard/visual-viewport settling before preparing/rendering the directory, further reducing the chance that the first `⋯` tap is consumed by mobile keyboard dismissal. Real iPhone validation remains required.
+
+
+
+## v0.5.0 security hardening and start-screen hierarchy
+
+- The start header is reduced to the Dials identity. The descriptive sentence moves to a quiet footer outside the connection/usage surfaces, followed by the live app version.
+- Usage copy is intentionally shorter: import the distributed `.dials` file, enter the password, and on later uses enter only the password.
+- The page uses a restrictive document CSP suitable for the current static/local-first architecture. Same-origin app scripts/styles/PWA resources are allowed; page-level fetch/XHR/WebSocket connections are blocked.
+- The early theme selector must remain external (`theme-init.js`) so the policy does not require `unsafe-inline`.
+- Unlock failure state is keyed by a SHA-256 fingerprint of the encrypted package, not by filename. Renaming the same package does not reset attempts in the same browser.
+- Failure policy: attempts 1–2 retry immediately; attempt 3 warns that the next failure causes 10 seconds; attempts 4/5/6/7/8+ cause 10s/30s/1m/5m/15m. Successful unlock clears the state for that package fingerprint.
+- Failure backoff is browser-local by design. Cross-browser/device synchronization was considered but rejected because it would require a central service and conflict with Dials' local-first/no-contact-upload architecture. Record this rationale; do not silently add server synchronization later.
+- Unlock backoff is only a UI abuse-control layer. It is not presented as protection against offline password guessing after an attacker obtains the encrypted package.
+
+## v0.5.1 main-view disclosure tree
+
+- The normal viewer now uses the same organization hierarchy interpretation as contact export, but without selection checkboxes.
+- Initial state shows only the top-level categories, all collapsed. Expand category → major organization → child organization as needed.
+- Direct major-level leaders/people are rendered before child departments at the same depth; child-department people appear only after that department is expanded.
+- Expansion is local UI state, not a browser History route. Browser History/Back remains meaningful for search sessions and contact-export navigation.
+- The `소속별 조회` heading is removed; the only home helper text is `소속을 선택하거나 검색창에서 바로 찾아보세요.`
+- Main browse and contact export share grouping/direct-major interpretation so ordering and hierarchy do not drift, while each keeps its own rendering and interaction rules.
+

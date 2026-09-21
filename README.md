@@ -21,28 +21,117 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - iPhone / iPad / Android / Windows / macOS 브라우저 반응형 화면
 - 확정된 Dials 공식 아이콘을 웹 헤더 / PWA / iPhone 홈 화면 아이콘에 공통 적용
 - iOS 파일 선택기에서 `.dials` 파일이 비활성화되던 문제 수정
-- `⋯ → 화면 모드`에서 시스템 / 라이트 / 다크 선택 (기본값은 시스템)
-- 라이트 모드의 따뜻한 베이지 배경과 매우 은은한 종이 질감
+- `⋯ → 화면 모드`에서 시스템 / 라이트 / 다크 / 블랙(OLED) 선택 (기본값은 시스템)
+- House Palette 기준 라이트 / 다크 / 블랙(OLED) 테마
+- `⋯ → 정보`에서 개인정보 보호·보안 방식, 현재 버전, GitHub 링크 확인
 - `⋯ → 바로가기 추가`에서 지원 브라우저의 앱 설치 안내를 사용하고, iPhone/iPad에서는 `공유 → 홈 화면에 추가` 방법 안내
 - 암호화 `.dials` 파일 불러오기 및 IndexedDB 재사용
 - 암호 미저장
+- 동일한 암호화 `.dials` 패키지는 파일명이 바뀌어도 SHA-256 지문으로 식별하여, 현재 브라우저 안에서 암호 실패 횟수와 재시도 지연을 이어서 적용
+- 암호 4회 실패부터 10초 → 30초 → 1분 → 5분 → 최대 15분으로 재시도 지연
+- 강한 Content Security Policy(CSP)로 외부 스크립트·외부 통신·iframe/플러그인 등 사용하지 않는 경로를 제한
 - 복호화된 연락처 데이터는 현재 열린 페이지 메모리에서만 사용
+- 잠금 해제 시점부터 10분이 지나면 자동 잠금(백그라운드 복귀 시에도 만료 여부 재확인)
 - 여러 검색어를 AND 조건으로 처리하는 통합 검색
 - Windows 프로그램의 시트1 출력순서를 그대로 사용하는 소속/인물 조회
 - `personKey` 기준으로 동일인의 여러 소속을 검색 결과 한 카드에 통합
 - 이름이 같은 다른 사람은 서로 다른 `personKey`로 별도 표시
 - 전화번호를 누르면 전화 앱 연결
-- `⋯ → 연락처 저장` 전용 화면
+- HJU Phonebook에서 내선 연결 불가로 지정한 번호는 전체 번호 뒤에 **`(외부번호)`** 표시
+- `⋯ → 연락처 저장`에서 `구분 → 주요 소속 → 하위 소속 → 인물`을 필요할 때만 펼쳐 선택
+- 소속 전체 선택 및 일부 선택(혼합 상태) 지원
+- 다중소속 인물은 `personKey` 하나의 선택 상태를 공유하며 vCard에 중복 저장되지 않음
 - 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
 - vCard에 넣을 개인번호 / 내선번호 / 소속 / 직책·역할 선택
 - 이름은 항상 포함
 - `혜)` 같은 이름 접두어 옵션 및 마지막 사용값 기억
 - 생성되는 모든 연락처 메모에 **Dials 데이터 기준일을 항상 기록**
-- 공개 `data-status.json`으로 최신 전화번호부 데이터 여부 확인
-- 새 데이터가 있으면 `⋯` 옆에 작게 노란 `!` 표시
-- 새 데이터 알림이 있어도 기존 전화번호부 조회는 차단하지 않음
 - 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
 - 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
+
+## v0.5.1 조회 화면 트리 통일
+
+- 일반 조회 화면도 연락처 저장 화면과 같은 단계형 펼침/접힘 계층으로 통일했습니다.
+- 처음에는 `행정부서 / 학과 / 기타시설`만 닫힌 상태로 보이고, 구분 → 주요 소속 → 하위 소속 순서로 필요한 항목만 펼칩니다.
+- 주요 소속을 펼치면 그 소속에 직접 속한 책임자/인물이 먼저 나오고, 하위 부서는 같은 깊이에 이어집니다. 하위 부서를 펼치면 그 안의 연락처가 표시됩니다.
+- 조회 화면에는 선택 체크박스를 두지 않고, 연락처 저장 화면과 조직 계층·순서만 공유합니다.
+- 첫 화면의 `소속별 조회` 제목은 제거하고 안내 문구를 `소속을 선택하거나 검색창에서 바로 찾아보세요.`로 간결하게 정리했습니다.
+- 검색 결과, 전화 링크, 외부번호 표기, History/Back, IME-safe 검색 등 기존 조회 동작은 유지합니다.
+
+## v0.5.0 보안 강화 · 암호 실패 지연 · 시작 화면 정리
+
+- Content Security Policy(CSP)를 추가해 기본 리소스 허용 범위를 닫고, 스크립트·스타일·이미지·Service Worker/PWA 리소스만 필요한 범위에서 허용합니다. 앱 페이지의 `fetch`/XHR/WebSocket 계열 외부 통신은 `connect-src 'none'`으로 차단합니다.
+- 기존 인라인 테마 초기화 코드는 `theme-init.js`로 분리해 `script-src 'self'` 정책에서 `unsafe-inline` 없이 동작하도록 정리했습니다.
+- `.dials`의 암호화 핵심 필드로 SHA-256 지문을 계산해 파일명이 바뀌어도 같은 암호화 패키지의 암호 실패 기록을 현재 브라우저에서 이어갑니다. 지문은 연락처 평문이나 암호가 아닙니다.
+- 암호 실패 1~2회는 즉시 재시도, 3회째에는 다음 실패 시 10초 지연을 사전 안내합니다. 4회부터 10초 → 30초 → 1분 → 5분 → 15분 순으로 대기 시간이 증가하며, 성공적으로 열면 해당 파일 지문의 실패 기록을 초기화합니다.
+- 이 제한은 브라우저 로컬 저장소 기반의 UI 보조 방어입니다. 다른 브라우저/기기와 실패 횟수를 공유하려면 중앙 서버가 필요하고 Dials의 로컬 우선·개인정보 비전송 구조와 충돌하므로 적용하지 않습니다. 오프라인 암호 추측 방어는 계속 파일 암호화/KDF와 충분히 강한 암호가 담당합니다.
+- 시작 화면 상단은 Dials 이름에 집중하도록 소개 문구를 제거했습니다. 하단 바깥쪽에 `배포받은 연락처 데이터로 빠르게 조회하는 웹 전화번호부입니다.`와 실제 앱 버전을 표시합니다.
+- 사용 방법 문구를 `배포받은 파일(.dials)을 불러옵니다.` / `연결 후 암호를 입력하면 연락처가 열립니다.` / `연결한 다음부터는 암호만 입력하면 됩니다.`로 간결하게 정리했습니다.
+
+## v0.4.2 연락처 저장 트리 · 선택 문법 정리
+
+- 연락처 저장 화면을 별도 페이지를 계속 들어가는 방식 대신 **한 화면의 펼침/접힘 트리**로 정리했습니다.
+- 처음에는 `행정부서 / 학과 / 기타시설`만 닫힌 상태로 보이고, 구분을 열면 `총무처 / 교무처 ...` 같은 주요 소속만 나타납니다. 주요 소속을 열면 직속 책임자/인물이 먼저 나오고 그 아래 하위 부서가 같은 위계로 이어지며, 하위 부서를 열면 인물이 표시됩니다.
+- 일반적인 트리 문법에 맞춰 **펼침/접힘은 왼쪽**, **선택 체크박스는 오른쪽**으로 분리했습니다. 두 조작 영역은 서로 독립되어 체크하다가 항목이 열리거나, 열다가 체크되는 오작동을 막습니다.
+- 주요 소속과 하위 소속의 체크박스는 해당 범위의 인물을 전체 선택하며, 일부만 선택되면 혼합 상태를 표시합니다. 다중소속 인물은 기존처럼 `personKey` 하나의 선택 상태를 공유합니다.
+- 부처 자체에 직접 속한 책임자/인물은 하위 부서보다 먼저 표시하면서 하위 부서와 같은 깊이에 둡니다.
+- 일반 조회 화면의 `시트1 기준의 소속 순서로 표시됩니다.` 문구는 제거했습니다. 실제 순서는 기존 데이터 순서를 계속 따릅니다.
+- 검색 결과도 선택 체크박스를 오른쪽에 두어 같은 선택 문법을 사용합니다.
+- 잠금 해제 성공 직후에는 전화번호부 준비/렌더링보다 먼저 모바일 키보드와 visual viewport 정리를 시작하도록 순서를 보강했습니다.
+
+## v0.4.1 모바일 첫 터치 · 안전한 데이터 교체 · 연락처 계층
+
+- 잠금 해제 직후 암호 입력 포커스와 모바일 키보드/visual viewport 전환을 정리해 상단 `⋯`의 첫 터치가 바로 동작하도록 보강했습니다. 실제 iPhone의 키보드 전환은 최종 실기기 확인 대상으로 남깁니다.
+- `⋯ → 새 데이터 불러오기`는 최초 데이터 연결 화면으로 돌아갑니다. 새 파일은 암호가 정상 확인된 뒤에만 기존 저장 데이터를 교체하므로 중간 취소·잘못된 파일·틀린 암호로 마지막 정상 데이터가 사라지지 않습니다.
+- 화면 내용이 실제 viewport보다 짧으면 불필요한 세로 스크롤/바운스를 억제하고, 길 때만 정상 스크롤합니다.
+- 연락처 저장의 소속 탐색에서 부처 자체에 직접 속한 책임자/인물은 `총무처 → 총무처` 같은 중복 소속 행 대신 부서들과 같은 위계의 인물 행으로 표시합니다. `.dials`에 들어온 조직/인물 순서는 그대로 유지합니다.
+- 직속 인물도 기존 `personKey` 선택 상태를 공유하므로 다중소속 인물 체크 동기화와 vCard 중복 제거가 그대로 적용됩니다.
+
+## v0.4.0 연락처 저장 구조 · 자동 잠금 · 정보 계층
+
+- 연락처 저장 화면을 긴 전체 인물 목록에서 메인 화면과 같은 `구분 → 소속 → 인물` 탐색 구조로 변경했습니다.
+- 소속 행과 소속 상세 화면에서 전체 선택할 수 있으며, 일부만 선택되면 체크박스가 혼합 상태로 표시됩니다.
+- 동일한 `personKey`를 가진 다중소속 인물은 어느 소속/검색 결과에서 체크해도 같은 선택 상태를 공유하고 vCard에는 한 번만 저장됩니다.
+- 연락처 저장 화면의 행 높이를 줄여 모바일에서 더 많은 항목을 한눈에 볼 수 있게 했습니다.
+- 잠금 해제 시점부터 10분이 지나면 활동 여부와 관계없이 자동으로 잠기며, 모바일 브라우저가 백그라운드에서 타이머를 늦춰도 화면 복귀 시 만료 여부를 다시 확인합니다.
+- 시작 화면에 사용자 친화적인 보안 안내를 추가하고, 연결된 데이터의 기준일을 더 잘 보이게 표시합니다.
+- `⋯ → 정보`는 사용자에게 필요한 보호 원칙만 간단히 보여주고 암호화/저장 방식의 기술 세부사항은 GitHub 문서에서 확인하도록 정리했습니다.
+- 공개 최신 데이터 확인 기능과 `data-status.json` 의존성을 제거했습니다. 기준일은 연결된 `.dials` 데이터 자체의 `dataVersion`을 표시합니다.
+
+## v0.3.2 모바일 IME · 메뉴 사용성 · 정보 화면
+
+- 모바일 한글 입력에서 첫 자모 뒤 다음 자모를 입력할 때 조합이 끊길 수 있던 문제를 다시 수정했습니다.
+- 검색 중에는 History/스크롤 상태를 계속 갱신하지 않고, 검색 입력 자체는 브라우저/키보드에 맡긴 뒤 짧은 debounce 후 결과만 갱신합니다.
+- 메인 검색과 `연락처 저장` 검색에 같은 IME-safe 입력 방식을 적용했습니다.
+- 상단 `⋯`의 실제 터치 영역을 48×48px로 넓히고 메뉴 항목도 최소 48px 높이로 보강했습니다.
+- `⋯ → 정보`를 추가해 Dials 설명, 개인정보 보호 및 보안 방식, 현재 버전, GitHub 링크를 확인할 수 있습니다.
+- 정보 화면은 일반 사용자가 필요한 보호 원칙만 설명하고, AES/PBKDF2 같은 기술 세부사항은 이 README와 데이터 형식 문서에 유지합니다.
+- v0.3.0의 뒤로가기/History, 스크롤 복원, 접근성, Light/Dark/Black(OLED), v0.2.0의 외부번호 표시는 그대로 유지합니다.
+
+## v0.3.1 한글·IME 검색 입력 수정
+
+- 한글, 일본어, 중국어처럼 IME 조합 입력이 필요한 검색에서는 조합 중간 상태로 검색 결과를 다시 렌더링하지 않습니다.
+- `compositionend`에서 글자가 확정된 뒤 검색/History를 한 번만 갱신하여 첫 글자가 사라지거나 조합이 끊기는 문제를 수정했습니다.
+- 영문·숫자 검색은 기존처럼 즉시 반영됩니다.
+- v0.3.0의 뒤로가기, 검색 History, 스크롤 복원, OLED 테마 동작은 그대로 유지합니다.
+
+## v0.3.0 웹 내비게이션 · 접근성 · OLED
+
+- 브라우저/Android 시스템 **뒤로가기**가 Dials 내부의 `홈 → 분류 → 소속` 이동과 자연스럽게 연결됩니다.
+- 검색 진입은 History에 한 번만 기록되며, 뒤로가기를 누르면 검색 이전 화면과 스크롤 위치로 돌아갑니다.
+- `연락처 저장`도 History에 연결되어 브라우저/시스템 뒤로가기로 전화번호부에 복귀합니다.
+- 목록으로 돌아왔을 때 이전 스크롤 위치를 복원합니다.
+- 모달은 Tab 포커스를 내부에 유지하고 닫을 때 원래 조작하던 컨트롤로 포커스를 돌려줍니다.
+- `⋯`는 ARIA menu 역할을 억지로 선언하지 않고 일반 popover 버튼 목록으로 정리했습니다.
+- 화면 모드는 실제 radio group이며 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 제공합니다.
+- 라이트/다크/블랙은 공통 House Palette 기준으로 정리했습니다.
+- `내선번호`라는 익숙한 전화번호부 용어는 유지합니다. 외부번호도 같은 번호 자리에서 `(외부번호)`만 덧붙여 표시합니다.
+
+## v0.2.0 외부번호 표시
+
+HJU Phonebook의 `번호 기반`에서 `내선 연결 가능`을 끈 번호는 Dials에서 전체 번호를 그대로 유지하면서 뒤에 **`(외부번호)`**를 표시합니다. 이 표시는 번호의 성격을 알려주는 정보이며 전화 링크 자체는 전체 번호를 그대로 사용합니다.
+
+기존 schema 1.1 데이터에는 이 필드가 없으므로 일반 내선번호와 동일하게 표시됩니다.
 
 ## iPhone / iPad 데이터 파일 선택
 
@@ -52,13 +141,20 @@ Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` �
 
 ## 화면 모드와 바로가기
 
-상단 `⋯` 메뉴의 **화면 모드**에서 `시스템 / 라이트 / 다크`를 선택할 수 있습니다. 기본값은 시스템이며, 사용자가 직접 선택한 모드는 현재 브라우저에 기억됩니다. 라이트 모드는 고급스러운 베이지 계열을 기본으로 하며 외부 이미지 파일 없이 생성한 매우 은은한 종이 질감을 사용합니다.
+상단 `⋯` 메뉴의 **화면 모드**에서 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 선택할 수 있습니다. 기본값은 시스템이며, 사용자가 직접 선택한 모드는 현재 브라우저에 기억됩니다.
+
+- 라이트: House Palette의 warm-neutral 기준 (`#F6F1E8` 배경)
+- 다크: developer-neutral 기준 (`#0D1117` 배경)
+- 블랙(OLED): 넓은 배경과 surface를 `#000000`으로 유지하여 OLED 발광 면적을 줄이는 모드
+- Accent: 웹 fallback `#3478F6`
+
+화면 모드 선택은 실제 radio group을 사용합니다.
 
 `⋯ → 바로가기 추가`는 설치를 직접 지원하는 브라우저에서는 PWA 설치 안내를 사용합니다. iPhone/iPad에서는 웹페이지가 홈 화면 추가 창을 직접 실행할 수 없기 때문에 **Safari 공유 → 홈 화면에 추가** 순서를 화면에서 안내합니다.
 
 ## Windows 프로그램과의 관계
 
-Dials v0.1.2는 **HJU Phonebook V0.8.1 build38**에서 생성한 `.dials` 파일을 기준으로 제작되었습니다.
+Dials v0.5.1는 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
 
 현재 규격은 다음과 같습니다.
 
@@ -67,7 +163,8 @@ Dials v0.1.2는 **HJU Phonebook V0.8.1 build38**에서 생성한 `.dials` 파일
 - 포맷 버전: `1`
 - 암호 키 파생: PBKDF2-HMAC-SHA256, 310,000회
 - 암호화: AES-256-GCM
-- payload 스키마: `1.1`
+- payload 스키마: `1.2` (`1.1`도 읽기 호환)
+- 외부번호 표시: `externalNumber: true`이면 전체 번호 뒤에 `(외부번호)` 표시
 - 동일인 식별: 실제 DB ID가 아닌 비표시 `personKey`
 - 소속 및 인물 순서: Windows의 시트1 출력순서
 
@@ -93,21 +190,11 @@ Dials는 Windows 관리용 SQLite DB를 직접 읽지 않습니다. 관리 프�
 
 실제 운영 `.dials` 파일은 **공개 GitHub 저장소에 올리지 않습니다.** 기관 내부 게시판 등 기존 비공개 배포 경로를 통해 별도로 전달합니다.
 
-새 데이터를 배포한 뒤 GitHub에는 `data-status.json`의 날짜만 갱신하면 됩니다.
-
-```json
-{
-  "schemaVersion": 1,
-  "latestDataVersion": "2026-09-13",
-  "message": "새 전화번호부 데이터가 배포되었습니다."
-}
-```
-
-현재 연결한 데이터보다 최신 날짜가 등록되어 있으면 Dials 상단의 `⋯` 옆에 작은 노란 `!`가 나타납니다. 느낌표를 누르면 현재 기준일과 최신 기준일을 비교해서 보여주고 새 데이터 연결 방법을 안내합니다.
+Dials는 공개 서버에서 최신 버전 여부를 별도로 조회하지 않습니다. 사용자는 연결 화면과 전화번호부 데이터 정보에서 `.dials` 파일 자체에 포함된 **기준일(`dataVersion`)**을 확인할 수 있습니다. 새 전화번호부가 배포되면 `⋯ → 새 데이터 불러오기`로 교체합니다.
 
 ## 연락처 저장
 
-`⋯ → 연락처 저장`에서 필요한 사람을 하나 또는 여러 명 선택할 수 있습니다.
+`⋯ → 연락처 저장`에서는 `행정부서 / 학과 / 기타시설`부터 시작해 필요한 소속만 단계적으로 펼쳐 사람을 선택할 수 있습니다. 펼침/접힘은 왼쪽, 선택 체크박스는 오른쪽으로 분리되어 있으며, 주요 소속/하위 소속 전체 선택과 일부 선택(혼합 상태)을 지원합니다. 여러 소속에 함께 등장하는 동일 인물의 체크 상태는 서로 동기화됩니다. **다중소속 인물은 vCard에 중복 저장되지 않습니다.**
 
 저장 항목은 다음 중 선택합니다.
 
@@ -136,7 +223,10 @@ Dials
 - 데이터 암호는 저장하지 않습니다.
 - 복호화된 전화번호부는 브라우저 영구 저장소에 저장하지 않습니다.
 - `잠금`을 누르면 페이지를 다시 불러와 현재 페이지 메모리에 있는 복호화 데이터를 내려놓습니다.
-- `data-status.json`에는 최신 기준일 같은 공개 가능한 메타데이터만 포함하고 실제 연락처는 포함하지 않습니다.
+- 잠금 해제 후 10분이 지나면 자동으로 같은 잠금 상태로 돌아가며, 복호화 데이터와 선택/검색 상태가 함께 내려갑니다.
+- CSP는 페이지가 필요로 하지 않는 외부 스크립트·외부 통신·프레임/플러그인 경로를 제한합니다. GitHub Pages의 정적 배포 특성상 문서의 `<meta http-equiv="Content-Security-Policy">`로 적용합니다.
+- 암호 실패 지연 기록은 암호화 패키지의 SHA-256 지문별로 **현재 브라우저의 IndexedDB에만** 저장됩니다. 파일명을 바꾸거나 같은 브라우저를 다시 열어도 이어지지만, 다른 브라우저/기기에는 공유되지 않습니다.
+- 브라우저 간 실패 기록 공유는 중앙 서버가 필요해 로컬 우선 설계와 충돌하므로 의도적으로 적용하지 않습니다. 이 제한은 Dials 화면에서의 반복 입력을 늦추는 보조장치이며 오프라인 공격 방어를 대신하지 않습니다.
 
 ---
 
@@ -161,25 +251,108 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Responsive viewer for iPhone, iPad, Android, Windows, and macOS browsers
 - Final Dials icon applied consistently to the web header, PWA, and iPhone Home Screen icon
 - Fixed iOS file-picker compatibility for custom `.dials` files
-- System/light/dark appearance selector, with system mode as the default
-- Warm parchment-inspired beige light theme with a subtle paper texture
+- System/light/dark/Black(OLED) appearance selector, with system mode as the default
+- House Palette themes: warm-neutral Light, developer-neutral Dark, and true-black OLED
+- `⋯ → 정보` About/privacy view with current version and GitHub link
 - `⋯ → Add shortcut` flow using the browser install prompt when available, with iPhone/iPad home-screen instructions as fallback
 - Local encrypted `.dials` import and IndexedDB reuse
 - Password never stored by Dials
+- The same encrypted `.dials` package is identified by a SHA-256 fingerprint even if its filename changes, so unlock-failure count and retry delay persist within the current browser
+- Retry backoff begins after the fourth failed password attempt: 10 seconds → 30 seconds → 1 minute → 5 minutes → up to 15 minutes
+- A restrictive Content Security Policy (CSP) limits external scripts, external connections, frames/plugins, and other unused execution paths
 - Decrypted contact data kept only in the active page memory
+- Fixed 10-minute auto-lock measured from unlock time, with expiry rechecked when returning from the background
 - Unified multi-keyword AND search
 - Organization browsing in the exact order supplied by the Windows exporter
 - Search results grouped by `personKey`, so one person with multiple affiliations appears once
 - Same-name people remain separate when their `personKey` differs
 - Tap-to-call phone numbers
+- Numbers marked as non-extension-callable by HJU Phonebook are shown with **`(외부번호)`** while keeping the full number callable
+- Contact export uses an expandable category → major organization → child organization → person disclosure tree
+- Organization-wide selection with mixed/partial checkbox state
+- Multi-affiliation people share one `personKey` selection and are exported only once
 - Dedicated multi-select vCard (`.vcf`) contact-export screen
 - Selectable vCard fields: mobile, extension, affiliation, title/role
 - Optional contact-name prefix such as `혜)`
 - Data version date always written into every exported vCard note
-- Public `data-status.json` check for a newer distributed data version
-- Small non-blocking yellow update indicator when newer contact data exists
 - Offline app-shell support after the first successful visit
 - No analytics, ads, external APIs, CDNs, or remote contact-data upload
+
+## v0.5.1 unified disclosure tree for browsing
+
+- The main browse screen now uses the same progressive disclosure hierarchy as contact export.
+- It starts with only the top-level categories collapsed, then expands category → major organization → child organization as needed.
+- People directly attached to a major organization appear before its child departments at the same hierarchy level; expanding a child department reveals its contacts.
+- The browse screen has no selection checkboxes; it shares only the organization hierarchy and ordering with contact export.
+- The redundant `소속별 조회` heading was removed and the helper copy is now `소속을 선택하거나 검색창에서 바로 찾아보세요.`
+- Existing search, phone links, external-number labels, History/Back, and IME-safe input behavior remain unchanged.
+
+## v0.5.0 security hardening, password backoff, and start-screen cleanup
+
+- Added a restrictive Content Security Policy (CSP). The page permits only the same-origin scripts/styles/PWA resources it needs, allows the existing embedded data-image texture, and blocks page-level fetch/XHR/WebSocket connections with `connect-src 'none'`.
+- Moved the early theme initializer from inline JavaScript to `theme-init.js`, allowing `script-src 'self'` without `unsafe-inline`.
+- Dials now fingerprints the encrypted package fields with SHA-256. Renaming the same `.dials` file does not reset its browser-local unlock-failure state. The fingerprint does not contain the plaintext directory or the password.
+- Attempts 1–2 can retry immediately. The third failure warns that the next failure will trigger a 10-second delay. From the fourth failure onward the backoff is 10 seconds → 30 seconds → 1 minute → 5 minutes → 15 minutes. A successful unlock clears the fingerprint's failure state.
+- Browser-to-browser/device-to-device failure sharing was considered and intentionally not implemented: it would require a central shared service and conflict with Dials' local-first/no-contact-upload model. The UI delay is only an auxiliary local control; the encrypted file, KDF, and password strength remain the protection against offline guessing.
+- The start-screen tagline was moved out of the header into a quiet footer together with the live app version. The three usage steps were shortened accordingly.
+
+## v0.4.2 contact-export disclosure tree and selection grammar
+
+- Contact export now uses one expandable disclosure tree instead of repeatedly navigating into separate category/organization pages.
+- The initial state shows only top-level categories, all collapsed. Expanding a category shows major organizations; expanding a major organization shows direct major-level people first and child departments at the same depth; expanding a child department shows its people.
+- Familiar interaction grammar is restored: disclosure/navigation is on the left, while selection checkboxes are isolated on the right. Expanding never changes selection and checking never expands a row.
+- Major-organization and child-organization checkboxes select the unique people in their subtree and show the native mixed state for partial selection. Multi-affiliation people continue to share one `personKey` selection.
+- The normal viewer no longer displays the implementation-oriented Sheet1-order explanation, while still preserving source order internally.
+- Search results use the same right-side selection grammar.
+- Successful unlock starts soft-keyboard/visual-viewport settling before directory preparation/rendering to further protect the first overflow-menu tap on mobile.
+
+## v0.4.1 mobile first tap, safe replacement, overflow, and contact hierarchy
+
+- Unlock now explicitly releases password focus and allows a likely mobile keyboard/visual-viewport transition to settle before the main viewer is shown, targeting the first-tap overflow-menu issue observed on iPhone. Real-device validation remains necessary.
+- `⋯ → 새 데이터 불러오기` returns to the initial data-connection screen. A new encrypted package replaces the stored package only after successful decryption, preserving the last known-good package if selection is cancelled or validation fails.
+- Root scrolling/overscroll is suppressed only when the current page is shorter than the viewport; long pages continue to scroll normally.
+- In contact-export hierarchy browsing, people assigned directly to a major organization are expanded inline beside child department rows when both exist, preserving source order and the shared `personKey` selection model.
+
+## v0.4.0 contact export navigation, auto-lock, and clearer privacy UI
+
+- Contact export now follows the same category → organization → person hierarchy as the main viewer instead of showing one very long list.
+- Organization-level checkboxes select all people in that organization and show a mixed state when only some are selected.
+- The same `personKey` shares selection across multiple affiliations and search results, and each person is written to the VCF only once.
+- Contact-selection rows are more compact on mobile.
+- Dials auto-locks 10 minutes after unlock, regardless of interaction; the expiry is rechecked when a suspended mobile browser returns to the foreground.
+- The start screen has a clearer privacy/security notice and emphasizes the connected data date.
+- About now presents user-facing privacy facts, while detailed encryption/storage information remains in the GitHub documentation.
+- The public latest-data check and `data-status.json` dependency were removed; the viewer displays the `dataVersion` embedded in the connected `.dials` file.
+
+## v0.3.2 mobile IME, touch targets, and About
+
+- Search input is no longer coupled to repeated History updates while the mobile IME is composing. The browser owns the text field, while Dials debounces result rendering.
+- The same IME-safe search behavior is used in the main viewer and Contact export.
+- The top `⋯` control now has a 48×48px touch target, and overflow actions use at least 48px row heights.
+- `⋯ → 정보` adds an About/privacy view with the current version and a GitHub link.
+- The in-app privacy explanation stays user-facing; encryption algorithm details remain documented here and in `docs/DIALS_DATA_FORMAT.md`.
+- Back/History, scroll restoration, accessibility, House Palette themes, OLED Black, and external-number behavior remain unchanged.
+
+## v0.3.1 IME search input fix
+
+- Search no longer rerenders while Korean, Japanese, Chinese, or other IME text is still being composed.
+- The query and browser History are committed after `compositionend`, preventing the first composed character from disappearing or composition from being interrupted.
+- Latin letters and numeric input still update immediately.
+- v0.3.0 Back navigation, search History, scroll restoration, and OLED theme behavior remain unchanged.
+
+## v0.3.0 navigation, accessibility, and OLED
+
+- Browser/Android system Back now follows Dials internal navigation.
+- Search adds only one history entry per search session; Back restores the previous view and scroll position.
+- Contact export participates in browser history.
+- Dialogs trap keyboard focus and restore it to the control that opened the dialog.
+- The overflow list uses ordinary buttons instead of incomplete ARIA menu semantics.
+- Appearance uses a real radio group and adds a true-black OLED mode alongside System/Light/Dark.
+- Light/Dark/Black palettes now follow the shared House Palette.
+
+## v0.2.0 external-number display
+
+When HJU Phonebook marks a number as not reachable through the internal extension system, Dials keeps the full number callable and appends **`(외부번호)`** to its display. Schema 1.1 files without this field continue to behave as ordinary extension-callable numbers.
 
 ## iPhone / iPad data-file selection
 
@@ -189,13 +362,13 @@ This lets iPhone/iPad users select a distributed `.dials` file directly from Fil
 
 ## Appearance and shortcut
 
-The overflow menu includes **Add shortcut** and **Appearance**. Appearance can follow the system setting or be fixed to light/dark mode. The light palette uses a warm beige, parchment-inspired background with a very subtle generated paper texture and no external image resource.
+The overflow menu includes **Add shortcut** and **Appearance**. Appearance can follow the system setting or be fixed to Light, Dark, or Black (OLED). The themes follow the shared House Palette: warm-neutral Light, developer-neutral Dark, and true-black large surfaces for Black/OLED.
 
 For installation, Dials uses the browser/PWA installation prompt when the platform exposes it. On iPhone/iPad, where a web page cannot directly trigger Home Screen installation, Dials shows the standard **Share → Add to Home Screen** instructions.
 
 ## Windows exporter compatibility
 
-Dials v0.1.2 is designed for `.dials` files generated by **HJU Phonebook V0.8.1 build38**.
+Dials v0.5.1 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
 
 Current format:
 
@@ -204,7 +377,8 @@ Current format:
 - `formatVersion`: `1`
 - KDF: PBKDF2-HMAC-SHA256, 310,000 iterations
 - Cipher: AES-256-GCM
-- Payload `schemaVersion`: `1.1`
+- Payload `schemaVersion`: `1.2` (reader remains compatible with `1.1`)
+- External-number marker: `externalNumber: true` adds `(외부번호)` to the displayed full number
 - Person identity: opaque `personKey`
 - Organization and person order: Windows Sheet1 output order
 
@@ -230,17 +404,11 @@ All app asset paths are relative, so the app works from the `/Dials/` project pa
 
 Actual `.dials` files must **not** be uploaded to this public repository. Distribute them through the organization's private/internal channel.
 
-After distributing a newer data file, update only `data-status.json`:
+Dials does not query a public service to decide whether a newer directory exists. The connection screen and data-info view display the **`dataVersion` embedded in the connected `.dials` file**. When a newer file is distributed, users replace it through the app's data-replacement action.
 
-```json
-{
-  "schemaVersion": 1,
-  "latestDataVersion": "2026-09-13",
-  "message": "새 전화번호부 데이터가 배포되었습니다."
-}
-```
+## Contact export
 
-When the connected file has an older `dataVersion`, Dials shows a small yellow `!` next to the overflow menu. The warning never blocks access to the currently connected data.
+Contact export mirrors the main category → organization → person hierarchy. Organization-wide selection is supported, selection follows the shared `personKey` across multiple affiliations and search results, and one person is written to the generated VCF only once. The existing field-selection and optional name-prefix controls remain available.
 
 ## Privacy and security model
 
@@ -250,7 +418,10 @@ When the connected file has an older `dataVersion`, Dials shows a small yellow `
 - The password is not saved.
 - The decrypted payload is not written to persistent browser storage.
 - Locking Dials reloads the page, releasing the decrypted payload from the active page state.
-- `data-status.json` contains only public update metadata and no contact records.
+- Dials automatically locks 10 minutes after unlock and rechecks expiry when a mobile browser returns from the background.
+- CSP restricts unneeded external scripts, page-level external network connections, frames/plugins, and other unused resource paths. On GitHub Pages it is applied with a document `<meta http-equiv="Content-Security-Policy">`.
+- Password-failure state is stored only in the current browser's IndexedDB, keyed by a SHA-256 fingerprint of the encrypted package. Renaming the file or reopening the same browser does not reset it; another browser/device has separate storage.
+- Cross-browser sharing of failure state is intentionally not implemented because it would require a central service and conflict with the local-first design. The delay is an auxiliary UI control, not a replacement for file encryption/KDF/password strength.
 
 ## Repository description
 

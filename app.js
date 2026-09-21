@@ -1,15 +1,20 @@
 "use strict";
 
-const APP_VERSION = "0.1.1";
+const APP_VERSION = "0.5.1";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
 const DATA_RECORD_KEY = "encryptedData";
 const SAFE_META_KEY = "safeMeta";
-const LATEST_STATUS_STORAGE_KEY = "dialsLatestStatus";
 const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
 const THEME_STORAGE_KEY = "dialsThemePreference";
+const HISTORY_STATE_KEY = "dialsRoute";
+const AUTO_LOCK_MS = 10 * 60 * 1000;
+const AUTO_LOCK_NOTICE_KEY = "dialsAutoLockNotice";
+const UNLOCK_FAILURE_KEY_PREFIX = "unlockFailure:";
+const UNLOCK_BACKOFF_SECONDS = new Map([[4, 10], [5, 30], [6, 60], [7, 300]]);
+const UNLOCK_BACKOFF_MAX_SECONDS = 900;
 
 const state = {
   encryptedText: "",
@@ -20,11 +25,29 @@ const state = {
   categories: [],
   currentView: { type: "home" },
   searchQuery: "",
-  latestStatus: null,
+  searchComposing: false,
+  contactSearchComposing: false,
+  globalSearchDebounceTimer: null,
+  contactSearchDebounceTimer: null,
   selectedPeople: new Set(),
   contactFilter: "",
+  contactView: { type: "home" },
+  contactDepth: 0,
+  contactExpanded: new Set(),
+  browseExpanded: new Set(),
   deferredInstallPrompt: null,
   themePreference: "system",
+  modalReturnFocus: null,
+  scrollSaveTimer: null,
+  unlockStartedAt: 0,
+  autoLockTimer: null,
+  connectionNeedsCommit: false,
+  pageOverflowFrame: null,
+  packageFingerprint: "",
+  unlockFailureCount: 0,
+  unlockDelayUntil: 0,
+  unlockDelayTimer: null,
+  unlockInProgress: false,
 };
 
 const el = {};
@@ -33,10 +56,11 @@ window.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   cacheElements();
+  el.startVersion.textContent = `v${APP_VERSION}`;
   bindEvents();
   registerServiceWorker();
   initializeTheme();
-  await loadLatestStatus();
+  try { localStorage.removeItem("dialsLatestStatus"); } catch {}
 
   if (!window.crypto?.subtle || !window.indexedDB) {
     showStartState("unsupported");
@@ -49,9 +73,13 @@ async function init() {
     if (saved?.text) {
       state.encryptedText = saved.text;
       state.encryptedPackage = parseAndValidateEncryptedPackage(saved.text);
+      state.packageFingerprint = await fingerprintEncryptedPackage(state.encryptedPackage);
+      await restoreUnlockFailureState();
       state.safeMeta = meta || null;
+      state.connectionNeedsCommit = false;
       showStartState("locked");
       updateStartMeta();
+      showAutoLockNoticeIfNeeded();
     } else {
       showStartState("empty");
     }
@@ -68,13 +96,13 @@ function cacheElements() {
     "noDataActions", "lockedDataActions", "connectDataButton", "replaceDataStartButton",
     "dataFileInput", "unlockForm", "passwordInput", "unlockButton", "unlockMessage",
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
-    "updateIndicator", "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
+    "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
-    "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactPeopleList",
+    "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "includeAffiliationOption", "includeJobOption",
     "prefixEnabledOption", "namePrefixInput", "prefixPreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
-    "themeMenuButton", "themeColorMeta",
+    "themeMenuButton", "themeColorMeta", "startVersion",
   ].forEach((id) => { el[id] = document.getElementById(id); });
 }
 
@@ -86,6 +114,16 @@ function bindEvents() {
   window.addEventListener("appinstalled", () => {
     state.deferredInstallPrompt = null;
   });
+  window.addEventListener("popstate", handleHistoryNavigation);
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.addEventListener("scroll", scheduleHistoryScrollSave, { passive: true });
+  window.addEventListener("focus", checkAutoLock);
+  window.addEventListener("pageshow", checkAutoLock);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkAutoLock();
+  });
+  window.addEventListener("resize", schedulePageOverflowSync, { passive: true });
+  window.visualViewport?.addEventListener?.("resize", schedulePageOverflowSync, { passive: true });
 
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
@@ -93,24 +131,26 @@ function bindEvents() {
   el.unlockForm.addEventListener("submit", handleUnlock);
 
   el.homeBrandButton.addEventListener("click", () => {
-    state.searchQuery = "";
-    el.globalSearchInput.value = "";
-    state.currentView = { type: "home" };
-    renderContent();
+    navigateToView({ type: "home" });
   });
 
-  el.globalSearchInput.addEventListener("input", () => {
-    state.searchQuery = el.globalSearchInput.value.trim();
-    el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
-    renderContent();
+  el.globalSearchInput.addEventListener("focus", prepareGlobalSearchHistory);
+  el.globalSearchInput.addEventListener("compositionstart", () => {
+    state.searchComposing = true;
+    cancelGlobalSearchCommit();
   });
-  el.clearSearchButton.addEventListener("click", () => {
-    el.globalSearchInput.value = "";
-    state.searchQuery = "";
-    el.globalSearchInput.focus();
-    el.clearSearchButton.classList.add("hidden");
-    renderContent();
+  el.globalSearchInput.addEventListener("compositionend", () => {
+    state.searchComposing = false;
+    scheduleGlobalSearchCommit(120);
   });
+  el.globalSearchInput.addEventListener("input", (event) => {
+    if (state.searchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
+    scheduleGlobalSearchCommit();
+  });
+  el.globalSearchInput.addEventListener("blur", () => {
+    window.setTimeout(syncGlobalSearchHistoryState, 0);
+  });
+  el.clearSearchButton.addEventListener("click", clearGlobalSearch);
 
   el.menuButton.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -125,22 +165,31 @@ function bindEvents() {
     if (!el.overflowMenu.contains(event.target) && event.target !== el.menuButton) closeOverflowMenu();
   });
   el.overflowMenu.addEventListener("click", handleMenuAction);
-  el.updateIndicator.addEventListener("click", showUpdateNotice);
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
     if (state.themePreference === "system") updateThemeMetaColor();
   });
 
   el.contactBackButton.addEventListener("click", leaveContactExport);
-  el.contactSearchInput.addEventListener("input", () => {
-    state.contactFilter = el.contactSearchInput.value.trim();
-    renderContactPeople();
+  el.contactSearchInput.addEventListener("compositionstart", () => {
+    state.contactSearchComposing = true;
+    cancelContactSearchCommit();
+  });
+  el.contactSearchInput.addEventListener("compositionend", () => {
+    state.contactSearchComposing = false;
+    scheduleContactSearchCommit(120);
+  });
+  el.contactSearchInput.addEventListener("input", (event) => {
+    if (state.contactSearchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
+    scheduleContactSearchCommit();
   });
   el.selectFilteredButton.addEventListener("click", selectFilteredPeople);
   el.clearSelectionButton.addEventListener("click", () => {
     state.selectedPeople.clear();
-    renderContactPeople();
+    syncContactSelectionUI();
   });
-  el.contactPeopleList.addEventListener("change", handleContactSelectionChange);
+  el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
+  el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
+  el.contentView.addEventListener("click", handleBrowseTreeClick);
   el.prefixEnabledOption.addEventListener("change", updatePrefixControls);
   el.namePrefixInput.addEventListener("input", updatePrefixControls);
   el.createVcardButton.addEventListener("click", createVcardFile);
@@ -153,6 +202,10 @@ function bindEvents() {
     if (event.key === "Escape") {
       closeOverflowMenu();
       closeModal();
+      return;
+    }
+    if (event.key === "Tab" && !el.modalBackdrop.classList.contains("hidden")) {
+      trapModalFocus(event);
     }
   });
 }
@@ -171,13 +224,15 @@ function showStartState(mode) {
     setBadge("지원 안 됨", "warning");
   } else if (mode === "locked") {
     el.connectStateText.textContent = "데이터가 연결되어 있습니다. 암호를 입력해 전화번호부를 여세요.";
-    setBadge("연결됨", hasNewerData(state.safeMeta?.dataVersion) ? "warning" : "connected");
+    setBadge("연결됨", "connected");
     el.passwordInput.value = "";
-    window.setTimeout(() => el.passwordInput.focus(), 20);
+    syncUnlockDelayUI();
+    if (!isUnlockDelayed()) window.setTimeout(() => el.passwordInput.focus(), 20);
   } else {
     el.connectStateText.textContent = "배포받은 Dials 데이터 파일을 연결해 주세요.";
     setBadge("미연결", "neutral");
   }
+  schedulePageOverflowSync();
 }
 
 function setBadge(text, type) {
@@ -188,10 +243,18 @@ function setBadge(text, type) {
 function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
-  const parts = [];
-  if (state.safeMeta?.dataVersion) parts.push(`${formatDate(state.safeMeta.dataVersion)} 기준`);
-  if (hasNewerData(state.safeMeta?.dataVersion)) parts.push("새 데이터 있음");
-  el.connectedMetaText.textContent = parts.join(" · ");
+  const dataVersion = String(state.safeMeta?.dataVersion || "");
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준` : "암호 입력 후 기준일을 확인할 수 있습니다.";
+  el.connectedMetaText.classList.toggle("placeholder", !dataVersion);
+}
+
+function showAutoLockNoticeIfNeeded() {
+  if (isUnlockDelayed()) return;
+  try {
+    if (sessionStorage.getItem(AUTO_LOCK_NOTICE_KEY) !== "1") return;
+    sessionStorage.removeItem(AUTO_LOCK_NOTICE_KEY);
+    setUnlockMessage("개인정보 보호를 위해 10분이 지나 자동으로 잠겼습니다.", false);
+  } catch {}
 }
 
 function openFilePicker() {
@@ -205,15 +268,17 @@ async function handleDataFileSelection() {
   try {
     const text = await readFileAsText(file);
     const packageData = parseAndValidateEncryptedPackage(text);
+    // 새 파일은 암호 확인이 끝날 때까지 메모리에만 보관합니다.
+    // 기존에 저장된 암호화 파일은 새 파일이 정상적으로 열린 뒤에만 교체됩니다.
     state.encryptedText = text;
     state.encryptedPackage = packageData;
+    state.packageFingerprint = await fingerprintEncryptedPackage(packageData);
+    await restoreUnlockFailureState();
     state.safeMeta = { fileName: file.name, dataVersion: "", generatedAt: "", title: "" };
-    await dbSet(DATA_RECORD_KEY, { text });
-    await dbSet(SAFE_META_KEY, state.safeMeta);
-    requestPersistentStorage();
+    state.connectionNeedsCommit = true;
     showStartState("locked");
     updateStartMeta();
-    setUnlockMessage("데이터가 연결되었습니다. 암호를 입력해 주세요.", false, true);
+    if (!isUnlockDelayed()) setUnlockMessage("데이터를 선택했습니다. 암호를 입력해 확인해 주세요.", false, true);
   } catch (error) {
     console.error(error);
     showModal({
@@ -222,6 +287,93 @@ async function handleDataFileSelection() {
       actions: [{ label: "확인", primary: true, onClick: closeModal }],
     });
   }
+}
+
+function beginDataReplacement() {
+  clearAutoLockTimer();
+  cancelGlobalSearchCommit();
+  cancelContactSearchCommit();
+  closeOverflowMenu();
+  closeModal();
+  document.activeElement instanceof HTMLElement && document.activeElement.blur();
+  state.payload = null;
+  state.people = [];
+  state.categories = [];
+  state.selectedPeople.clear();
+  state.searchQuery = "";
+  state.contactFilter = "";
+  state.currentView = { type: "home" };
+  state.contactView = { type: "home" };
+  state.contactDepth = 0;
+  state.contactExpanded.clear();
+  state.browseExpanded.clear();
+  state.unlockStartedAt = 0;
+  state.encryptedText = "";
+  state.encryptedPackage = null;
+  state.safeMeta = null;
+  state.connectionNeedsCommit = false;
+  state.packageFingerprint = "";
+  state.unlockFailureCount = 0;
+  state.unlockDelayUntil = 0;
+  clearUnlockDelayTimer();
+  state.unlockInProgress = false;
+  el.passwordInput.value = "";
+  setUnlockMessage("", false);
+  showStartState("empty");
+  history.replaceState(null, "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+  schedulePageOverflowSync();
+}
+
+async function settleAfterPasswordInput() {
+  const viewport = window.visualViewport;
+  const beforeHeight = viewport?.height || 0;
+  const keyboardWasLikelyOpen = Boolean(viewport && window.innerHeight - beforeHeight > 80);
+  el.passwordInput.blur();
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  await nextAnimationFrame();
+  await nextAnimationFrame();
+  if (!keyboardWasLikelyOpen || !viewport) return;
+  if (viewport.height >= window.innerHeight - 40) return;
+  await new Promise((resolve) => {
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      viewport.removeEventListener("resize", onResize);
+      window.clearTimeout(timeout);
+      resolve();
+    };
+    const onResize = () => {
+      if (viewport.height >= beforeHeight + 40 || viewport.height >= window.innerHeight - 40) finish();
+    };
+    const timeout = window.setTimeout(finish, 360);
+    viewport.addEventListener("resize", onResize, { passive: true });
+  });
+  await nextAnimationFrame();
+}
+
+function nextAnimationFrame() {
+  return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+function schedulePageOverflowSync() {
+  if (state.pageOverflowFrame) window.cancelAnimationFrame(state.pageOverflowFrame);
+  state.pageOverflowFrame = window.requestAnimationFrame(() => {
+    state.pageOverflowFrame = null;
+    syncPageOverflow();
+  });
+}
+
+function syncPageOverflow() {
+  document.documentElement.classList.remove("no-page-scroll");
+  document.body.classList.remove("no-page-scroll");
+  const viewportHeight = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight;
+  const contentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+  const needsScroll = contentHeight > viewportHeight + 2;
+  document.documentElement.classList.toggle("no-page-scroll", !needsScroll);
+  document.body.classList.toggle("no-page-scroll", !needsScroll);
+  if (!needsScroll && window.scrollY) window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function readFileAsText(file) {
@@ -244,19 +396,173 @@ function parseAndValidateEncryptedPackage(text) {
   return data;
 }
 
+async function fingerprintEncryptedPackage(packageData) {
+  const canonical = JSON.stringify([
+    String(packageData.format || ""),
+    Number(packageData.formatVersion || 0),
+    String(packageData.kdf?.name || ""),
+    String(packageData.kdf?.salt || ""),
+    Number(packageData.kdf?.iterations || 0),
+    String(packageData.cipher?.name || ""),
+    String(packageData.cipher?.nonce || ""),
+    String(packageData.cipher?.ciphertext || ""),
+  ]);
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function unlockFailureStorageKey() {
+  return state.packageFingerprint ? `${UNLOCK_FAILURE_KEY_PREFIX}${state.packageFingerprint}` : "";
+}
+
+async function restoreUnlockFailureState() {
+  clearUnlockDelayTimer();
+  state.unlockFailureCount = 0;
+  state.unlockDelayUntil = 0;
+  const key = unlockFailureStorageKey();
+  if (!key) return;
+  try {
+    const saved = await dbGet(key);
+    if (!saved || typeof saved !== "object") return;
+    state.unlockFailureCount = Math.max(0, Number(saved.failures) || 0);
+    state.unlockDelayUntil = Math.max(0, Number(saved.retryAt) || 0);
+    if (state.unlockDelayUntil <= Date.now()) state.unlockDelayUntil = 0;
+  } catch (error) {
+    console.warn("Failed to restore unlock backoff state", error);
+  }
+}
+
+function backoffSecondsForFailure(failureCount) {
+  if (UNLOCK_BACKOFF_SECONDS.has(failureCount)) return UNLOCK_BACKOFF_SECONDS.get(failureCount);
+  return failureCount >= 8 ? UNLOCK_BACKOFF_MAX_SECONDS : 0;
+}
+
+async function registerUnlockFailure() {
+  state.unlockFailureCount += 1;
+  const delaySeconds = backoffSecondsForFailure(state.unlockFailureCount);
+  state.unlockDelayUntil = delaySeconds ? Date.now() + delaySeconds * 1000 : 0;
+  const key = unlockFailureStorageKey();
+  if (key) {
+    try {
+      await dbSet(key, {
+        failures: state.unlockFailureCount,
+        retryAt: state.unlockDelayUntil,
+        updatedAt: Date.now(),
+      });
+    } catch (error) {
+      console.warn("Failed to persist unlock backoff state", error);
+    }
+  }
+  return delaySeconds;
+}
+
+async function clearUnlockFailureState() {
+  const key = unlockFailureStorageKey();
+  state.unlockFailureCount = 0;
+  state.unlockDelayUntil = 0;
+  clearUnlockDelayTimer();
+  if (!key) return;
+  try { await dbDelete(key); } catch (error) { console.warn("Failed to clear unlock backoff state", error); }
+}
+
+function isUnlockDelayed() {
+  return state.unlockDelayUntil > Date.now();
+}
+
+function unlockDelaySecondsRemaining() {
+  return Math.max(0, Math.ceil((state.unlockDelayUntil - Date.now()) / 1000));
+}
+
+function clearUnlockDelayTimer() {
+  if (!state.unlockDelayTimer) return;
+  window.clearTimeout(state.unlockDelayTimer);
+  state.unlockDelayTimer = null;
+}
+
+function scheduleUnlockDelayTick() {
+  clearUnlockDelayTimer();
+  if (!isUnlockDelayed()) return;
+  state.unlockDelayTimer = window.setTimeout(() => {
+    if (isUnlockDelayed()) {
+      syncUnlockDelayUI();
+      scheduleUnlockDelayTick();
+      return;
+    }
+    state.unlockDelayUntil = 0;
+    syncUnlockDelayUI();
+    setUnlockMessage("다시 암호를 입력할 수 있습니다.", false);
+    if (!el.startView.classList.contains("hidden")) el.passwordInput.focus();
+  }, 250);
+}
+
+function syncUnlockDelayUI() {
+  const delayed = isUnlockDelayed();
+  const disabled = delayed || state.unlockInProgress;
+  el.passwordInput.disabled = disabled;
+  el.unlockButton.disabled = disabled;
+  if (delayed) {
+    const seconds = unlockDelaySecondsRemaining();
+    setUnlockMessage(`암호 입력이 여러 번 실패했습니다. ${seconds}초 후 다시 시도할 수 있습니다.`, true);
+    scheduleUnlockDelayTick();
+    return;
+  }
+  clearUnlockDelayTimer();
+  if (!state.unlockInProgress && el.startView && !el.startView.classList.contains("hidden") && state.encryptedPackage) {
+    // Delay expiry only restores input availability. Existing non-delay guidance may be replaced by the next action.
+  }
+}
+
 async function handleUnlock(event) {
   event.preventDefault();
+  if (isUnlockDelayed()) {
+    syncUnlockDelayUI();
+    return;
+  }
   const password = el.passwordInput.value;
   if (!password) {
     setUnlockMessage("데이터 암호를 입력해 주세요.", true);
     return;
   }
 
-  el.unlockButton.disabled = true;
+  state.unlockInProgress = true;
+  syncUnlockDelayUI();
   setUnlockMessage("암호화 데이터를 여는 중입니다…", false);
+
+  let payload;
   try {
-    const payload = await decryptDialsPackage(state.encryptedPackage, password);
+    payload = await decryptDialsPackage(state.encryptedPackage, password);
+  } catch (error) {
+    console.warn("Dials package decryption failed", error);
+    state.unlockInProgress = false;
+    const delaySeconds = await registerUnlockFailure();
+    if (delaySeconds > 0) {
+      syncUnlockDelayUI();
+    } else if (state.unlockFailureCount === 3) {
+      setUnlockMessage("암호가 올바르지 않습니다. 다음 실패 시 10초 후 다시 시도할 수 있습니다.", true);
+      syncUnlockDelayUI();
+    } else {
+      setUnlockMessage("암호가 올바르지 않습니다.", true);
+      syncUnlockDelayUI();
+    }
+    return;
+  }
+
+  try {
     validatePayload(payload);
+  } catch (error) {
+    console.error(error);
+    await clearUnlockFailureState();
+    state.unlockInProgress = false;
+    syncUnlockDelayUI();
+    setUnlockMessage(error.message || "전화번호부 데이터 내용이 올바르지 않습니다.", true);
+    return;
+  }
+
+  try {
+    await clearUnlockFailureState();
+    // 실제 모바일에서는 성공 판정 직후부터 소프트 키보드를 닫기 시작해
+    // 메인 화면의 첫 터치가 키보드/visualViewport 정리에 소비되지 않게 합니다.
+    await settleAfterPasswordInput();
     state.payload = payload;
     prepareDirectoryData(payload);
     state.safeMeta = {
@@ -266,15 +572,22 @@ async function handleUnlock(event) {
       title: String(payload.title || "전화번호부"),
       schemaVersion: String(payload.schemaVersion || ""),
     };
+    if (state.connectionNeedsCommit) {
+      await dbSet(DATA_RECORD_KEY, { text: state.encryptedText });
+      state.connectionNeedsCommit = false;
+      requestPersistentStorage();
+    }
     await dbSet(SAFE_META_KEY, state.safeMeta);
     el.passwordInput.value = "";
     setUnlockMessage("", false);
+    startAutoLockSession();
     enterMainView();
   } catch (error) {
     console.error(error);
-    setUnlockMessage("암호가 올바르지 않거나 데이터 파일이 손상되었습니다.", true);
+    setUnlockMessage("전화번호부를 여는 중 오류가 발생했습니다.", true);
   } finally {
-    el.unlockButton.disabled = false;
+    state.unlockInProgress = false;
+    syncUnlockDelayUI();
   }
 }
 
@@ -325,6 +638,15 @@ function prepareDirectoryData(payload) {
     })),
   }));
 
+  let sourceIndex = 0;
+  for (const category of state.categories) {
+    for (const org of category.organizations) {
+      for (const record of org.people) {
+        record._personKey = derivePersonKey(record, org, sourceIndex);
+        sourceIndex += 1;
+      }
+    }
+  }
   state.people = buildUniquePeople(state.categories);
 }
 
@@ -334,7 +656,7 @@ function buildUniquePeople(categories) {
   for (const category of categories) {
     for (const org of category.organizations) {
       for (const record of org.people) {
-        const personKey = derivePersonKey(record, org, sourceIndex);
+        const personKey = String(record._personKey || derivePersonKey(record, org, sourceIndex));
         if (!peopleMap.has(personKey)) {
           peopleMap.set(personKey, {
             key: personKey,
@@ -354,6 +676,7 @@ function buildUniquePeople(categories) {
           job: String(record.job || formatJob(record.title, record.role)),
           extension: String(record.extension || ""),
           mobile: String(record.mobile || ""),
+          externalNumber: Boolean(record.externalNumber),
         });
         sourceIndex += 1;
       }
@@ -381,46 +704,270 @@ function enterMainView() {
   el.directoryTitle.textContent = String(state.payload?.title || "전화번호부");
   el.dataDateLabel.textContent = state.payload?.dataVersion ? `${formatDate(state.payload.dataVersion)} 기준` : "";
   state.currentView = { type: "home" };
+  state.browseExpanded.clear();
   state.searchQuery = "";
   el.globalSearchInput.value = "";
   el.clearSearchButton.classList.add("hidden");
-  updateUpdateIndicator();
   renderContent();
+  history.replaceState(makeHistoryState({ scrollY: 0 }), "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+  schedulePageOverflowSync();
+}
+
+function makeHistoryState({ screen = "main", view = state.currentView, contactView = state.contactView, contactDepth = state.contactDepth, searchQuery = state.searchQuery, scrollY = window.scrollY, searchSession = false } = {}) {
+  return {
+    [HISTORY_STATE_KEY]: {
+      screen,
+      view: { ...view },
+      contactView: { ...contactView },
+      contactDepth: Number.isFinite(Number(contactDepth)) ? Number(contactDepth) : 0,
+      searchQuery: String(searchQuery || ""),
+      scrollY: Number.isFinite(Number(scrollY)) ? Number(scrollY) : 0,
+      searchSession: Boolean(searchSession),
+    },
+  };
+}
+
+function searchInputIsActive() {
+  return document.activeElement === el.globalSearchInput || state.searchComposing;
+}
+
+function saveCurrentHistoryScroll(force = false) {
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (!route || !state.payload || (!force && searchInputIsActive())) return;
+  history.replaceState(makeHistoryState({
+    screen: route.screen || "main",
+    view: route.view || state.currentView,
+    contactView: route.contactView || state.contactView,
+    contactDepth: route.contactDepth ?? state.contactDepth,
+    searchQuery: route.searchQuery ?? state.searchQuery,
+    scrollY: window.scrollY,
+    searchSession: Boolean(route.searchSession),
+  }), "", window.location.href);
+}
+
+function scheduleHistoryScrollSave() {
+  if (!state.payload || !history.state?.[HISTORY_STATE_KEY] || searchInputIsActive()) return;
+  if (state.scrollSaveTimer) window.clearTimeout(state.scrollSaveTimer);
+  state.scrollSaveTimer = window.setTimeout(() => {
+    state.scrollSaveTimer = null;
+    saveCurrentHistoryScroll();
+  }, 80);
+}
+
+function navigateToView(view) {
+  if (!state.payload) return;
+  saveCurrentHistoryScroll();
+  state.currentView = { ...view };
+  state.searchQuery = "";
+  el.globalSearchInput.value = "";
+  el.clearSearchButton.classList.add("hidden");
+  el.contactExportView.classList.add("hidden");
+  el.mainView.classList.remove("hidden");
+  history.pushState(makeHistoryState({ screen: "main", view: state.currentView, searchQuery: "", scrollY: 0 }), "", window.location.href);
+  renderContent();
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function prepareGlobalSearchHistory() {
+  if (!state.payload) return;
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.screen !== "main" || route.searchSession) return;
+  saveCurrentHistoryScroll(true);
+  history.pushState(makeHistoryState({
+    screen: "main",
+    view: state.currentView,
+    searchQuery: state.searchQuery,
+    scrollY: window.scrollY,
+    searchSession: true,
+  }), "", window.location.href);
+}
+
+function cancelGlobalSearchCommit() {
+  if (!state.globalSearchDebounceTimer) return;
+  window.clearTimeout(state.globalSearchDebounceTimer);
+  state.globalSearchDebounceTimer = null;
+}
+
+function scheduleGlobalSearchCommit(delay = 220) {
+  cancelGlobalSearchCommit();
+  state.globalSearchDebounceTimer = window.setTimeout(() => {
+    state.globalSearchDebounceTimer = null;
+    if (state.searchComposing) return;
+    commitGlobalSearchInput();
+  }, delay);
+}
+
+function commitGlobalSearchInput() {
+  const previous = state.searchQuery;
+  const next = el.globalSearchInput.value.trim();
+  if (previous === next) {
+    el.clearSearchButton.classList.toggle("hidden", !next);
+    return;
+  }
+  state.searchQuery = next;
+  el.clearSearchButton.classList.toggle("hidden", !next);
+  renderContent();
+}
+
+function syncGlobalSearchHistoryState() {
+  if (!state.payload || state.searchComposing) return;
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.screen !== "main" || !route.searchSession) return;
+  history.replaceState(makeHistoryState({
+    screen: "main",
+    view: state.currentView,
+    searchQuery: state.searchQuery,
+    scrollY: window.scrollY,
+    searchSession: true,
+  }), "", window.location.href);
+}
+
+function clearGlobalSearch() {
+  cancelGlobalSearchCommit();
+  if (!state.searchQuery && !el.globalSearchInput.value) return;
+  el.globalSearchInput.value = "";
+  const route = history.state?.[HISTORY_STATE_KEY];
+  if (route?.searchSession) {
+    history.back();
+    return;
+  }
+  state.searchQuery = "";
+  el.clearSearchButton.classList.add("hidden");
+  renderContent();
+  window.setTimeout(() => el.globalSearchInput.focus(), 0);
+}
+
+function handleHistoryNavigation(event) {
+  const route = event.state?.[HISTORY_STATE_KEY];
+  if (!route || !state.payload) return;
+  closeOverflowMenu();
+  closeModal();
+  state.currentView = route.view && typeof route.view === "object" ? { ...route.view } : { type: "home" };
+  state.searchQuery = String(route.searchQuery || "");
+  el.globalSearchInput.value = state.searchQuery;
+  el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
+  if (route.screen === "contact-export") {
+    el.startView.classList.add("hidden");
+    state.contactView = route.contactView && typeof route.contactView === "object" ? { ...route.contactView } : { type: "home" };
+    state.contactDepth = Number(route.contactDepth) || 0;
+    state.contactFilter = "";
+    el.contactSearchInput.value = "";
+    showContactExportView();
+  } else {
+    el.contactExportView.classList.add("hidden");
+    el.mainView.classList.remove("hidden");
+    renderContent();
+  }
+  window.requestAnimationFrame(() => window.scrollTo({ top: Number(route.scrollY) || 0, behavior: "auto" }));
 }
 
 function renderContent() {
   if (!state.payload) return;
-  if (state.searchQuery) {
-    renderSearchResults();
-    return;
-  }
-  const view = state.currentView;
-  if (view.type === "category") renderCategory(view.categoryId);
-  else if (view.type === "organization") renderOrganization(view.categoryId, view.orgIndex);
+  if (state.searchQuery) renderSearchResults();
   else renderHome();
+  schedulePageOverflowSync();
 }
 
 function renderHome() {
-  const cards = state.categories.map((category) => {
-    const count = category.organizations.length;
-    return `<button class="category-card" type="button" data-category-id="${escapeAttr(category.id)}">
-      <strong>${escapeHtml(category.label)}</strong>
-      <span>${count}개 소속 <span class="chevron">›</span></span>
-    </button>`;
-  }).join("");
+  const rows = state.categories.map((category) => browseCategoryNodeHtml(category)).join("");
   el.contentView.innerHTML = `
-    <div class="page-heading">
-      <h1>소속별 조회</h1>
-      <p>소속을 선택하거나 위 검색창에서 이름·소속·번호를 바로 찾아보세요.</p>
-    </div>
-    <div class="category-grid">${cards || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
-  el.contentView.querySelectorAll("[data-category-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.currentView = { type: "category", categoryId: button.dataset.categoryId };
-      renderContent();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    <p class="lookup-intro">소속을 선택하거나 검색창에서 바로 찾아보세요.</p>
+    <div class="browse-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+}
+
+function browseCategoryNodeHtml(category) {
+  const treeKey = categoryTreeKey(category.id);
+  const expanded = state.browseExpanded.has(treeKey);
+  const groups = contactMajorGroups(category);
+  const children = expanded
+    ? `<div class="browse-tree-children">${groups.map((group) => browseMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`
+    : "";
+  return `<section class="browse-tree-node">
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속` })}
+    ${children}
+  </section>`;
+}
+
+function browseMajorNodeHtml(category, group) {
+  const treeKey = majorTreeKey(category.id, group.major);
+  const expanded = state.browseExpanded.has(treeKey);
+  const directItems = group.items.filter(({ org }) => isDirectMajorOrganization(group.major, org));
+  const childItems = group.items.filter(({ org }) => !isDirectMajorOrganization(group.major, org));
+  const directPeople = [];
+  const directSeen = new Set();
+  directItems.forEach(({ org }) => {
+    uniqueOrgRecords(org).forEach((record) => {
+      const key = String(record._personKey || "");
+      if (!key || directSeen.has(key)) return;
+      directSeen.add(key);
+      directPeople.push(record);
     });
   });
+  const keys = unique(group.items.flatMap(({ org }) => org.people.map((record) => record._personKey)).filter(Boolean));
+  const children = expanded
+    ? `<div class="browse-tree-children">
+        ${directPeople.map((record) => browseTreePersonRowHtml(record, 2, true)).join("")}
+        ${childItems.map(({ org, orgIndex }) => browseOrganizationNodeHtml(category, org, orgIndex)).join("")}
+        ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}
+      </div>`
+    : "";
+  return `<section class="browse-tree-node">
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명` })}
+    ${children}
+  </section>`;
+}
+
+function browseOrganizationNodeHtml(category, org, orgIndex) {
+  const treeKey = orgTreeKey(category.id, orgIndex);
+  const expanded = state.browseExpanded.has(treeKey);
+  const label = org.minor || org.major || "소속 없음";
+  const records = uniqueOrgRecords(org);
+  const children = expanded
+    ? `<div class="browse-tree-children">${records.map((record) => browseTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`
+    : "";
+  return `<section class="browse-tree-node">
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${records.length}명` })}
+    ${children}
+  </section>`;
+}
+
+function browseDisclosureRowHtml({ treeKey, expanded, level, label, detail = "" }) {
+  return `<div class="browse-tree-row" style="--tree-level:${Number(level) || 0}">
+    <button class="browse-tree-toggle" type="button" data-browse-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
+      <span class="browse-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
+      <span class="browse-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
+    </button>
+  </div>`;
+}
+
+function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
+  const name = String(record?.name || "").trim() || "이름 없음";
+  const job = String(record?.job || formatJob(record?.title, record?.role));
+  const primary = directMajorPerson && job ? `${job} ${name}` : name;
+  const lines = [];
+  if (record?.extension) lines.push(phoneLineHtml("내선번호", record.extension, record.externalNumber));
+  if (record?.mobile) lines.push(phoneLineHtml("개인번호", record.mobile));
+  return `<article class="browse-tree-row browse-tree-person" style="--tree-level:${Number(level) || 0}">
+    <div class="browse-tree-static">
+      <span class="browse-tree-chevron-spacer" aria-hidden="true"></span>
+      <div class="browse-tree-person-content">
+        <div class="browse-tree-person-title"><strong>${escapeHtml(primary)}</strong>${!directMajorPerson && job ? `<span>${escapeHtml(job)}</span>` : ""}</div>
+        ${lines.length ? `<div class="browse-tree-phone-lines">${lines.join("")}</div>` : ""}
+      </div>
+    </div>
+  </article>`;
+}
+
+function handleBrowseTreeClick(event) {
+  const toggle = event.target.closest("[data-browse-tree-toggle]");
+  if (!toggle) return;
+  const treeKey = toggle.dataset.treeKey;
+  if (!treeKey) return;
+  if (state.browseExpanded.has(treeKey)) state.browseExpanded.delete(treeKey);
+  else state.browseExpanded.add(treeKey);
+  renderHome();
+  schedulePageOverflowSync();
 }
 
 function renderCategory(categoryId) {
@@ -458,14 +1005,12 @@ function renderCategory(categoryId) {
 
   el.contentView.innerHTML = `
     ${breadcrumbsHtml([{ label: "처음으로", view: "home" }])}
-    <div class="page-heading"><h1>${escapeHtml(category.label)}</h1><p>시트1 기준의 소속 순서로 표시됩니다.</p></div>
+    <div class="page-heading"><h1>${escapeHtml(category.label)}</h1></div>
     ${groupsHtml || renderEmptyHtml("표시할 소속이 없습니다.")}`;
 
   el.contentView.querySelectorAll("[data-org-index]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.currentView = { type: "organization", categoryId, orgIndex: Number(button.dataset.orgIndex) };
-      renderContent();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      navigateToView({ type: "organization", categoryId, orgIndex: Number(button.dataset.orgIndex) });
     });
   });
   bindBreadcrumbs();
@@ -491,7 +1036,7 @@ function renderOrganization(categoryId, orgIndex) {
 function personCardHtml(person) {
   const job = String(person.job || formatJob(person.title, person.role));
   const lines = [];
-  if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension));
+  if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension, person.externalNumber));
   if (person.mobile) lines.push(phoneLineHtml("개인번호", person.mobile));
   return `<article class="person-card">
     <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${job ? `<span class="person-job">${escapeHtml(job)}</span>` : ""}</div>
@@ -499,8 +1044,9 @@ function personCardHtml(person) {
   </article>`;
 }
 
-function phoneLineHtml(label, number) {
-  return `<div class="phone-line"><span>${escapeHtml(label)}</span><a href="tel:${escapeAttr(telHref(number))}">${escapeHtml(number)}</a></div>`;
+function phoneLineHtml(label, number, externalNumber = false) {
+  const display = externalNumber ? `${number} (외부번호)` : number;
+  return `<div class="phone-line"><span>${escapeHtml(label)}</span><a href="tel:${escapeAttr(telHref(number))}">${escapeHtml(display)}</a></div>`;
 }
 
 function renderSearchResults() {
@@ -518,7 +1064,11 @@ function searchPersonCardHtml(person) {
   const affiliationHtml = person.affiliations.map((a) => {
     const orgPath = affiliationPath(a);
     const phones = [];
-    if (a.extension) phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">내선 ${escapeHtml(a.extension)}</a>`);
+    if (a.extension) {
+      const label = "내선";
+      const display = a.externalNumber ? `${a.extension} (외부번호)` : a.extension;
+      phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">${label} ${escapeHtml(display)}</a>`);
+    }
     if (a.mobile && a.mobile !== commonMobile) phones.push(`<a href="tel:${escapeAttr(telHref(a.mobile))}">개인 ${escapeHtml(a.mobile)}</a>`);
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.job ? `<span>${escapeHtml(a.job)}</span>` : ""}</div>
@@ -535,7 +1085,10 @@ function searchPersonCardHtml(person) {
 function personMatchesTokens(person, tokens) {
   if (!tokens.length) return true;
   const textParts = [person.name];
-  person.affiliations.forEach((a) => textParts.push(a.categoryLabel, a.major, a.minor, a.title, a.role, a.job, a.extension, a.mobile));
+  person.affiliations.forEach((a) => textParts.push(
+    a.categoryLabel, a.major, a.minor, a.title, a.role, a.job, a.extension, a.mobile,
+    a.externalNumber ? "외부번호" : "",
+  ));
   const haystack = normalizeText(textParts.filter(Boolean).join(" "));
   const digits = textParts.filter(Boolean).join(" ").replace(/\D/g, "");
   return tokens.every((token) => {
@@ -553,9 +1106,8 @@ function bindBreadcrumbs() {
   el.contentView.querySelectorAll("[data-breadcrumb]").forEach((button) => {
     button.addEventListener("click", () => {
       const item = JSON.parse(button.dataset.breadcrumb);
-      if (item.view === "category") state.currentView = { type: "category", categoryId: item.categoryId };
-      else state.currentView = { type: "home" };
-      renderContent();
+      if (item.view === "category") navigateToView({ type: "category", categoryId: item.categoryId });
+      else navigateToView({ type: "home" });
     });
   });
 }
@@ -570,22 +1122,23 @@ function handleMenuAction(event) {
   closeOverflowMenu();
   const action = button.dataset.action;
   if (action === "data-info") showDataInfo();
-  else if (action === "replace-data") openFilePicker();
+  else if (action === "replace-data") beginDataReplacement();
   else if (action === "contact-export") enterContactExport();
   else if (action === "install-app") handleInstallRequest();
   else if (action === "theme") showThemeChooser();
+  else if (action === "about") showAboutInfo();
   else if (action === "lock") lockApp();
 }
 
 
 function initializeTheme() {
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  state.themePreference = ["light", "dark"].includes(saved) ? saved : "system";
+  state.themePreference = ["light", "dark", "black"].includes(saved) ? saved : "system";
   applyTheme(state.themePreference, false);
 }
 
 function applyTheme(mode, persist = true) {
-  const normalized = ["light", "dark"].includes(mode) ? mode : "system";
+  const normalized = ["light", "dark", "black"].includes(mode) ? mode : "system";
   state.themePreference = normalized;
   document.documentElement.dataset.theme = normalized;
   if (persist) localStorage.setItem(THEME_STORAGE_KEY, normalized);
@@ -595,40 +1148,46 @@ function applyTheme(mode, persist = true) {
 
 function updateThemeMenuLabel() {
   if (!el.themeMenuButton) return;
-  const label = state.themePreference === "light" ? "라이트" : state.themePreference === "dark" ? "다크" : "시스템";
-  el.themeMenuButton.textContent = `화면 모드 · ${label}`;
+  const labels = { system: "시스템", light: "라이트", dark: "다크", black: "블랙" };
+  el.themeMenuButton.textContent = `화면 모드 · ${labels[state.themePreference] || "시스템"}`;
 }
 
 function resolvedTheme() {
-  if (state.themePreference === "light" || state.themePreference === "dark") return state.themePreference;
+  if (["light", "dark", "black"].includes(state.themePreference)) return state.themePreference;
   return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
 }
 
 function updateThemeMetaColor() {
   if (!el.themeColorMeta) return;
-  el.themeColorMeta.setAttribute("content", resolvedTheme() === "dark" ? "#111317" : "#efe6d7");
+  const colors = { light: "#F6F1E8", dark: "#0D1117", black: "#000000" };
+  el.themeColorMeta.setAttribute("content", colors[resolvedTheme()] || colors.light);
 }
 
 function showThemeChooser() {
   const current = state.themePreference;
   const option = (value, title, description) => `
-    <button class="theme-choice${current === value ? " selected" : ""}" type="button" data-theme-choice="${value}">
-      <span class="theme-choice-radio" aria-hidden="true"></span>
+    <label class="theme-choice${current === value ? " selected" : ""}" data-theme-value="${value}">
+      <input type="radio" name="dials-theme" value="${value}" ${current === value ? "checked" : ""}>
       <span><strong>${title}</strong><small>${description}</small></span>
-    </button>`;
+    </label>`;
   showModal({
     title: "화면 모드",
-    body: `<div class="theme-choice-list">
+    body: `<fieldset class="theme-choice-list">
+      <legend class="visually-hidden">화면 모드 선택</legend>
       ${option("system", "시스템 설정", "기기의 라이트/다크 모드를 자동으로 따릅니다.")}
-      ${option("light", "라이트", "따뜻한 베이지와 은은한 종이 질감의 밝은 화면입니다.")}
-      ${option("dark", "다크", "어두운 환경에 맞춘 화면입니다.")}
-    </div>`,
+      ${option("light", "라이트", "따뜻한 뉴트럴 계열의 밝은 화면입니다.")}
+      ${option("dark", "다크", "차분한 개발자 도구 계열의 어두운 화면입니다.")}
+      ${option("black", "블랙 (OLED)", "넓은 배경을 순수 검정으로 표시해 OLED 발광 면적을 줄입니다.")}
+    </fieldset>`,
     actions: [{ label: "닫기", onClick: closeModal }],
   });
-  el.modalBody.querySelectorAll("[data-theme-choice]").forEach((button) => {
-    button.addEventListener("click", () => {
-      applyTheme(button.dataset.themeChoice);
-      closeModal();
+  el.modalBody.querySelectorAll('input[name="dials-theme"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (!radio.checked) return;
+      applyTheme(radio.value);
+      el.modalBody.querySelectorAll("[data-theme-value]").forEach((label) => {
+        label.classList.toggle("selected", label.dataset.themeValue === radio.value);
+      });
     });
   });
 }
@@ -670,72 +1229,100 @@ async function handleInstallRequest() {
   });
 }
 
+function showAboutInfo() {
+  showModal({
+    title: "정보",
+    body: `<div class="about-info">
+      <p><strong>Dials</strong><br>배포받은 전화번호부를 빠르게 찾아보고 필요한 연락처를 저장할 수 있습니다.</p>
+      <section class="about-section" aria-labelledby="privacySecurityTitle">
+        <h3 id="privacySecurityTitle">개인정보 보호</h3>
+        <div class="privacy-feature-list">
+          <div class="privacy-feature">${uiIcon("shield")}<span>연락처 데이터는 <strong>이 기기에만 보관되며 외부로 전송되지 않습니다.</strong></span></div>
+          <div class="privacy-feature">${uiIcon("lock")}<span>입력한 암호는 저장하지 않습니다.</span></div>
+          <div class="privacy-feature">${uiIcon("clock")}<span>개인정보 보호를 위해 <strong>10분이 지나면 자동으로 잠깁니다.</strong></span></div>
+        </div>
+        <p class="about-tech-note">자세한 기술 정보는 GitHub에서 확인할 수 있습니다.</p>
+      </section>
+      <div class="about-footer">
+        <span>v${APP_VERSION}</span>
+        <a class="github-link" href="https://github.com/Bak2ya/Dials" target="_blank" rel="noopener noreferrer">GitHub에서 보기</a>
+      </div>
+    </div>`,
+    actions: [{ label: "닫기", onClick: closeModal }],
+  });
+}
+
+function uiIcon(name) {
+  const paths = {
+    shield: '<path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3z"/><path d="M9.5 12.2l1.7 1.7 3.7-4"/>',
+    lock: '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  };
+  return `<svg class="ui-line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
+}
+
 function closeOverflowMenu() {
   el.overflowMenu.classList.add("hidden");
   el.menuButton.setAttribute("aria-expanded", "false");
 }
 
-function lockApp() {
-  // 복호화된 payload와 암호를 브라우저 메모리에서 가장 확실하게 내려놓기 위해 새로고침합니다.
-  window.location.reload();
+function startAutoLockSession() {
+  state.unlockStartedAt = Date.now();
+  scheduleAutoLock();
 }
 
-async function loadLatestStatus() {
-  let cached = null;
-  try { cached = JSON.parse(localStorage.getItem(LATEST_STATUS_STORAGE_KEY) || "null"); } catch { cached = null; }
-  state.latestStatus = cached;
-  try {
-    const response = await fetch(`./data-status.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return;
-    const status = await response.json();
-    if (status && typeof status.latestDataVersion === "string") {
-      state.latestStatus = status;
-      localStorage.setItem(LATEST_STATUS_STORAGE_KEY, JSON.stringify(status));
-    }
-  } catch {
-    // 오프라인에서는 마지막으로 확인한 공개 상태값을 사용합니다.
+function clearAutoLockTimer() {
+  if (!state.autoLockTimer) return;
+  window.clearTimeout(state.autoLockTimer);
+  state.autoLockTimer = null;
+}
+
+function scheduleAutoLock() {
+  clearAutoLockTimer();
+  if (!state.payload || !state.unlockStartedAt) return;
+  const remaining = AUTO_LOCK_MS - (Date.now() - state.unlockStartedAt);
+  if (remaining <= 0) {
+    lockApp("auto");
+    return;
   }
+  state.autoLockTimer = window.setTimeout(() => checkAutoLock(), remaining + 25);
 }
 
-function hasNewerData(currentVersion) {
-  const current = String(currentVersion || "");
-  const latest = String(state.latestStatus?.latestDataVersion || "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(current) || !/^\d{4}-\d{2}-\d{2}$/.test(latest)) return false;
-  return latest > current;
+function checkAutoLock() {
+  if (!state.payload || !state.unlockStartedAt) return;
+  if (Date.now() - state.unlockStartedAt >= AUTO_LOCK_MS) {
+    lockApp("auto");
+    return;
+  }
+  scheduleAutoLock();
 }
 
-function updateUpdateIndicator() {
-  el.updateIndicator.classList.toggle("hidden", !hasNewerData(state.payload?.dataVersion));
-}
-
-function showUpdateNotice() {
-  if (!hasNewerData(state.payload?.dataVersion)) return;
-  const current = formatDate(state.payload?.dataVersion);
-  const latest = formatDate(state.latestStatus?.latestDataVersion);
-  const message = String(state.latestStatus?.message || "새 전화번호부 데이터가 배포되었습니다.");
-  showModal({
-    title: "새 전화번호부 데이터",
-    body: `<div class="update-callout"><strong>새 데이터가 있습니다.</strong>${escapeHtml(message)}</div>
-      <dl class="info-grid" style="margin-top:16px"><dt>현재 기준일</dt><dd>${escapeHtml(current)}</dd><dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd></dl>
-      <p class="muted">새로 배포받은 <code>.dials</code> 파일을 불러오면 현재 데이터가 교체됩니다.</p>`,
-    actions: [
-      { label: "나중에", onClick: closeModal },
-      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); openFilePicker(); } },
-    ],
-  });
+function lockApp(reason = "manual") {
+  clearAutoLockTimer();
+  cancelGlobalSearchCommit();
+  cancelContactSearchCommit();
+  state.payload = null;
+  state.people = [];
+  state.categories = [];
+  state.selectedPeople.clear();
+  state.searchQuery = "";
+  state.contactFilter = "";
+  state.contactExpanded.clear();
+  state.browseExpanded.clear();
+  state.unlockStartedAt = 0;
+  if (reason === "auto") {
+    try { sessionStorage.setItem(AUTO_LOCK_NOTICE_KEY, "1"); } catch {}
+  }
+  // 새로고침으로 페이지 메모리의 복호화 데이터와 파생 상태를 함께 내려놓습니다.
+  window.location.reload();
 }
 
 function showDataInfo() {
   const current = formatDate(state.payload?.dataVersion) || "알 수 없음";
-  const latestRaw = state.latestStatus?.latestDataVersion || "";
-  const latest = latestRaw ? formatDate(latestRaw) : "확인할 수 없음";
-  const isOld = hasNewerData(state.payload?.dataVersion);
   showModal({
     title: "전화번호부 데이터",
-    body: `${isOld ? `<div class="update-callout"><strong>새 전화번호부 데이터가 있습니다.</strong>${escapeHtml(state.latestStatus?.message || "새 데이터 파일로 교체해 주세요.")}</div>` : ""}
-      <dl class="info-grid" style="margin-top:${isOld ? 16 : 0}px">
-        <dt>현재 기준일</dt><dd>${escapeHtml(current)}</dd>
-        <dt>최신 기준일</dt><dd>${escapeHtml(latest)}</dd>
+    body: `<dl class="info-grid">
+        <dt>기준일</dt><dd>${escapeHtml(current)}</dd>
         <dt>기준월</dt><dd>${escapeHtml(state.payload?.period || "-")}</dd>
         <dt>데이터 생성</dt><dd>${escapeHtml(formatDateTime(state.payload?.generatedAt) || "-")}</dd>
         <dt>연결 파일</dt><dd>${escapeHtml(state.safeMeta?.fileName || "Dials 데이터")}</dd>
@@ -743,27 +1330,58 @@ function showDataInfo() {
       </dl>`,
     actions: [
       { label: "닫기", onClick: closeModal },
-      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); openFilePicker(); } },
+      { label: "새 데이터 불러오기", primary: true, onClick: () => { closeModal(); beginDataReplacement(); } },
     ],
   });
 }
 
 function enterContactExport() {
+  saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.contactFilter = "";
+  state.contactView = { type: "home" };
+  state.contactDepth = 0;
+  state.contactExpanded.clear();
   el.contactSearchInput.value = "";
+  showContactExportView();
+  history.pushState(makeHistoryState({ screen: "contact-export", contactView: state.contactView, contactDepth: state.contactDepth, scrollY: 0 }), "", window.location.href);
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function showContactExportView() {
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
   restorePrefixSettings();
-  renderContactPeople();
+  renderContactBrowse();
   setVcardMessage("");
-  window.scrollTo({ top: 0 });
+  schedulePageOverflowSync();
 }
 
 function leaveContactExport() {
+  if (history.state?.[HISTORY_STATE_KEY]?.screen === "contact-export") {
+    history.go(-(state.contactDepth + 1));
+    return;
+  }
   el.contactExportView.classList.add("hidden");
   el.mainView.classList.remove("hidden");
-  window.scrollTo({ top: 0 });
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+function cancelContactSearchCommit() {
+  if (!state.contactSearchDebounceTimer) return;
+  window.clearTimeout(state.contactSearchDebounceTimer);
+  state.contactSearchDebounceTimer = null;
+}
+
+function scheduleContactSearchCommit(delay = 220) {
+  cancelContactSearchCommit();
+  state.contactSearchDebounceTimer = window.setTimeout(() => {
+    state.contactSearchDebounceTimer = null;
+    const next = el.contactSearchInput.value.trim();
+    if (state.contactFilter === next) return;
+    state.contactFilter = next;
+    renderContactBrowse();
+  }, delay);
 }
 
 function filteredContactPeople() {
@@ -772,30 +1390,284 @@ function filteredContactPeople() {
   return state.people.filter((person) => personMatchesTokens(person, tokens));
 }
 
-function renderContactPeople() {
-  const people = filteredContactPeople();
-  el.contactPeopleList.innerHTML = people.map((person) => {
-    const selected = state.selectedPeople.has(person.key);
-    const affiliationText = summarizeAffiliations(person);
-    return `<label class="contact-person-row">
-      <input type="checkbox" value="${escapeAttr(person.key)}" ${selected ? "checked" : ""}>
-      <span><strong>${escapeHtml(person.name || "이름 없음")}</strong><small>${escapeHtml(affiliationText || "소속 정보 없음")}</small></span>
-    </label>`;
-  }).join("") || renderEmptyHtml("검색 결과가 없습니다.");
+function renderContactBrowse() {
+  if (!el.contactBrowseView) return;
+  const searching = Boolean(state.contactFilter);
+  el.selectFilteredButton.classList.toggle("hidden", !searching);
+  if (searching) renderContactSearchResults();
+  else renderContactHome();
+  syncContactSelectionUI();
   updateSelectedCount();
+  schedulePageOverflowSync();
+}
+
+function renderContactHome() {
+  const rows = state.categories.map((category) => contactCategoryNodeHtml(category)).join("");
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>필요한 소속을 펼쳐 인물을 선택하세요.</span></div>
+    <div class="contact-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
+}
+
+function contactMajorGroups(category) {
+  const groups = [];
+  const map = new Map();
+  category.organizations.forEach((org, orgIndex) => {
+    const major = org.major || category.label;
+    if (!map.has(major)) {
+      const entry = { major, items: [] };
+      map.set(major, entry);
+      groups.push(entry);
+    }
+    map.get(major).items.push({ org, orgIndex });
+  });
+  return groups;
+}
+
+function isDirectMajorOrganization(groupMajor, org) {
+  const major = String(groupMajor || "").trim();
+  const minor = String(org?.minor || "").trim();
+  return !minor || minor === major;
+}
+
+function categoryTreeKey(categoryId) {
+  return `category:${categoryId}`;
+}
+
+function majorTreeKey(categoryId, major) {
+  return `major:${categoryId}:${major}`;
+}
+
+function orgTreeKey(categoryId, orgIndex) {
+  return `org:${categoryId}:${orgIndex}`;
+}
+
+function contactCategoryNodeHtml(category) {
+  const treeKey = categoryTreeKey(category.id);
+  const expanded = state.contactExpanded.has(treeKey);
+  const groups = contactMajorGroups(category);
+  const children = expanded
+    ? `<div class="contact-tree-children">${groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`
+    : "";
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속`, checkboxHtml: "" })}
+    ${children}
+  </section>`;
+}
+
+function contactMajorNodeHtml(category, group) {
+  const treeKey = majorTreeKey(category.id, group.major);
+  const expanded = state.contactExpanded.has(treeKey);
+  const keys = majorPersonKeys(category.id, group.major);
+  const selected = selectionStateForKeys(keys);
+  const directItems = group.items.filter(({ org }) => isDirectMajorOrganization(group.major, org));
+  const childItems = group.items.filter(({ org }) => !isDirectMajorOrganization(group.major, org));
+  const directPeople = [];
+  const directSeen = new Set();
+  directItems.forEach(({ org }) => {
+    uniqueOrgRecords(org).forEach((record) => {
+      const key = String(record._personKey || "");
+      if (!key || directSeen.has(key)) return;
+      directSeen.add(key);
+      directPeople.push(record);
+    });
+  });
+  const children = expanded
+    ? `<div class="contact-tree-children">
+        ${directPeople.map((record) => contactTreePersonRowHtml(record, 2, true)).join("")}
+        ${childItems.map(({ org, orgIndex }) => contactOrganizationNodeHtml(category, org, orgIndex)).join("")}
+        ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}
+      </div>`
+    : "";
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "major",
+    categoryId: category.id,
+    major: group.major,
+    label: `${group.major} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, checkboxHtml })}
+    ${children}
+  </section>`;
+}
+
+function contactOrganizationNodeHtml(category, org, orgIndex) {
+  const treeKey = orgTreeKey(category.id, orgIndex);
+  const expanded = state.contactExpanded.has(treeKey);
+  const label = org.minor || org.major || "소속 없음";
+  const records = uniqueOrgRecords(org);
+  const keys = records.map((record) => record._personKey).filter(Boolean);
+  const selected = selectionStateForKeys(keys);
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "org",
+    categoryId: category.id,
+    orgIndex,
+    label: `${label} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  const children = expanded
+    ? `<div class="contact-tree-children">${records.map((record) => contactTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.")}</div>`
+    : "";
+  return `<section class="contact-tree-node">
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${keys.length}명`, checkboxHtml })}
+    ${children}
+  </section>`;
+}
+
+function contactDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", checkboxHtml = "" }) {
+  return `<div class="contact-tree-row${checkboxHtml ? "" : " no-select"}" style="--tree-level:${Number(level) || 0}">
+    <button class="contact-tree-toggle" type="button" data-contact-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
+      <span class="contact-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
+      <span class="contact-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
+    </button>
+    ${checkboxHtml || `<span class="contact-tree-check-spacer" aria-hidden="true"></span>`}
+  </div>`;
+}
+
+function contactTreeCheckboxHtml({ type, categoryId, major = "", orgIndex = -1, label, selected, disabled = false }) {
+  const attrs = type === "major"
+    ? `data-major-select data-category-id="${escapeAttr(categoryId)}" data-major="${escapeAttr(major)}"`
+    : `data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${Number(orgIndex)}"`;
+  return `<label class="contact-tree-check" title="${escapeAttr(label)}">
+    <input type="checkbox" ${attrs} ${selected?.all ? "checked" : ""} ${disabled ? "disabled" : ""}>
+    <span class="visually-hidden">${escapeHtml(label)}</span>
+  </label>`;
+}
+
+function contactTreePersonRowHtml(record, level, directMajorPerson = false) {
+  const personKey = String(record?._personKey || "");
+  const selected = state.selectedPeople.has(personKey);
+  const name = String(record?.name || "").trim() || "이름 없음";
+  const job = formatJob(record?.title, record?.role);
+  const primary = directMajorPerson && job ? `${job} ${name}` : name;
+  const details = directMajorPerson
+    ? unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")
+    : [job, unique([record?.extension, record?.mobile].filter(Boolean)).join(" · ")].filter(Boolean).join(" · ");
+  return `<div class="contact-tree-row contact-tree-person" style="--tree-level:${Number(level) || 0}">
+    <div class="contact-tree-static">
+      <span class="contact-tree-chevron-spacer" aria-hidden="true"></span>
+      <span class="contact-tree-label"><strong>${escapeHtml(primary)}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ""}</span>
+    </div>
+    <label class="contact-tree-check" title="${escapeAttr(name)} 선택">
+      <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+      <span class="visually-hidden">${escapeHtml(name)} 선택</span>
+    </label>
+  </div>`;
+}
+
+function renderContactSearchResults() {
+  const people = filteredContactPeople();
+  const rows = people.map((person) => contactPersonRowHtml(person.key, person.name, summarizeAffiliations(person))).join("");
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>검색 결과</strong><span>${people.length}명 · 여러 소속의 동일 인물은 하나의 선택 상태를 공유합니다.</span></div>
+    <div class="contact-person-list">${rows || renderEmptyHtml("검색 결과가 없습니다.")}</div>`;
+}
+
+function contactPersonRowHtml(personKey, name, detail = "", extension = "", mobile = "") {
+  const selected = state.selectedPeople.has(personKey);
+  const numberText = unique([extension, mobile].filter(Boolean)).join(" · ");
+  const secondary = [detail, numberText].filter(Boolean).join(" · ");
+  return `<div class="contact-person-row">
+    <span><strong>${escapeHtml(name || "이름 없음")}</strong>${secondary ? `<small>${escapeHtml(secondary)}</small>` : ""}</span>
+    <label class="contact-person-check" title="${escapeAttr(name || "이름 없음")} 선택">
+      <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+      <span class="visually-hidden">${escapeHtml(name || "이름 없음")} 선택</span>
+    </label>
+  </div>`;
+}
+
+function handleContactBrowseClick(event) {
+  const toggle = event.target.closest("[data-contact-tree-toggle]");
+  if (!toggle) return;
+  const treeKey = toggle.dataset.treeKey;
+  if (!treeKey) return;
+  if (state.contactExpanded.has(treeKey)) state.contactExpanded.delete(treeKey);
+  else state.contactExpanded.add(treeKey);
+  renderContactBrowse();
+}
+
+function majorPersonKeys(categoryId, major) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  if (!category) return [];
+  const group = contactMajorGroups(category).find((item) => item.major === major);
+  if (!group) return [];
+  return unique(group.items.flatMap(({ org }) => org.people.map((record) => record._personKey)).filter(Boolean));
 }
 
 function handleContactSelectionChange(event) {
-  const checkbox = event.target.closest('input[type="checkbox"]');
-  if (!checkbox) return;
-  if (checkbox.checked) state.selectedPeople.add(checkbox.value);
-  else state.selectedPeople.delete(checkbox.value);
+  const personCheckbox = event.target.closest('input[data-person-key]');
+  if (personCheckbox) {
+    if (personCheckbox.checked) state.selectedPeople.add(personCheckbox.dataset.personKey);
+    else state.selectedPeople.delete(personCheckbox.dataset.personKey);
+    syncContactSelectionUI();
+    return;
+  }
+  const majorCheckbox = event.target.closest('input[data-major-select]');
+  if (majorCheckbox) {
+    const keys = majorPersonKeys(majorCheckbox.dataset.categoryId, majorCheckbox.dataset.major);
+    keys.forEach((key) => {
+      if (majorCheckbox.checked) state.selectedPeople.add(key);
+      else state.selectedPeople.delete(key);
+    });
+    syncContactSelectionUI();
+    return;
+  }
+  const orgCheckbox = event.target.closest('input[data-org-select]');
+  if (orgCheckbox) {
+    const keys = orgPersonKeys(orgCheckbox.dataset.categoryId, Number(orgCheckbox.dataset.orgIndex));
+    keys.forEach((key) => {
+      if (orgCheckbox.checked) state.selectedPeople.add(key);
+      else state.selectedPeople.delete(key);
+    });
+    syncContactSelectionUI();
+  }
+}
+
+function orgPersonKeys(categoryId, orgIndex) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  const org = category?.organizations?.[orgIndex];
+  if (!org) return [];
+  return unique(org.people.map((record) => record._personKey).filter(Boolean));
+}
+
+function uniqueOrgRecords(org) {
+  const map = new Map();
+  for (const record of org.people || []) {
+    const key = String(record._personKey || "");
+    if (key && !map.has(key)) map.set(key, record);
+  }
+  return [...map.values()];
+}
+
+function selectionStateForKeys(keys) {
+  const total = keys.length;
+  const count = keys.reduce((sum, key) => sum + (state.selectedPeople.has(key) ? 1 : 0), 0);
+  return { total, count, all: total > 0 && count === total, some: count > 0 && count < total };
+}
+
+function syncContactSelectionUI() {
+  if (!el.contactBrowseView) return;
+  el.contactBrowseView.querySelectorAll('input[data-person-key]').forEach((checkbox) => {
+    checkbox.checked = state.selectedPeople.has(checkbox.dataset.personKey);
+  });
+  el.contactBrowseView.querySelectorAll('input[data-major-select]').forEach((checkbox) => {
+    const current = selectionStateForKeys(majorPersonKeys(checkbox.dataset.categoryId, checkbox.dataset.major));
+    checkbox.checked = current.all;
+    checkbox.indeterminate = current.some;
+    checkbox.setAttribute("aria-checked", current.some ? "mixed" : String(current.all));
+  });
+  el.contactBrowseView.querySelectorAll('input[data-org-select]').forEach((checkbox) => {
+    const current = selectionStateForKeys(orgPersonKeys(checkbox.dataset.categoryId, Number(checkbox.dataset.orgIndex)));
+    checkbox.checked = current.all;
+    checkbox.indeterminate = current.some;
+    checkbox.setAttribute("aria-checked", current.some ? "mixed" : String(current.all));
+  });
   updateSelectedCount();
 }
 
 function selectFilteredPeople() {
   filteredContactPeople().forEach((person) => state.selectedPeople.add(person.key));
-  renderContactPeople();
+  syncContactSelectionUI();
 }
 
 function updateSelectedCount() {
@@ -920,6 +1792,9 @@ function setVcardMessage(message, isError = false, isSuccess = false) {
 }
 
 function showModal({ title, body, actions = [] }) {
+  if (el.modalBackdrop.classList.contains("hidden")) {
+    state.modalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
   el.modalTitle.textContent = title;
   el.modalBody.innerHTML = body;
   el.modalActions.innerHTML = "";
@@ -933,12 +1808,43 @@ function showModal({ title, body, actions = [] }) {
   });
   el.modalBackdrop.classList.remove("hidden");
   el.modalBackdrop.setAttribute("aria-hidden", "false");
-  window.setTimeout(() => el.modalCloseButton.focus(), 10);
+  window.setTimeout(() => {
+    const target = el.modalBody.querySelector('input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]')
+      || el.modalActions.querySelector('button:not([disabled])')
+      || el.modalCloseButton;
+    target?.focus();
+  }, 10);
 }
 
 function closeModal() {
+  if (el.modalBackdrop.classList.contains("hidden")) return;
   el.modalBackdrop.classList.add("hidden");
   el.modalBackdrop.setAttribute("aria-hidden", "true");
+  const returnFocus = state.modalReturnFocus;
+  state.modalReturnFocus = null;
+  const visibleReturnFocus = returnFocus?.isConnected && returnFocus.offsetParent !== null ? returnFocus : null;
+  const fallbackFocus = el.menuButton?.isConnected && el.menuButton.offsetParent !== null ? el.menuButton : null;
+  const target = visibleReturnFocus || fallbackFocus;
+  if (target) window.setTimeout(() => target.focus(), 0);
+}
+
+function trapModalFocus(event) {
+  const focusable = [...el.modalPanel.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter((node) => node.offsetParent !== null);
+  if (!focusable.length) {
+    event.preventDefault();
+    el.modalPanel.focus?.();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function setUnlockMessage(message, isError = false, isSuccess = false) {
@@ -1048,6 +1954,19 @@ async function dbSet(key, value) {
     await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, "readwrite");
       tx.objectStore(STORE_NAME).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally { db.close(); }
+}
+
+async function dbDelete(key) {
+  const db = await openDatabase();
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      tx.objectStore(STORE_NAME).delete(key);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
