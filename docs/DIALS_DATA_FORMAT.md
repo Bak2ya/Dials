@@ -1,6 +1,6 @@
 # Dials data format — schema 1.4
 
-Dials v0.7.3 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
+Dials v0.7.4 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
 
 Older schema 1.3 / 1.2 / 1.1 payloads are intentionally not accepted. The project has not been deployed yet, so the first release keeps one exact contract instead of carrying fallback branches.
 

@@ -1,6 +1,15 @@
 # Dials UX notes
 
-## v0.7.3 iOS direct-open first
+## v0.7.4 contact-save handoff and selection copy
+
+- Treat v0.7.2 vCard serialization as frozen: real iPhone testing through Messages showed the full multi-contact import screen correctly.
+- The v0.7.3 direct `data:text/vcard` navigation experiment is rejected. Real iPhone testing produced a black browsing context, and manually reloading that URL exposed only the first contact from a multi-contact VCF.
+- On iOS-like browsers, use file-based Web Share with a real `text/vcard` `.vcf` file. Do not attempt direct vCard navigation. Ordinary `.vcf` download remains the fallback.
+- Always show the Android/iPhone save instructions below `연락처 저장하기`; do not depend on OS detection to decide whether the help text exists.
+- Put representative-title help immediately below the contact search field. Example title is `팀장`; wording explains that the selected affiliation and title become the contact's organization/title fields.
+- While searching, show `검색결과 N명` and one `모두 선택` / `선택 해제` toggle on the same line. The toggle affects only the current filtered results. Explain directly below that one person appearing in multiple affiliations is saved as one contact.
+
+## v0.7.3 iOS direct-open first — rejected after real-device test
 
 - Real-device testing confirmed the v0.7.2 vCard payload itself is valid: when sent through Messages, iOS shows the multi-contact import screen correctly. Treat the vCard serialization as stable.
 - On iOS-like browsers, first navigate a new browsing context to a `data:text/vcard;charset=utf-8,...` resource. This is intended to let Safari/WebKit hand the vCard directly to the system contact-card viewer while keeping the Dials page/PWA alive behind it.
@@ -47,7 +56,7 @@ Dials is intentionally a **viewer**, not a management app.
 ## Search
 
 - Multi-keyword AND matching.
-- Search targets name, organization, title, role, extension, and mobile.
+- Search targets name, organization, title, duty, extension, and mobile.
 - One person with multiple affiliations appears as one result card through `personKey`.
 - Same-name people with different `personKey` values remain separate.
 
@@ -56,11 +65,11 @@ Dials is intentionally a **viewer**, not a management app.
 Available through `⋯ → 연락처 저장` so the normal viewer stays uncluttered.
 
 - Multi-select people; selection is keyed by `personKey` and multi-affiliation people export once.
-- Selection rows intentionally omit phone numbers. The row focuses on the person's name, a compact representative affiliation/job button, and the right-side person checkbox.
+- Selection rows intentionally omit phone numbers. The row focuses on the person's name, a compact representative affiliation/title button, and the right-side person checkbox.
 - Name is mandatory. Mobile and extension remain independently selectable.
 - `직장 / 기관` is a global standard-field option. The organization name is derived from the directory title.
-- A person's representative button can choose zero or one affiliation for standard contact fields. The immediate department becomes the second `ORG` component and its combined title/role becomes `TITLE`. Choosing a second representative asks before replacing the first.
-- `메모에 기록할 내용` independently controls the Dials data date, all affiliations, and all titles/roles. Rich multi-affiliation context may remain in `NOTE` even when only one representative department/title is placed in standard fields.
+- A person's representative button can choose zero or one affiliation for standard contact fields. The immediate department becomes the second `ORG` component and its title becomes `TITLE`. Choosing a second representative asks before replacing the first.
+- `메모에 기록할 내용` independently controls the Dials data date, all affiliations, and all titles/duties. Rich multi-affiliation context may remain in `NOTE` even when only one representative department/title is placed in standard fields.
 - Optional literal contact-name prefix and suffix are each remembered locally.
 - One VCF may contain multiple VCARD entries.
 

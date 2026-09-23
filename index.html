@@ -151,7 +151,7 @@
           <button id="contactBackButton" class="back-button" type="button">← 전화번호부</button>
           <div class="header-title-only">
             <strong>연락처 저장</strong>
-            <small>선택한 연락처를 vCard(.vcf) 파일로 만듭니다.</small>
+            <small>선택한 연락처를 휴대폰 연락처로 저장합니다.</small>
           </div>
           <div class="header-actions spacer-actions"></div>
         </div>
@@ -162,7 +162,6 @@
           <div class="section-heading-row export-heading">
             <div class="contact-select-copy">
               <p class="contact-select-instruction">저장할 연락처를 선택하세요.</p>
-              <p class="contact-representative-help"><span class="representative-button-sample">처장</span> 같은 버튼을 누르면 해당 소속과 직함이 연락처에 함께 저장됩니다.</p>
             </div>
             <strong id="selectedPeopleCount" class="selected-count">0명 선택</strong>
           </div>
@@ -171,11 +170,7 @@
             <span class="search-icon" aria-hidden="true">⌕</span>
             <input id="contactSearchInput" type="search" autocomplete="off" placeholder="이름, 시설·업체 또는 소속 검색" aria-label="연락처 저장 대상 검색">
           </div>
-
-          <div class="selection-tools">
-            <button id="selectFilteredButton" class="text-button hidden" type="button">검색 결과 모두 선택</button>
-            <button id="clearSelectionButton" class="text-button" type="button">선택 해제</button>
-          </div>
+          <p class="contact-representative-help"><span class="representative-button-sample">팀장</span>과 같은 직함을 선택하면 해당 소속과 직함이 연락처의 소속·직함으로 저장됩니다.</p>
 
           <div id="contactBrowseView" class="contact-browse-view"></div>
         </section>
@@ -213,9 +208,16 @@
             </div>
           </section>
 
-          <p class="dedupe-note">다중소속 연락처는 중복 저장되지 않습니다.</p>
-          <button id="createVcardButton" class="primary-button wide-button" type="button">연락처 파일 만들기</button>
-          <button id="vcardFallbackShareButton" class="secondary-button wide-button vcard-fallback-button hidden" type="button">공유로 다시 시도</button>
+          <button id="createVcardButton" class="primary-button wide-button" type="button">연락처 저장하기</button>
+          <div class="contact-save-guide" aria-label="휴대폰 연락처 저장 방법">
+            <p><strong>Android에서는</strong> <strong>[연락처 저장하기]</strong>로 <strong>연락처를 바로 추가할 수 있습니다.</strong></p>
+            <p><strong>iPhone(iOS)에서는</strong> <strong>[연락처 저장하기]</strong><strong>만으로는 연락처를 바로 등록할 수 없습니다.</strong><br>아래 순서대로 진행해 주세요.</p>
+            <ol>
+              <li><strong>[연락처 저장하기]</strong>를 누른 후 다음 화면에서 <strong>메시지</strong>를 선택하세요.</li>
+              <li>받는 사람에 <strong>내 전화번호</strong>를 입력해 자신에게 보내세요.</li>
+              <li>메시지에서 첨부된 연락처 파일을 열면 저장할 수 있습니다.</li>
+            </ol>
+          </div>
           <p id="vcardMessage" class="form-message" role="status"></p>
         </aside>
       </section>
