@@ -1,11 +1,12 @@
 "use strict";
 
-const APP_VERSION = "0.7.4";
+const APP_VERSION = "0.7.5";
 const DIALS_SCHEMA_VERSION = "1.4";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
 const DIALS_ORGANIZATION_FIELDS = Object.freeze(["major", "minor", "people"]);
 const DIALS_RECORD_FIELDS = Object.freeze(["personKey", "name", "title", "duty", "recordType", "extension", "mobile", "externalNumber"]);
+const DIALS_EXCLUDED_SYNTHETIC_MAJOR = "학사학위 전공심화";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
@@ -57,6 +58,8 @@ const state = {
   unlockDelayUntil: 0,
   unlockDelayTimer: null,
   unlockInProgress: false,
+  excludedSyntheticAffiliationCount: 0,
+  excludedSyntheticOnlyPersonCount: 0,
 };
 
 const el = {};
@@ -701,19 +704,45 @@ function validatePayload(payload) {
   });
 }
 
+function isExcludedSyntheticOrganization(organization) {
+  // HJU Phonebook uses this exact major label for the Excel-only bachelor
+  // advanced-course duplicate. It is a synthetic copy of the original
+  // academic affiliation, not an independent Dials organization.
+  return String(organization?.major || "").trim() === DIALS_EXCLUDED_SYNTHETIC_MAJOR;
+}
+
 function prepareDirectoryData(payload) {
-  state.categories = payload.categories.map((category) => ({
-    id: category.id,
-    label: category.label,
-    organizations: category.organizations.map((org, orgIndex) => ({
-      major: org.major,
-      minor: org.minor,
-      categoryId: category.id,
-      categoryLabel: category.label,
-      orgIndex,
-      people: org.people.map((person, personIndex) => ({ ...person, _personIndex: personIndex })),
-    })),
-  }));
+  const excludedPersonKeys = new Set();
+  const includedPersonKeys = new Set();
+  let excludedAffiliationCount = 0;
+
+  state.categories = payload.categories.map((category) => {
+    const organizations = [];
+    category.organizations.forEach((org, orgIndex) => {
+      if (isExcludedSyntheticOrganization(org)) {
+        excludedAffiliationCount += org.people.length;
+        org.people.forEach((person) => excludedPersonKeys.add(String(person.personKey || "")));
+        return;
+      }
+      org.people.forEach((person) => includedPersonKeys.add(String(person.personKey || "")));
+      organizations.push({
+        major: org.major,
+        minor: org.minor,
+        categoryId: category.id,
+        categoryLabel: category.label,
+        orgIndex,
+        people: org.people.map((person, personIndex) => ({ ...person, _personIndex: personIndex })),
+      });
+    });
+    return { id: category.id, label: category.label, organizations };
+  });
+
+  const excludedOnly = [...excludedPersonKeys].filter((key) => key && !includedPersonKeys.has(key));
+  state.excludedSyntheticAffiliationCount = excludedAffiliationCount;
+  state.excludedSyntheticOnlyPersonCount = excludedOnly.length;
+  if (excludedOnly.length) {
+    console.warn(`학사학위 전공심화에만 존재하는 연락처 ${excludedOnly.length}건을 Dials에서 제외했습니다. 원 학과 소속 데이터를 확인해 주세요.`);
+  }
 
   for (const category of state.categories) {
     for (const org of category.organizations) {
@@ -2027,8 +2056,38 @@ async function createVcardFile() {
   }
 }
 
+function mergePeopleForVcard(selected) {
+  const merged = new Map();
+  for (const person of selected || []) {
+    const personKey = String(person?.key || "").trim();
+    if (!personKey) continue;
+    if (!merged.has(personKey)) {
+      merged.set(personKey, {
+        ...person,
+        key: personKey,
+        affiliations: [],
+        _vcardAffiliationKeys: new Set(),
+      });
+    }
+    const target = merged.get(personKey);
+    for (const affiliation of person?.affiliations || []) {
+      const affiliationKey = String(affiliation?.key || [
+        affiliation?.categoryId, affiliation?.major, affiliation?.minor, affiliation?.title,
+        affiliation?.duty, affiliation?.extension, affiliation?.mobile, affiliation?.externalNumber,
+      ].join("|")).trim();
+      if (target._vcardAffiliationKeys.has(affiliationKey)) continue;
+      target._vcardAffiliationKeys.add(affiliationKey);
+      target.affiliations.push(affiliation);
+    }
+  }
+  return [...merged.values()].map((person) => {
+    const { _vcardAffiliationKeys, ...clean } = person;
+    return clean;
+  });
+}
+
 function createVcardText(selected, options) {
-  return selected.map((person) => makeVcard(person, options)).join("\r\n");
+  return mergePeopleForVcard(selected).map((person) => makeVcard(person, options)).join("\r\n");
 }
 
 function representativeAffiliationForPerson(person) {
@@ -2037,13 +2096,31 @@ function representativeAffiliationForPerson(person) {
   return person?.affiliations?.find((affiliation) => affiliation.key === affiliationKey) || null;
 }
 
+function orderedAffiliationsForVcard(person) {
+  const affiliations = [...(person?.affiliations || [])];
+  const representative = representativeAffiliationForPerson(person);
+  if (!representative) return affiliations;
+  return [representative, ...affiliations.filter((affiliation) => affiliation.key !== representative.key)];
+}
+
+function uniquePhoneValues(affiliations, field, seen = new Set()) {
+  const result = [];
+  for (const affiliation of affiliations) {
+    const value = String(affiliation?.[field] || "").trim();
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    result.push(value);
+  }
+  return result;
+}
+
 function makeVcard(person, options) {
   const displayName = applyNameDecorations(person.name || "이름 없음", options.prefix, options.suffix);
   const contactRecord = person.recordType === "CONTACT";
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.4//KO",
+    "PRODID:-//Dials//Dials v0.7.5//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given
@@ -2051,8 +2128,10 @@ function makeVcard(person, options) {
     `N:${vcardEscape(displayName)};;;;`,
   ];
 
-  const mobiles = options.mobile ? unique(person.affiliations.map((a) => a.mobile).filter(Boolean)) : [];
-  const extensions = options.extension ? unique(person.affiliations.map((a) => a.extension).filter(Boolean)) : [];
+  const affiliations = orderedAffiliationsForVcard(person);
+  const seenPhoneNumbers = new Set();
+  const extensions = options.extension ? uniquePhoneValues(affiliations, "extension", seenPhoneNumbers) : [];
+  const mobiles = options.mobile ? uniquePhoneValues(affiliations, "mobile", seenPhoneNumbers) : [];
   extensions.forEach((number) => lines.push(`TEL;TYPE=WORK:${vcardEscape(number)}`));
   mobiles.forEach((number) => lines.push(`TEL;TYPE=${contactRecord ? "WORK" : "CELL"}:${vcardEscape(number)}`));
 
@@ -2070,14 +2149,20 @@ function makeVcard(person, options) {
 
   if (options.noteAffiliations) {
     noteLines.push("", "소속:");
-    person.affiliations.forEach((affiliation) => {
+    const multipleExtensions = extensions.length > 1;
+    const multipleMobiles = mobiles.length > 1;
+    const affiliationNotes = affiliations.map((affiliation) => {
       const path = affiliationPath(affiliation) || affiliation.categoryLabel || "소속 없음";
       const detail = options.noteTitleDuty ? affiliationTitleDutyNote(affiliation) : "";
-      noteLines.push(`- ${path}${detail ? ` — ${detail}` : ""}`);
+      const phoneDetails = [];
+      if (multipleExtensions && options.extension && affiliation.extension) phoneDetails.push(String(affiliation.extension).trim());
+      if (multipleMobiles && options.mobile && affiliation.mobile) phoneDetails.push(`개인 ${String(affiliation.mobile).trim()}`);
+      return `- ${path}${detail ? ` — ${detail}` : ""}${phoneDetails.length ? ` · ${phoneDetails.join(" · ")}` : ""}`;
     });
+    unique(affiliationNotes).forEach((line) => noteLines.push(line));
   } else if (options.noteTitleDuty) {
-    const titles = unique(person.affiliations.map((affiliation) => String(affiliation.title || "").trim()).filter(Boolean));
-    const duties = unique(person.affiliations.map((affiliation) => String(affiliation.duty || "").trim()).filter(Boolean));
+    const titles = unique(affiliations.map((affiliation) => String(affiliation.title || "").trim()).filter(Boolean));
+    const duties = unique(affiliations.map((affiliation) => String(affiliation.duty || "").trim()).filter(Boolean));
     if (titles.length) {
       noteLines.push("", "직함:");
       titles.forEach((title) => noteLines.push(`- ${title}`));

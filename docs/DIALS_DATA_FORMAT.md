@@ -1,6 +1,6 @@
 # Dials data format — schema 1.4
 
-Dials v0.7.4 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
+Dials v0.7.5 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
 
 Older schema 1.3 / 1.2 / 1.1 payloads are intentionally not accepted. The project has not been deployed yet, so the first release keeps one exact contract instead of carrying fallback branches.
 
@@ -141,6 +141,10 @@ Dials rejects the payload instead of guessing when any of these occur:
 
 Any future contract change must use a new schema version and an explicit migration/compatibility decision at that time.
 
+## Dials-only synthetic-organization filter
+
+HJU Phonebook build76 may include an academic organization whose `major` is exactly `학사학위 전공심화`. This is an Excel/display duplicate synthesized from the original academic assignment, not a distinct Dials affiliation. Dials v0.7.5 excludes that exact synthetic organization before building its browse/search/person model. No name or phone-number inference is used.
+
 ## vCard mapping
 
 - PERSON representative `title` → `TITLE`
@@ -149,7 +153,9 @@ Any future contract change must use a new schema version and an explicit migrati
 - PERSON/CONTACT → visible name in both `FN` and a non-empty structured `N` field
 - CONTACT → no `TITLE`
 - Generated VCF starts directly with `BEGIN:VCARD` (no UTF-8 BOM) and uses `text/vcard` for file handoff
-- all affiliations/titles/duties may be preserved in NOTE according to the user's export options
+- one `personKey` produces one VCARD entry; unique work/mobile numbers from all included affiliations are merged into that card
+- a user-selected representative affiliation is ordered first for `ORG`/`TITLE`, work-number order and affiliation NOTE order
+- all included affiliations/titles/duties may be preserved in NOTE according to the user's export options; when multiple distinct work numbers exist, affiliation NOTE lines also carry the corresponding work number
 
 ## Privacy boundary
 
