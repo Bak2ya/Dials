@@ -1,11 +1,19 @@
 # Dials UX notes
 
+## v0.7.1 strict pre-deployment data contract
+
+- Dials does not guess missing contact semantics. `title`, `duty`, `recordType`, and `personKey` come from the `.dials` payload exactly as exported.
+- A schema mismatch or malformed record is an explicit data error, not a cue to reconstruct values from names, organizations, or old aliases.
+- This strictness is intentional because the project has not been deployed yet; keeping one contract is preferred over carrying fallback paths into the first release.
+- User-visible behavior from v0.7.0 remains: duty is secondary/searchable information, CONTACT is labeled `시설·업체`, and duty never becomes a representative title or vCard `TITLE`.
+
 Dials is intentionally a **viewer**, not a management app.
 
 ## Start / lock screen
 
 - No connected data: show data connection and short usage instructions.
 - After selecting a `.dials` file: stay on the same screen and reveal the password field.
+- The password field includes an inline eye/eye-off button. Visibility changes only the input presentation; the value is not persisted and a new locked/replacement state starts hidden.
 - Previously connected encrypted data is reused from IndexedDB.
 - Passwords are never persisted.
 - Decrypted contacts are never written back to persistent storage.
@@ -30,12 +38,36 @@ Dials is intentionally a **viewer**, not a management app.
 
 Available through `⋯ → 연락처 저장` so the normal viewer stays uncluttered.
 
-- Multi-select people.
-- Name is mandatory.
-- Optional mobile / extension / affiliation / title-role fields.
-- Optional literal contact-name prefix and suffix, each remembered locally.
+- Multi-select people; selection is keyed by `personKey` and multi-affiliation people export once.
+- Selection rows intentionally omit phone numbers. The row focuses on the person's name, a compact representative affiliation/job button, and the right-side person checkbox.
+- Name is mandatory. Mobile and extension remain independently selectable.
+- `직장 / 기관` is a global standard-field option. The organization name is derived from the directory title.
+- A person's representative button can choose zero or one affiliation for standard contact fields. The immediate department becomes the second `ORG` component and its combined title/role becomes `TITLE`. Choosing a second representative asks before replacing the first.
+- `메모에 기록할 내용` independently controls the Dials data date, all affiliations, and all titles/roles. Rich multi-affiliation context may remain in `NOTE` even when only one representative department/title is placed in standard fields.
+- Optional literal contact-name prefix and suffix are each remembered locally.
 - One VCF may contain multiple VCARD entries.
-- Every VCARD note always contains the Dials `dataVersion` date.
+
+
+## v0.7.0 title / duty / facility-company contact semantics
+
+- Current UI wording uses `직함` rather than the old `직위/역할` bundle. Representative confirmation is `대표 부서/직함`.
+- `담당` is secondary searchable context, visually separate from title; it is never rendered as a representative title button.
+- `CONTACT` entries show an explicit `시설·업체` label. Missing type in older packages defaults to person without inference.
+- Contact export memo option is `직함 / 담당`; standard `TITLE` remains reserved for the selected representative title of PERSON records.
+
+
+## v0.6.0 layout, native scrolling, and representative contact fields
+
+- Large-screen header/search/content use the same maximum content width as the start screen. Do not widen the directory simply because the viewport is wide.
+- Dials no longer toggles a root `no-page-scroll` class. Native document scrolling is the source of truth; this supersedes the v0.4.1 short-page scroll suppression because dynamic disclosure animation could leave a long contact-export page accidentally locked.
+- Expanded browse/contact cards have no divider between the header and revealed body. Hierarchy is expressed by containment, spacing, chevron state, and child cards.
+- Contact-export left copy is `저장할 사람을 선택하세요.` without another `저장할 사람` heading. A compact sample job button explains that selecting it stores that affiliation's department plus title/role as the representative contact information.
+- Representative state belongs to `personKey`, not to the visible row. One representative at most; none is valid. If another affiliation is already representative, require explicit confirmation before switching. Removing a person from export also clears that person's representative choice.
+- The right-side checkbox remains the sole control for whether the person is exported. Organization/group checkboxes keep their mixed-state behavior.
+- The representative button can be configured independently of the person checkbox; only checked people export. Explicitly unchecking a person clears that person's representative choice.
+- Company/organization and representative department/title are separate concerns: company may be saved without a representative department; representative department/title may also be saved while company is disabled.
+- Current vCard mapping: company + department → `ORG:company;department`; representative job → `TITLE`; memo options → `NOTE`.
+- No `.dials` schema change.
 
 ## Appearance
 

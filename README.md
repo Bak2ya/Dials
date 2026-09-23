@@ -13,7 +13,7 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 1. 브라우저 또는 홈 화면 아이콘에서 Dials를 엽니다.
 2. 배포받은 `.dials` 데이터 파일을 최초 1회 연결합니다.
 3. 파일을 연결하면 같은 화면에 나타나는 암호 입력란에서 데이터 암호를 입력합니다.
-4. 이름, 소속, 내선번호, 개인번호로 검색하거나 `행정부서 / 학과 / 기타시설`을 따라 조회합니다.
+4. 이름, 소속, 직함, 담당, 내선번호, 개인번호로 검색하거나 `행정부서 / 학과 / 기타시설`을 따라 조회합니다.
 5. 이후 다시 실행할 때는 이전에 연결한 암호화 파일을 브라우저가 기억하므로 파일을 다시 선택하지 않고 암호만 입력하면 됩니다.
 
 ## 주요 기능
@@ -42,13 +42,38 @@ Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응�
 - 소속 전체 선택 및 일부 선택(혼합 상태) 지원
 - 다중소속 인물은 `personKey` 하나의 선택 상태를 공유하며 vCard에 중복 저장되지 않음
 - 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
-- vCard에 넣을 개인번호 / 내선번호 / 소속 / 직책·역할 선택
+- vCard 기본 필드에 넣을 개인번호 / 내선번호 / 직장·기관 선택
+- 연락처 저장 목록에서는 번호를 반복 표시하지 않고 이름 + 직함 대표 버튼 + 연락처 선택 체크박스에 집중
+- 연락처별 대표 버튼으로 다중소속 중 하나의 **부서 + 직함**을 대표 정보로 선택(대표를 선택하지 않는 것도 가능)
 - 이름은 항상 포함
 - 이름 앞/뒤에 원하는 문자열을 그대로 붙이는 옵션과 각각의 마지막 사용값 기억
-- 생성되는 모든 연락처 메모에 **Dials 데이터 기준일을 항상 기록**
+- `메모에 기록할 내용`에서 데이터 기준일 / 전체 소속 / 전체 직함·담당을 각각 선택
 - 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
 - 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
 
+
+
+## v0.7.1 배포 전 스키마 단일화
+
+- 아직 실제 배포 전이므로 레거시 호환 분기를 제거하고 **schema 1.4 하나만** 허용합니다.
+- 연락처 레코드는 `title=직함`, `duty=담당`, `recordType=PERSON|CONTACT`만 사용합니다. `job`, `role` 같은 중복/레거시 alias는 더 이상 규격에 존재하지 않습니다.
+- schema 버전이 다르거나 필수 필드가 빠졌거나 허용되지 않은 필드가 섞여 있으면 추측해서 열지 않고 명확한 오류를 표시합니다.
+- `personKey`, 이름, 유형도 누락 시 추정하지 않습니다. 같은 `personKey`가 `PERSON`과 `CONTACT` 유형을 섞어 쓰는 데이터는 거부합니다.
+- 담당 검색·보조표시, CONTACT의 `시설·업체` 표시, vCard NOTE 저장, 대표 부서/직함 기능은 v0.7.0 설계를 그대로 유지합니다.
+- 대응 exporter는 **HJU Phonebook V0.26.4 build75**입니다.
+
+
+## v0.6.0 연락처 대표 정보 · 메모 옵션 · 스크롤/화면 정리
+
+- 큰 화면에서도 Dials의 주요 콘텐츠 폭을 시작 화면과 같은 최대 폭으로 통일해, 넓은 모니터에서 조회/저장 UI가 과도하게 늘어나지 않도록 정리했습니다.
+- 시작 화면의 데이터 암호 입력칸 안에 눈 모양의 표시/숨기기 버튼을 추가했습니다. 입력값·커서 위치는 유지하며, 잠금/데이터 교체 등 새 암호 입력 상태에서는 다시 숨김으로 시작합니다.
+- v0.4.1부터 사용하던 JS 기반 `no-page-scroll` 잠금/해제 로직을 제거하고 브라우저의 기본 페이지 스크롤에 맡깁니다. 펼침 애니메이션과 viewport 재계산 타이밍에 따라 연락처 저장 화면의 스크롤이 간헐적으로 잠기던 원인을 제거했습니다.
+- 조회/연락처 저장의 펼친 카드에서 헤더와 하위 내용 사이의 얇은 구분선을 제거하고 기존 내부 여백만 유지합니다.
+- 연락처 저장의 왼쪽 영역은 별도 `저장할 사람` 제목 없이 `저장할 사람을 선택하세요.` 안내로 시작합니다. 선택 목록에서는 어차피 저장되는 전화번호를 숨기고 **이름 + 직위/역할 대표 버튼 + 오른쪽 사람 선택 체크박스**만 표시합니다.
+- 직위/역할 버튼(예: `처장`, `교수`)을 선택하면 그 카드가 속한 소속을 vCard의 대표 **부서**로, 해당 직위/역할을 `TITLE`로 기록합니다. 한 사람에게 대표 정보는 최대 하나이며, 다른 소속의 대표 버튼을 누르면 기존 대표에서 새 대표로 바꿀지 확인합니다. 대표 버튼을 다시 누르면 대표 정보 없음 상태로 돌아갈 수 있습니다.
+- `직장 / 기관`은 별도 전역 옵션으로 두며 현재 전화번호부 제목에서 기관명(예: `혜전대학교`)을 가져옵니다. 대표 부서가 함께 있으면 vCard `ORG`는 `기관;부서` 형태로 기록됩니다.
+- 기존의 소속/직책 저장 옵션과 `메모에 항상 포함` 안내를 재구성해 `메모에 기록할 내용` 하위 카드에서 **데이터 기준일 / 소속 / 직책·역할**을 각각 선택할 수 있게 했습니다. 다중소속의 전체 정보는 메모에 보존하면서 기본 연락처 필드는 대표 하나만 깔끔하게 표시할 수 있습니다.
+- `.dials` 포맷/schema는 변경하지 않았습니다. `personKey`, CSP, 암호 실패 지연, 10분 고정 자동 잠금, IME-safe 검색, History/Back, 안전한 데이터 교체, v0.5.5 Safari vCard 우회와 이름 앞/뒤 문자열 기능을 그대로 유지합니다.
 
 ## v0.5.5 iPhone 연락처 파일 저장 호환성 · 이름 앞/뒤 문자열
 
@@ -183,7 +208,7 @@ Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` �
 
 ## Windows 프로그램과의 관계
 
-Dials v0.5.5는 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지원하며, 기존 schema 1.1 파일도 계속 읽습니다.
+Dials v0.7.1은 **HJU Phonebook V0.26.4 build75**가 생성하는 `.dials` schema **1.4만** 지원합니다. 아직 배포 전이므로 1.3/1.2/1.1 호환 분기는 의도적으로 제거했습니다.
 
 현재 규격은 다음과 같습니다.
 
@@ -192,7 +217,10 @@ Dials v0.5.5는 **HJU Phonebook V0.24.1 build69**의 `.dials` schema 1.2를 지�
 - 포맷 버전: `1`
 - 암호 키 파생: PBKDF2-HMAC-SHA256, 310,000회
 - 암호화: AES-256-GCM
-- payload 스키마: `1.2` (`1.1`도 읽기 호환)
+- payload 스키마: `1.4`
+- 직함: `title`
+- 담당: `duty` (직함/TITLE과 분리)
+- 연락처 유형: `recordType` = `PERSON` / `CONTACT`
 - 외부번호 표시: `externalNumber: true`이면 전체 번호 뒤에 `(외부번호)` 표시
 - 동일인 식별: 실제 DB ID가 아닌 비표시 `personKey`
 - 소속 및 인물 순서: Windows의 시트1 출력순서
@@ -223,26 +251,20 @@ Dials는 공개 서버에서 최신 버전 여부를 별도로 조회하지 않�
 
 ## 연락처 저장
 
-`⋯ → 연락처 저장`에서는 `행정부서 / 학과 / 기타시설`부터 시작해 필요한 소속만 단계적으로 펼쳐 사람을 선택할 수 있습니다. 펼침/접힘은 왼쪽, 선택 체크박스는 오른쪽으로 분리되어 있으며, 주요 소속/하위 소속 전체 선택과 일부 선택(혼합 상태)을 지원합니다. 여러 소속에 함께 등장하는 동일 인물의 체크 상태는 서로 동기화됩니다. **다중소속 인물은 vCard에 중복 저장되지 않습니다.**
+`⋯ → 연락처 저장`에서는 `행정부서 / 학과 / 기타시설`부터 시작해 필요한 소속만 단계적으로 펼쳐 연락처를 선택할 수 있습니다. 펼침/접힘은 왼쪽, 선택 체크박스는 오른쪽으로 분리되어 있으며, 주요 소속/하위 소속 전체 선택과 일부 선택(혼합 상태)을 지원합니다. 여러 소속에 함께 등장하는 동일 연락처의 체크 상태는 서로 동기화됩니다. **다중소속 연락처는 vCard에 중복 저장되지 않습니다.**
 
 저장 항목은 다음 중 선택합니다.
 
 - 이름: 항상 포함
 - 개인번호
 - 내선번호
-- 소속
-- 직책 / 역할
+- 직장 / 기관
+- 대표 부서 / 직함
+- 메모: 데이터 기준일 / 소속 / 직함·담당
 
 필요하면 이름 앞과 뒤에 원하는 문자열을 붙일 수 있습니다. 예시 입력은 앞 `직장`, 뒤 `교수`이며, 공백과 기호를 포함해 사용자가 입력한 문자열을 그대로 사용합니다. 앞/뒤 문자열은 vCard 생성 시에만 적용되고 Dials 원본 데이터의 이름은 변경하지 않습니다.
 
-생성되는 모든 연락처의 메모에는 선택 여부와 관계없이 다음 정보가 항상 들어갑니다.
-
-```text
-Dials
-데이터 기준일: YYYY-MM-DD
-```
-
-따라서 나중에 휴대폰 연락처를 확인할 때 어느 날짜의 전화번호부에서 가져온 정보인지 확인할 수 있습니다.
+메모 항목은 각각 선택할 수 있습니다. `직함 / 담당`을 켜면 담당은 NOTE에만 보존되며 대표 `TITLE`에는 들어가지 않습니다. 따라서 `방사선`, `통신` 같은 담당 정보가 직함처럼 보이는 일을 막습니다.
 
 ## 개인정보 및 보안 구조
 
@@ -301,12 +323,26 @@ Dials is a lightweight, responsive contact viewer. The web app and the actual co
 - Organization-wide selection with mixed/partial checkbox state
 - Multi-affiliation people share one `personKey` selection and are exported only once
 - Dedicated multi-select vCard (`.vcf`) contact-export screen
-- Selectable vCard fields: mobile, extension, affiliation, title/role
+- Selectable standard vCard fields: mobile, extension, and company/organization
+- Contact-selection rows omit repeated phone numbers and focus on name + representative title/affiliation button + person checkbox
+- A per-person representative button chooses at most one department + title for standard contact fields; leaving all representative buttons off is supported
 - Optional literal contact-name prefix and suffix, with independent saved values
-- Data version date always written into every exported vCard note
+- Memo content is independently selectable: data-version date, all affiliations, and all titles/roles
 - Offline app-shell support after the first successful visit
 - No analytics, ads, external APIs, CDNs, or remote contact-data upload
 
+
+## v0.6.0 representative contact fields, memo options, and scroll/layout cleanup
+
+- The main content width on large screens now follows the same maximum width as the start/connection screen instead of stretching across wide monitors.
+- The password field now includes an inline eye/eye-off control. Toggling visibility keeps the value and caret/selection, and new locked/replacement states start hidden again.
+- The JavaScript `no-page-scroll` lock/unlock mechanism introduced for short pages was removed. Dials now relies on native document scrolling, eliminating an intermittent contact-export scroll lock caused by disclosure-animation/viewport timing.
+- The thin divider between an expanded card header and its revealed body is removed in both browsing and contact export; existing internal spacing remains.
+- Contact export removes the redundant `저장할 사람` subheading and hides phone numbers from selection rows. Rows focus on **name + compact representative title button + right-side person checkbox**.
+- A representative title button (for example `처장` or `교수`) selects that affiliation's department and title for the standard vCard fields. At most one representative affiliation can be active per `personKey`; choosing a different one asks for confirmation, and the active one can be toggled off to save no representative department/title.
+- `직장 / 기관` is a separate global option. The organization name is derived from the directory title (for example `혜전대학교`); with a representative department, vCard `ORG` is emitted as `organization;department`, while the representative title is emitted as `TITLE`.
+- The old affiliation/title export controls and always-on memo notice are replaced by a `메모에 기록할 내용` sub-card with independent options for the data-version date, all affiliations, and all titles/roles. This keeps rich multi-affiliation context in `NOTE` while allowing the standard contact fields to stay concise.
+- The `.dials` package/schema is unchanged. Existing `personKey` de-duplication, CSP, unlock backoff, fixed 10-minute auto-lock, IME-safe search, History/Back, safe data replacement, and v0.5.5 Safari/name-affix behavior are preserved.
 
 ## v0.5.5 iPhone contact-file download compatibility and name affixes
 
@@ -425,7 +461,7 @@ For installation, Dials uses the browser/PWA installation prompt when the platfo
 
 ## Windows exporter compatibility
 
-Dials v0.5.5 supports `.dials` schema 1.2 generated by **HJU Phonebook V0.24.1 build69**, while remaining compatible with schema 1.1 files.
+Dials v0.7.1 supports only `.dials` schema **1.4** generated by **HJU Phonebook V0.26.4 build75**. Because the project is still pre-deployment, legacy schema fallbacks were intentionally removed.
 
 Current format:
 
@@ -434,7 +470,10 @@ Current format:
 - `formatVersion`: `1`
 - KDF: PBKDF2-HMAC-SHA256, 310,000 iterations
 - Cipher: AES-256-GCM
-- Payload `schemaVersion`: `1.2` (reader remains compatible with `1.1`)
+- Payload `schemaVersion`: `1.4`
+- Title: `title` only
+- Duty: `duty` only
+- Record type: `recordType` = `PERSON` or `CONTACT`
 - External-number marker: `externalNumber: true` adds `(외부번호)` to the displayed full number
 - Person identity: opaque `personKey`
 - Organization and person order: Windows Sheet1 output order
@@ -465,7 +504,7 @@ Dials does not query a public service to decide whether a newer directory exists
 
 ## Contact export
 
-Contact export mirrors the main category → organization → person hierarchy. Organization-wide selection is supported, selection follows the shared `personKey` across multiple affiliations and search results, and one person is written to the generated VCF only once. The field-selection controls and independent literal name-prefix/name-suffix options remain available.
+Contact export mirrors the main category → organization → person hierarchy. Organization-wide selection is supported, selection follows the shared `personKey` across multiple affiliations and search results, and one person is written to the generated VCF only once. Selection rows intentionally omit phone numbers. A compact per-affiliation title button can choose one representative department/title for the standard vCard fields, while the global company/organization option and memo-content options remain independent. Literal name-prefix/name-suffix options remain available.
 
 ## Privacy and security model
 
