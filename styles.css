@@ -163,6 +163,7 @@ code { background: var(--surface-soft); border-radius: 6px; padding: 1px 5px; }
 input[type="password"], input[type="search"], input[type="text"] { width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); color: var(--text); padding: 10px 12px; outline: none; }
 input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
 input:disabled { opacity: 0.68; cursor: not-allowed; }
+.vcard-fallback-button { margin-top: 9px; }
 .form-message { min-height: 1.2em; margin: 9px 0 0; color: var(--muted); font-size: 0.9rem; }
 .form-message.error { color: var(--danger); }
 .form-message.success { color: var(--success); }

@@ -1,5 +1,13 @@
 # Dials UX notes
 
+## v0.7.3 iOS direct-open first
+
+- Real-device testing confirmed the v0.7.2 vCard payload itself is valid: when sent through Messages, iOS shows the multi-contact import screen correctly. Treat the vCard serialization as stable.
+- On iOS-like browsers, first navigate a new browsing context to a `data:text/vcard;charset=utf-8,...` resource. This is intended to let Safari/WebKit hand the vCard directly to the system contact-card viewer while keeping the Dials page/PWA alive behind it.
+- If opening a new browsing context is blocked, fall back automatically to the existing `text/vcard` Web Share file path, then to ordinary `.vcf` download.
+- If a browser opens a context but still does not hand off to Contacts, Dials cannot reliably detect that browser-level outcome. Keep a visible `공유로 다시 시도` action after a direct-open attempt so the user can explicitly invoke the proven Web Share fallback.
+- Do not alter the vCard body, schema 1.4, title/duty semantics, or CONTACT rules in this patch.
+
 ## v0.7.2 iOS vCard handoff
 
 - Generated vCard text starts directly with `BEGIN:VCARD`; do not prepend a UTF-8 BOM.

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.2";
+const APP_VERSION = "0.7.3";
 const DIALS_SCHEMA_VERSION = "1.4";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -57,6 +57,7 @@ const state = {
   unlockDelayUntil: 0,
   unlockDelayTimer: null,
   unlockInProgress: false,
+  lastVcardExport: null,
 };
 
 const el = {};
@@ -110,7 +111,7 @@ function cacheElements() {
     "selectedPeopleCount", "selectFilteredButton", "clearSelectionButton", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "includeOrganizationOption", "organizationOptionName",
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
-    "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
+    "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardFallbackShareButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
     "themeMenuButton", "themeColorMeta", "startVersion",
   ].forEach((id) => { el[id] = document.getElementById(id); });
@@ -204,6 +205,7 @@ function bindEvents() {
   el.suffixEnabledOption.addEventListener("change", updateNameDecorationControls);
   el.nameSuffixInput.addEventListener("input", updateNameDecorationControls);
   el.createVcardButton.addEventListener("click", createVcardFile);
+  el.vcardFallbackShareButton.addEventListener("click", shareLastVcardFallback);
 
   el.modalCloseButton.addEventListener("click", closeModal);
   el.modalBackdrop.addEventListener("click", (event) => {
@@ -310,6 +312,7 @@ function beginDataReplacement() {
   state.payload = null;
   state.people = [];
   state.categories = [];
+  state.lastVcardExport = null;
   state.selectedPeople.clear();
   state.representativeAffiliations.clear();
   state.searchQuery = "";
@@ -1447,6 +1450,8 @@ function enterContactExport() {
   saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.representativeAffiliations.clear();
+  state.lastVcardExport = null;
+  setVcardFallbackVisible(false);
   state.contactFilter = "";
   state.contactView = { type: "home" };
   state.contactDepth = 0;
@@ -1983,9 +1988,15 @@ async function createVcardFile() {
   const cards = createVcardText(selected, options);
   const filename = `Dials_Contacts_${state.payload?.dataVersion || todayIso()}.vcf`;
 
+  state.lastVcardExport = { cards, filename, count: selected.length };
+  setVcardFallbackVisible(false);
+
   try {
-    const delivery = await shareOrDownloadVcard(cards, filename);
-    if (delivery === "shared") {
+    const delivery = await deliverVcard(cards, filename);
+    if (delivery === "opened") {
+      setVcardMessage(`${selected.length}명의 연락처 가져오기 화면을 열었습니다. 열리지 않았다면 아래 공유 버튼으로 다시 시도해 주세요.`, false, true);
+      setVcardFallbackVisible(true);
+    } else if (delivery === "shared") {
       setVcardMessage(`${selected.length}명의 연락처를 만들었습니다. 공유 시트에서 연락처를 가져올 방법을 선택해 주세요.`, false, true);
     } else {
       setVcardMessage(`${selected.length}명의 연락처 파일을 만들었습니다. .vcf 파일을 열어 가져와 주세요.`, false, true);
@@ -1997,6 +2008,7 @@ async function createVcardFile() {
     }
     console.error(error);
     setVcardMessage("연락처 파일을 전달하지 못했습니다. 다시 시도해 주세요.", true);
+    setVcardFallbackVisible(true);
   }
 }
 
@@ -2016,7 +2028,7 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.2//KO",
+    "PRODID:-//Dials//Dials v0.7.3//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given
@@ -2097,30 +2109,75 @@ function isIOSLikeBrowser() {
 
 const VCARD_MIME_TYPE = "text/vcard";
 
-async function shareOrDownloadVcard(cards, filename) {
-  // iOS works more reliably when a real vCard File is handed to the system
-  // share sheet. This keeps the MIME type intact all the way to Messages/Mail/
-  // Contacts instead of disguising the file as a generic binary download.
-  if (isIOSLikeBrowser() && typeof File === "function" && typeof navigator.share === "function") {
-    const file = new File([cards], filename, { type: VCARD_MIME_TYPE });
-    const shareData = { files: [file], title: "Dials 연락처" };
-    const canShareFiles = typeof navigator.canShare !== "function" || navigator.canShare(shareData);
-    if (canShareFiles) {
-      try {
-        await navigator.share(shareData);
-        return "shared";
-      } catch (error) {
-        if (error?.name === "AbortError") throw error;
-        // If Web Share rejects the generated file for a browser-specific reason,
-        // fall back to a normal text/vcard download rather than changing MIME.
-        console.warn("vCard file sharing failed; falling back to download.", error);
-      }
-    }
+function tryOpenVcardDirectly(cards) {
+  if (!isIOSLikeBrowser() || typeof window.open !== "function") return false;
+
+  // Safari/Chrome on iOS can hand a navigated text/vcard resource to the
+  // system contact-card viewer. Open a new browsing context first so the Dials
+  // PWA/page remains intact behind the native import UI. If the popup is
+  // blocked, return false immediately and continue to Web Share.
+  const dataUrl = `data:${VCARD_MIME_TYPE};charset=utf-8,${encodeURIComponent(cards)}`;
+  try {
+    const opened = window.open(dataUrl, "_blank");
+    if (!opened) return false;
+    try { opened.opener = null; } catch {}
+    return true;
+  } catch (error) {
+    console.warn("Direct vCard opening failed; falling back to sharing.", error);
+    return false;
+  }
+}
+
+async function tryShareVcard(cards, filename) {
+  if (!isIOSLikeBrowser() || typeof File !== "function" || typeof navigator.share !== "function") return false;
+  const file = new File([cards], filename, { type: VCARD_MIME_TYPE });
+  const shareData = { files: [file], title: "Dials 연락처" };
+  const canShareFiles = typeof navigator.canShare !== "function" || navigator.canShare(shareData);
+  if (!canShareFiles) return false;
+  await navigator.share(shareData);
+  return true;
+}
+
+async function deliverVcard(cards, filename, { skipDirect = false } = {}) {
+  if (!skipDirect && tryOpenVcardDirectly(cards)) return "opened";
+
+  try {
+    if (await tryShareVcard(cards, filename)) return "shared";
+  } catch (error) {
+    if (error?.name === "AbortError") throw error;
+    console.warn("vCard file sharing failed; falling back to download.", error);
   }
 
   const blob = new Blob([cards], { type: VCARD_MIME_TYPE });
   downloadBlob(blob, filename);
   return "downloaded";
+}
+
+async function shareLastVcardFallback() {
+  const current = state.lastVcardExport;
+  if (!current) return;
+  setVcardFallbackVisible(false);
+  try {
+    const delivery = await deliverVcard(current.cards, current.filename, { skipDirect: true });
+    if (delivery === "shared") {
+      setVcardMessage(`${current.count}명의 연락처를 만들었습니다. 공유 시트에서 연락처를 가져올 방법을 선택해 주세요.`, false, true);
+    } else {
+      setVcardMessage(`${current.count}명의 연락처 파일을 만들었습니다. .vcf 파일을 열어 가져와 주세요.`, false, true);
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      setVcardMessage("연락처 공유를 취소했습니다.", false, false);
+      setVcardFallbackVisible(true);
+      return;
+    }
+    console.error(error);
+    setVcardMessage("연락처 파일을 전달하지 못했습니다. 다시 시도해 주세요.", true);
+    setVcardFallbackVisible(true);
+  }
+}
+
+function setVcardFallbackVisible(visible) {
+  el.vcardFallbackShareButton.classList.toggle("hidden", !visible);
 }
 
 function downloadBlob(blob, filename) {
