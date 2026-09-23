@@ -1,6 +1,6 @@
 # Dials data format — schema 1.4
 
-Dials v0.7.1 and HJU Phonebook V0.26.4 build75 use one strict pre-deployment contract: **schema 1.4**.
+Dials v0.7.2 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
 
 Older schema 1.3 / 1.2 / 1.1 payloads are intentionally not accepted. The project has not been deployed yet, so the first release keeps one exact contract instead of carrying fallback branches.
 
@@ -146,7 +146,9 @@ Any future contract change must use a new schema version and an explicit migrati
 - PERSON representative `title` → `TITLE`
 - representative organization path → `ORG`
 - `duty` → optional NOTE content only
-- CONTACT → `FN` + empty structured `N`; no `TITLE`
+- PERSON/CONTACT → visible name in both `FN` and a non-empty structured `N` field
+- CONTACT → no `TITLE`
+- Generated VCF starts directly with `BEGIN:VCARD` (no UTF-8 BOM) and uses `text/vcard` for file handoff
 - all affiliations/titles/duties may be preserved in NOTE according to the user's export options
 
 ## Privacy boundary

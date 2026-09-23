@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.1";
+const APP_VERSION = "0.7.2";
 const DIALS_SCHEMA_VERSION = "1.4";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -1964,7 +1964,7 @@ function updateOrganizationOptionLabel() {
   if (!organization) el.includeOrganizationOption.checked = false;
 }
 
-function createVcardFile() {
+async function createVcardFile() {
   const selected = state.people.filter((person) => state.selectedPeople.has(person.key));
   if (!selected.length) {
     setVcardMessage("저장할 사람을 한 명 이상 선택해 주세요.", true);
@@ -1980,11 +1980,28 @@ function createVcardFile() {
     prefix: el.prefixEnabledOption.checked ? el.namePrefixInput.value : "",
     suffix: el.suffixEnabledOption.checked ? el.nameSuffixInput.value : "",
   };
-  const cards = selected.map((person) => makeVcard(person, options)).join("\r\n");
-  const blob = new Blob(["\ufeff", cards], { type: "text/vcard;charset=utf-8" });
+  const cards = createVcardText(selected, options);
   const filename = `Dials_Contacts_${state.payload?.dataVersion || todayIso()}.vcf`;
-  downloadBlob(blob, filename);
-  setVcardMessage(`${selected.length}명의 연락처 파일을 만들었습니다. 기기의 연락처 앱에서 가져와 주세요.`, false, true);
+
+  try {
+    const delivery = await shareOrDownloadVcard(cards, filename);
+    if (delivery === "shared") {
+      setVcardMessage(`${selected.length}명의 연락처를 만들었습니다. 공유 시트에서 연락처를 가져올 방법을 선택해 주세요.`, false, true);
+    } else {
+      setVcardMessage(`${selected.length}명의 연락처 파일을 만들었습니다. .vcf 파일을 열어 가져와 주세요.`, false, true);
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      setVcardMessage("연락처 공유를 취소했습니다.", false, false);
+      return;
+    }
+    console.error(error);
+    setVcardMessage("연락처 파일을 전달하지 못했습니다. 다시 시도해 주세요.", true);
+  }
+}
+
+function createVcardText(selected, options) {
+  return selected.map((person) => makeVcard(person, options)).join("\r\n");
 }
 
 function representativeAffiliationForPerson(person) {
@@ -1999,8 +2016,12 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
+    "PRODID:-//Dials//Dials v0.7.2//KO",
     `FN:${vcardEscape(displayName)}`,
-    contactRecord ? "N:;;;;" : `N:;${vcardEscape(displayName)};;;`,
+    // Keep a non-empty structured name for iOS Contacts. Dials stores one
+    // display-name string rather than splitting Korean names into family/given
+    // components, so the full visible name is placed in the family-name slot.
+    `N:${vcardEscape(displayName)};;;;`,
   ];
 
   const mobiles = options.mobile ? unique(person.affiliations.map((a) => a.mobile).filter(Boolean)) : [];
@@ -2074,15 +2095,36 @@ function isIOSLikeBrowser() {
   return iOSDevice || iPadDesktopMode;
 }
 
+const VCARD_MIME_TYPE = "text/vcard";
+
+async function shareOrDownloadVcard(cards, filename) {
+  // iOS works more reliably when a real vCard File is handed to the system
+  // share sheet. This keeps the MIME type intact all the way to Messages/Mail/
+  // Contacts instead of disguising the file as a generic binary download.
+  if (isIOSLikeBrowser() && typeof File === "function" && typeof navigator.share === "function") {
+    const file = new File([cards], filename, { type: VCARD_MIME_TYPE });
+    const shareData = { files: [file], title: "Dials 연락처" };
+    const canShareFiles = typeof navigator.canShare !== "function" || navigator.canShare(shareData);
+    if (canShareFiles) {
+      try {
+        await navigator.share(shareData);
+        return "shared";
+      } catch (error) {
+        if (error?.name === "AbortError") throw error;
+        // If Web Share rejects the generated file for a browser-specific reason,
+        // fall back to a normal text/vcard download rather than changing MIME.
+        console.warn("vCard file sharing failed; falling back to download.", error);
+      }
+    }
+  }
+
+  const blob = new Blob([cards], { type: VCARD_MIME_TYPE });
+  downloadBlob(blob, filename);
+  return "downloaded";
+}
+
 function downloadBlob(blob, filename) {
-  // Recent iOS Safari/WebKit can reject client-generated Blob downloads for
-  // otherwise valid MIME types. Re-wrapping only on iOS-like WebKit as a
-  // generic binary download preserves the .vcf filename while avoiding that
-  // download path. Other browsers keep the original vCard MIME type.
-  const downloadBlob = isIOSLikeBrowser()
-    ? new Blob([blob], { type: "application/octet-stream" })
-    : blob;
-  const url = URL.createObjectURL(downloadBlob);
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;

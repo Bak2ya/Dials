@@ -1,5 +1,14 @@
 # Dials UX notes
 
+## v0.7.2 iOS vCard handoff
+
+- Generated vCard text starts directly with `BEGIN:VCARD`; do not prepend a UTF-8 BOM.
+- Both PERSON and CONTACT write the visible name into `FN` and into a non-empty structured `N` field. CONTACT remains a non-person semantic record and still never emits `TITLE`.
+- On iOS-like browsers, prefer `navigator.share()` with a real `.vcf` `File` using `text/vcard`. If file sharing is unavailable or fails for a browser-specific reason, fall back to an ordinary `text/vcard` download. User cancellation is not treated as an error.
+- Do not restore the `application/octet-stream` MIME disguise: real-device testing showed that download success alone is insufficient if Contacts cannot reliably parse/import the result.
+- One VCF may still contain multiple VCARD entries.
+
+
 ## v0.7.1 strict pre-deployment data contract
 
 - Dials does not guess missing contact semantics. `title`, `duty`, `recordType`, and `personKey` come from the `.dials` payload exactly as exported.
@@ -208,4 +217,4 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Name decoration is one compact setting group: prefix control, suffix control, then one combined preview directly below them.
 - Preview base name is `박주성`. Example placeholders are `직장` for the prefix and `교수` for the suffix.
 - Prefix/suffix are literal. Do not auto-insert, trim, or normalize spaces. Users control spaces and punctuation themselves.
-- iOS-like WebKit gets a download-compatibility wrapper (`application/octet-stream`) for generated `.vcf` Blob downloads; filename and vCard contents stay unchanged. Other browsers keep the original MIME path.
+- Historical note: v0.5.5 used an `application/octet-stream` download wrapper. It is superseded by v0.7.2; current builds keep `text/vcard` and prefer iOS file sharing.
