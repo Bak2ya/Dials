@@ -1,5 +1,18 @@
 # Dials UX notes
 
+
+## v0.7.6 current UX additions
+
+- Preserve the approved overall viewer layout. Changes are local refinements, not a redesign.
+- Password visibility icon has no filled normal/hover background; keyboard focus remains visible. The custom Dials search-clear X is the only clear control shown.
+- Regular organization FAX is quiet right-aligned header metadata. Facility category is a flat exception: category → facility card, with facility FAX in the card. A real facility contact person is rendered inside that same card rather than adding hierarchy.
+- Contact-export top categories have right-side select-all checkboxes and native indeterminate state. Person/checkbox rows are visually seamless with no vertical cell divider.
+- Bulk representative action is `대표 직함 모두 선택`; it preserves existing representative choices and fills only missing choices using the first current affiliation. When every selected person has a representative it becomes `대표 직함 선택 해제`.
+- Save-options heading is `연락처에 저장할 정보`; `직장 / 기관` shows its organization value on the same row. Suffix example is `조교`.
+- Android/iPhone help is always visible below `연락처 저장하기`; inline action samples visually match the current theme's primary action without being clickable.
+- FAX is viewer/search context only in this release; it is not silently added to vCard.
+
+
 ## v0.7.5 multi-affiliation contact export
 
 - Freeze the v0.7.4 visible layout. The change is export/data filtering only.

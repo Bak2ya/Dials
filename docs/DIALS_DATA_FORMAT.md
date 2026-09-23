@@ -1,8 +1,8 @@
-# Dials data format — schema 1.4
+# Dials data format — schema 1.5
 
-Dials v0.7.5 and HJU Phonebook V0.26.5 build76 use one strict pre-deployment contract: **schema 1.4**.
+Dials v0.7.6 and HJU Phonebook V0.26.6 build77 use one strict pre-deployment contract: **schema 1.5**.
 
-Older schema 1.3 / 1.2 / 1.1 payloads are intentionally not accepted. The project has not been deployed yet, so the first release keeps one exact contract instead of carrying fallback branches.
+Schema 1.4 and older payloads are intentionally not accepted. The project is still before broad deployment, so the current release keeps one exact contract instead of carrying fallback branches.
 
 ## File wrapper
 
@@ -37,7 +37,7 @@ The top-level object has exactly these fields:
 
 ```json
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "dataVersion": "2026-09-23",
   "generatedAt": "2026-09-23T10:00:00+09:00",
   "period": "2026.09",
@@ -46,7 +46,7 @@ The top-level object has exactly these fields:
 }
 ```
 
-`schemaVersion` must be exactly `1.4`.
+`schemaVersion` must be exactly `1.5`.
 
 ## Category
 
@@ -70,15 +70,21 @@ Dials preserves organization and contact order from the exporter.
 
 ## Organization
 
-Each organization has exactly:
+Each organization has exactly four fields:
 
 ```json
 {
   "major": "총무처",
   "minor": "총무팀",
+  "fax": "041-630-1234",
   "people": []
 }
 ```
+
+- `major`: parent organization label.
+- `minor`: child organization/facility label.
+- `fax`: explicit organization FAX from HJU Phonebook; empty string when none exists.
+- `people`: contact records for that organization. A FAX-only organization may legitimately have an empty array.
 
 The key remains `people`, but an item may represent either a person or a facility/company contact. `recordType` is the only source of that meaning.
 
@@ -121,29 +127,40 @@ Facility/company example:
 - `title`: **직함** only. This is the only source for representative-title UI and vCard `TITLE` for PERSON records.
 - `duty`: **담당** only. Searchable and optionally preserved in NOTE. It never becomes `TITLE`.
 - `recordType`: exactly `PERSON` or `CONTACT`. Dials never infers this from strings.
-- `extension`: full internal/work number string; may be empty only when `mobile` is present.
-- `mobile`: mobile/contact number string; may be empty only when `extension` is present.
+- `extension`: work/internal number string. HJU build77 exports it independently of Excel sheet number-display settings; explicit person-level number hiding still removes it.
+- `mobile`: personal/mobile contact number. Same visibility rule as `extension`.
 - `externalNumber`: boolean marker for an extension that is not callable through the internal extension system.
 
-There are deliberately no `job` or `role` alias fields in schema 1.4.
+There are deliberately no `job` or `role` alias fields.
 
 ## Strict validation
 
 Dials rejects the payload instead of guessing when any of these occur:
 
-- schema version is not `1.4`
+- schema version is not `1.5`
 - required fields are missing
 - unexpected fields are present
 - a field has the wrong type
+- organization `fax` is not a string
 - `recordType` is not `PERSON` or `CONTACT`
-- both `extension` and `mobile` are empty
+- a contact record has both `extension` and `mobile` empty
 - the same `personKey` is reused with a different `recordType`
+
+A FAX-only organization is valid even when `people` is empty.
 
 Any future contract change must use a new schema version and an explicit migration/compatibility decision at that time.
 
 ## Dials-only synthetic-organization filter
 
-HJU Phonebook build76 may include an academic organization whose `major` is exactly `학사학위 전공심화`. This is an Excel/display duplicate synthesized from the original academic assignment, not a distinct Dials affiliation. Dials v0.7.5 excludes that exact synthetic organization before building its browse/search/person model. No name or phone-number inference is used.
+HJU Phonebook may include an academic organization whose `major` is exactly `학사학위 전공심화`. This is an Excel/display duplicate synthesized from the original academic assignment, not a distinct Dials affiliation. Dials excludes that exact synthetic organization before building browse/search/person/vCard models. No name or phone-number inference is used.
+
+## Viewer-specific presentation
+
+- Regular departments/majors may show `fax` as right-side organization metadata.
+- `facility` uses a flat presentation: expanding `기타시설` shows facility cards directly.
+- A facility CONTACT whose visible name repeats the facility name is not duplicated visually.
+- A PERSON/contact-person associated with a facility is shown inside that same facility card with its own numbers and title/duty.
+- FAX is searchable. It is not currently emitted into vCard because there is no user-facing FAX save option.
 
 ## vCard mapping
 
@@ -159,4 +176,4 @@ HJU Phonebook build76 may include an academic organization whose `major` is exac
 
 ## Privacy boundary
 
-The HJU Phonebook SQLite database is never distributed to Dials. Exported `.dials` data excludes employee numbers, notes, internal DB IDs, room/install metadata, and change logs.
+The HJU Phonebook SQLite database is never distributed to Dials. Exported `.dials` data excludes employee numbers, internal notes, DB IDs, room/install metadata and change logs.

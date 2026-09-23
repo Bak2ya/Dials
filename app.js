@@ -1,10 +1,10 @@
 "use strict";
 
-const APP_VERSION = "0.7.5";
-const DIALS_SCHEMA_VERSION = "1.4";
+const APP_VERSION = "0.7.6";
+const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
-const DIALS_ORGANIZATION_FIELDS = Object.freeze(["major", "minor", "people"]);
+const DIALS_ORGANIZATION_FIELDS = Object.freeze(["major", "minor", "fax", "people"]);
 const DIALS_RECORD_FIELDS = Object.freeze(["personKey", "name", "title", "duty", "recordType", "extension", "mobile", "externalNumber"]);
 const DIALS_EXCLUDED_SYNTHETIC_MAJOR = "학사학위 전공심화";
 const DB_NAME = "DialsLocalStore";
@@ -110,7 +110,7 @@ function cacheElements() {
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
     "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
-    "selectedPeopleCount", "contactBrowseView",
+    "selectedPeopleCount", "contactBrowseView", "representativeBulkButton",
     "includeMobileOption", "includeExtensionOption", "includeOrganizationOption", "organizationOptionName",
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
     "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
@@ -195,6 +195,7 @@ function bindEvents() {
   });
   el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
   el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
+  el.representativeBulkButton.addEventListener("click", toggleBulkRepresentativeAffiliations);
   el.contentView.addEventListener("click", handleBrowseTreeClick);
   el.prefixEnabledOption.addEventListener("change", updateNameDecorationControls);
   el.namePrefixInput.addEventListener("input", updateNameDecorationControls);
@@ -680,6 +681,7 @@ function validatePayload(payload) {
       assertExactKeys(organization, DIALS_ORGANIZATION_FIELDS, organizationPath);
       assertStringField(organization, "major", organizationPath);
       assertStringField(organization, "minor", organizationPath);
+      assertStringField(organization, "fax", organizationPath);
       if (!Array.isArray(organization.people)) throw new Error(`${organizationPath}.people 값은 배열이어야 합니다.`);
 
       organization.people.forEach((record, recordIndex) => {
@@ -728,6 +730,7 @@ function prepareDirectoryData(payload) {
       organizations.push({
         major: org.major,
         minor: org.minor,
+        fax: org.fax,
         categoryId: category.id,
         categoryLabel: category.label,
         orgIndex,
@@ -753,6 +756,7 @@ function prepareDirectoryData(payload) {
         record._categoryLabel = org.categoryLabel;
         record._major = org.major;
         record._minor = org.minor;
+        record._fax = org.fax || "";
       }
     }
   }
@@ -788,6 +792,7 @@ function buildUniquePeople(categories) {
           extension: record.extension,
           mobile: record.mobile,
           externalNumber: record.externalNumber,
+          fax: org.fax || "",
         });
         sourceIndex += 1;
       }
@@ -989,13 +994,59 @@ function browseCategoryNodeHtml(category) {
   const treeKey = categoryTreeKey(category.id);
   const expanded = state.browseExpanded.has(treeKey);
   const groups = contactMajorGroups(category);
-  const children = expanded
-    ? browseChildrenShellHtml(treeKey, groups.map((group) => browseMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다."))
-    : "";
+  const isFacility = category.id === "facility";
+  const detail = isFacility ? `${category.organizations.length}개` : `${groups.length}개 소속`;
+  const childHtml = isFacility
+    ? browseFacilityListHtml(category)
+    : groups.map((group) => browseMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.");
+  const children = expanded ? browseChildrenShellHtml(treeKey, childHtml) : "";
   return `<section class="browse-tree-node level-0${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
-    ${browseDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속` })}
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail })}
     ${children}
   </section>`;
+}
+
+function browseFacilityListHtml(category) {
+  const cards = (category?.organizations || []).map((org) => browseFacilityCardHtml(org)).join("");
+  return `<div class="facility-flat-list">${cards || renderEmptyHtml("표시할 기타시설이 없습니다.")}</div>`;
+}
+
+function facilityDisplayName(org) {
+  const minor = String(org?.minor || "").trim();
+  const major = String(org?.major || "").trim();
+  if (minor) return minor;
+  if (major && major !== "기타시설") return major;
+  return "기타시설";
+}
+
+function browseFacilityCardHtml(org) {
+  const facilityName = facilityDisplayName(org);
+  const records = uniqueOrgRecords(org);
+  const fax = String(org?.fax || "").trim();
+  const recordHtml = records.map((record) => browseFacilityRecordHtml(record, facilityName)).join("");
+  return `<article class="facility-flat-card">
+    <div class="facility-flat-header">
+      <strong>${escapeHtml(facilityName)}</strong>
+      ${fax ? `<span class="facility-flat-fax">FAX ${escapeHtml(fax)}</span>` : ""}
+    </div>
+    ${recordHtml ? `<div class="facility-flat-records">${recordHtml}</div>` : ""}
+  </article>`;
+}
+
+function browseFacilityRecordHtml(record, facilityName) {
+  const name = String(record?.name || "").trim() || facilityName;
+  const title = String(record?.title || "").trim();
+  const duty = String(record?.duty || "").trim();
+  const recordType = record?.recordType || "CONTACT";
+  const showPerson = recordType === "PERSON" || normalizeText(name) !== normalizeText(facilityName) || Boolean(title);
+  const lines = [];
+  if (record?.extension) lines.push(phoneLineHtml("연락처", record.extension, record.externalNumber));
+  if (record?.mobile) lines.push(phoneLineHtml(recordType === "PERSON" ? "개인번호" : "연락번호", record.mobile));
+  return `<div class="facility-flat-record">
+    ${showPerson ? `<div class="facility-flat-person"><strong>${escapeHtml(name)}</strong>${title ? `<span>${escapeHtml(title)}</span>` : ""}</div>` : ""}
+    ${duty ? `<div class="person-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
+    ${lines.length ? `<div class="browse-tree-phone-lines">${lines.join("")}</div>` : ""}
+  </div>`;
 }
 
 function browseMajorNodeHtml(category, group) {
@@ -1018,8 +1069,9 @@ function browseMajorNodeHtml(category, group) {
     ${childItems.map(({ org, orgIndex }) => browseOrganizationNodeHtml(category, org, orgIndex)).join("")}
     ${!directPeople.length && !childItems.length ? renderEmptyHtml("표시할 인물이 없습니다.") : ""}`;
   const children = expanded ? browseChildrenShellHtml(treeKey, childHtml) : "";
+  const directFax = unique(directItems.map(({ org }) => String(org.fax || "").trim()).filter(Boolean))[0] || "";
   return `<section class="browse-tree-node level-1${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
-    ${browseDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명` })}
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, rightDetail: directFax ? `FAX ${directFax}` : "" })}
     ${children}
   </section>`;
 }
@@ -1031,17 +1083,19 @@ function browseOrganizationNodeHtml(category, org, orgIndex) {
   const records = uniqueOrgRecords(org);
   const childHtml = records.map((record) => browseTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.");
   const children = expanded ? browseChildrenShellHtml(treeKey, childHtml) : "";
+  const fax = String(org?.fax || "").trim();
   return `<section class="browse-tree-node level-2${expanded ? " expanded" : ""}" data-browse-node-key="${escapeAttr(treeKey)}">
-    ${browseDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${records.length}명` })}
+    ${browseDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${records.length}명`, rightDetail: fax ? `FAX ${fax}` : "" })}
     ${children}
   </section>`;
 }
 
-function browseDisclosureRowHtml({ treeKey, expanded, level, label, detail = "" }) {
+function browseDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", rightDetail = "" }) {
   return `<div class="browse-tree-row" data-tree-level="${Number(level) || 0}">
     <button class="browse-tree-toggle" type="button" data-browse-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
       <span class="browse-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
       <span class="browse-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
+      ${rightDetail ? `<span class="tree-row-meta">${escapeHtml(rightDetail)}</span>` : ""}
     </button>
   </div>`;
 }
@@ -1199,6 +1253,7 @@ function searchPersonCardHtml(person) {
       phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">${label} ${escapeHtml(display)}</a>`);
     }
     if (a.mobile && a.mobile !== commonMobile) phones.push(`<a href="tel:${escapeAttr(telHref(a.mobile))}">개인 ${escapeHtml(a.mobile)}</a>`);
+    if (a.fax) phones.push(`<a href="tel:${escapeAttr(telHref(a.fax))}">FAX ${escapeHtml(a.fax)}</a>`);
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.title ? `<span>${escapeHtml(a.title)}</span>` : ""}${a.recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
       ${a.duty ? `<div class="person-duty">담당 · ${escapeHtml(a.duty)}</div>` : ""}
@@ -1216,7 +1271,7 @@ function personMatchesTokens(person, tokens) {
   if (!tokens.length) return true;
   const textParts = [person.name];
   person.affiliations.forEach((a) => textParts.push(
-    a.categoryLabel, a.major, a.minor, a.title, a.duty, a.extension, a.mobile,
+    a.categoryLabel, a.major, a.minor, a.title, a.duty, a.extension, a.mobile, a.fax,
     a.recordType === "CONTACT" ? "시설 업체 연락처" : "인물",
     a.externalNumber ? "외부번호" : "",
   ));
@@ -1582,13 +1637,107 @@ function contactCategoryNodeHtml(category) {
   const treeKey = categoryTreeKey(category.id);
   const expanded = state.contactExpanded.has(treeKey);
   const groups = contactMajorGroups(category);
-  const children = expanded
-    ? contactChildrenShellHtml(treeKey, groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다."))
-    : "";
+  const keys = categoryPersonKeys(category.id);
+  const selected = selectionStateForKeys(keys);
+  const isFacility = category.id === "facility";
+  const childHtml = isFacility
+    ? contactFacilityListHtml(category)
+    : groups.map((group) => contactMajorNodeHtml(category, group)).join("") || renderEmptyHtml("표시할 소속이 없습니다.");
+  const children = expanded ? contactChildrenShellHtml(treeKey, childHtml) : "";
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "category",
+    categoryId: category.id,
+    label: `${category.label} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  const detail = isFacility ? `${category.organizations.length}개` : `${groups.length}개 소속`;
   return `<section class="contact-tree-node level-0${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
-    ${contactDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail: `${groups.length}개 소속`, checkboxHtml: "" })}
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 0, label: category.label, detail, checkboxHtml })}
     ${children}
   </section>`;
+}
+
+function contactFacilityListHtml(category) {
+  const rows = (category?.organizations || []).map((org, orgIndex) => contactFacilityCardHtml(category, org, orgIndex)).join("");
+  return `<div class="facility-flat-list">${rows || renderEmptyHtml("표시할 기타시설이 없습니다.")}</div>`;
+}
+
+function contactFacilityCardHtml(category, org, orgIndex) {
+  const facilityName = facilityDisplayName(org);
+  const records = uniqueOrgRecords(org);
+  const keys = records.map((record) => String(record._personKey || "")).filter(Boolean);
+  const selected = selectionStateForKeys(keys);
+  const checkboxHtml = contactTreeCheckboxHtml({
+    type: "org",
+    categoryId: category.id,
+    orgIndex,
+    label: `${facilityName} 전체 선택`,
+    selected,
+    disabled: !keys.length,
+  });
+  const fax = String(org?.fax || "").trim();
+
+  if (records.length <= 1) {
+    const record = records[0] || null;
+    let detailHtml = "";
+    if (record) {
+      const personKey = String(record._personKey || "");
+      const person = state.people.find((item) => item.key === personKey);
+      const affiliation = recordAffiliation(record);
+      const name = String(record.name || "").trim();
+      const title = String(record.title || "").trim();
+      const showPerson = record.recordType === "PERSON" || normalizeText(name) !== normalizeText(facilityName) || Boolean(title);
+      const representativeButton = showPerson ? contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]) : "";
+      if (showPerson || record.duty || representativeButton) {
+        detailHtml = `<div class="contact-facility-person-main">
+          ${showPerson ? `<strong>${escapeHtml(name || "이름 없음")}</strong>${title ? `<small>${escapeHtml(title)}</small>` : ""}` : ""}
+          ${record.duty ? `<small>담당 · ${escapeHtml(record.duty)}</small>` : ""}
+          ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
+        </div>`;
+      }
+    }
+    return `<section class="contact-facility-card">
+      <div class="contact-facility-head">
+        <div class="contact-facility-main">
+          <div class="contact-facility-title"><strong>${escapeHtml(facilityName)}</strong>${fax ? `<span>FAX ${escapeHtml(fax)}</span>` : ""}</div>
+          ${detailHtml}
+        </div>
+        ${checkboxHtml}
+      </div>
+    </section>`;
+  }
+
+  const peopleHtml = records.map((record) => contactFacilityPersonHtml(record)).join("");
+  return `<section class="contact-facility-card">
+    <div class="contact-facility-head">
+      <div class="contact-facility-main"><div class="contact-facility-title"><strong>${escapeHtml(facilityName)}</strong>${fax ? `<span>FAX ${escapeHtml(fax)}</span>` : ""}</div></div>
+      ${checkboxHtml}
+    </div>
+    <div class="contact-facility-people">${peopleHtml}</div>
+  </section>`;
+}
+
+function contactFacilityPersonHtml(record) {
+  const personKey = String(record?._personKey || "");
+  const selected = state.selectedPeople.has(personKey);
+  const name = String(record?.name || "").trim() || "이름 없음";
+  const affiliation = recordAffiliation(record);
+  const person = state.people.find((item) => item.key === personKey);
+  const representativeButton = contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]);
+  const title = String(record?.title || "").trim();
+  return `<div class="contact-facility-person">
+    <div class="contact-facility-person-main">
+      <strong>${escapeHtml(name)}</strong>
+      ${title ? `<small>${escapeHtml(title)}</small>` : ""}
+      ${record?.duty ? `<small>담당 · ${escapeHtml(record.duty)}</small>` : ""}
+      ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
+    </div>
+    <label class="contact-person-check" title="${escapeAttr(name)} 선택">
+      <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
+      <span class="visually-hidden">${escapeHtml(name)} 선택</span>
+    </label>
+  </div>`;
 }
 
 function contactMajorNodeHtml(category, group) {
@@ -1620,8 +1769,9 @@ function contactMajorNodeHtml(category, group) {
     selected,
     disabled: !keys.length,
   });
+  const directFax = unique(directItems.map(({ org }) => String(org.fax || "").trim()).filter(Boolean))[0] || "";
   return `<section class="contact-tree-node level-1${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
-    ${contactDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, checkboxHtml })}
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 1, label: group.major, detail: `${keys.length}명`, rightDetail: directFax ? `FAX ${directFax}` : "", checkboxHtml })}
     ${children}
   </section>`;
 }
@@ -1643,26 +1793,29 @@ function contactOrganizationNodeHtml(category, org, orgIndex) {
   });
   const childHtml = records.map((record) => contactTreePersonRowHtml(record, 3, false)).join("") || renderEmptyHtml("표시할 인물이 없습니다.");
   const children = expanded ? contactChildrenShellHtml(treeKey, childHtml) : "";
+  const fax = String(org?.fax || "").trim();
   return `<section class="contact-tree-node level-2${expanded ? " expanded" : ""}" data-contact-node-key="${escapeAttr(treeKey)}">
-    ${contactDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${keys.length}명`, checkboxHtml })}
+    ${contactDisclosureRowHtml({ treeKey, expanded, level: 2, label, detail: `${keys.length}명`, rightDetail: fax ? `FAX ${fax}` : "", checkboxHtml })}
     ${children}
   </section>`;
 }
 
-function contactDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", checkboxHtml = "" }) {
+function contactDisclosureRowHtml({ treeKey, expanded, level, label, detail = "", rightDetail = "", checkboxHtml = "" }) {
   return `<div class="contact-tree-row${checkboxHtml ? "" : " no-select"}" data-tree-level="${Number(level) || 0}">
     <button class="contact-tree-toggle" type="button" data-contact-tree-toggle data-tree-key="${escapeAttr(treeKey)}" aria-expanded="${expanded ? "true" : "false"}">
       <span class="contact-tree-chevron${expanded ? " open" : ""}" aria-hidden="true">›</span>
       <span class="contact-tree-label"><strong>${escapeHtml(label || "소속 없음")}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
+      ${rightDetail ? `<span class="tree-row-meta">${escapeHtml(rightDetail)}</span>` : ""}
     </button>
     ${checkboxHtml || `<span class="contact-tree-check-spacer" aria-hidden="true"></span>`}
   </div>`;
 }
 
 function contactTreeCheckboxHtml({ type, categoryId, major = "", orgIndex = -1, label, selected, disabled = false }) {
-  const attrs = type === "major"
-    ? `data-major-select data-category-id="${escapeAttr(categoryId)}" data-major="${escapeAttr(major)}"`
-    : `data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${Number(orgIndex)}"`;
+  let attrs = "";
+  if (type === "category") attrs = `data-category-select data-category-id="${escapeAttr(categoryId)}"`;
+  else if (type === "major") attrs = `data-major-select data-category-id="${escapeAttr(categoryId)}" data-major="${escapeAttr(major)}"`;
+  else attrs = `data-org-select data-category-id="${escapeAttr(categoryId)}" data-org-index="${Number(orgIndex)}"`;
   return `<label class="contact-tree-check" title="${escapeAttr(label)}">
     <input type="checkbox" ${attrs} ${selected?.all ? "checked" : ""} ${disabled ? "disabled" : ""}>
     <span class="visually-hidden">${escapeHtml(label)}</span>
@@ -1679,6 +1832,10 @@ function recordAffiliation(record) {
     title: record?.title || "",
     duty: record?.duty || "",
     recordType: record?.recordType || "PERSON",
+    extension: record?.extension || "",
+    mobile: record?.mobile || "",
+    externalNumber: Boolean(record?.externalNumber),
+    fax: record?._fax || "",
   };
 }
 
@@ -1777,6 +1934,39 @@ function applyRepresentativeAffiliation(personKey, affiliationKey) {
   syncContactSelectionUI();
 }
 
+function selectedRepresentativePeople() {
+  return state.people.filter((person) => state.selectedPeople.has(person.key) && (person.affiliations || []).length);
+}
+
+function validRepresentativeKey(person) {
+  const key = state.representativeAffiliations.get(person?.key) || "";
+  return key && person?.affiliations?.some((affiliation) => affiliation.key === key) ? key : "";
+}
+
+function updateBulkRepresentativeToggle() {
+  if (!el.representativeBulkButton) return;
+  const people = selectedRepresentativePeople();
+  const allSet = people.length > 0 && people.every((person) => Boolean(validRepresentativeKey(person)));
+  el.representativeBulkButton.disabled = people.length === 0;
+  el.representativeBulkButton.textContent = allSet ? "대표 직함 선택 해제" : "대표 직함 모두 선택";
+}
+
+function toggleBulkRepresentativeAffiliations() {
+  const people = selectedRepresentativePeople();
+  if (!people.length) return;
+  const allSet = people.every((person) => Boolean(validRepresentativeKey(person)));
+  if (allSet) {
+    people.forEach((person) => state.representativeAffiliations.delete(person.key));
+  } else {
+    people.forEach((person) => {
+      if (validRepresentativeKey(person)) return;
+      const first = person.affiliations?.[0];
+      if (first?.key) state.representativeAffiliations.set(person.key, first.key);
+    });
+  }
+  syncContactSelectionUI();
+}
+
 function handleRepresentativeButton(button) {
   const personKey = String(button.dataset.representativePerson || "");
   const affiliationKey = String(button.dataset.representativeAffiliation || "");
@@ -1847,6 +2037,12 @@ function handleContactBrowseClick(event) {
   }, 180);
 }
 
+function categoryPersonKeys(categoryId) {
+  const category = state.categories.find((item) => item.id === categoryId);
+  if (!category) return [];
+  return unique(category.organizations.flatMap((org) => org.people.map((record) => record._personKey)).filter(Boolean));
+}
+
 function majorPersonKeys(categoryId, major) {
   const category = state.categories.find((item) => item.id === categoryId);
   if (!category) return [];
@@ -1856,6 +2052,19 @@ function majorPersonKeys(categoryId, major) {
 }
 
 function handleContactSelectionChange(event) {
+  const categoryCheckbox = event.target.closest('input[data-category-select]');
+  if (categoryCheckbox) {
+    const keys = categoryPersonKeys(categoryCheckbox.dataset.categoryId);
+    keys.forEach((key) => {
+      if (categoryCheckbox.checked) state.selectedPeople.add(key);
+      else {
+        state.selectedPeople.delete(key);
+        state.representativeAffiliations.delete(key);
+      }
+    });
+    syncContactSelectionUI();
+    return;
+  }
   const personCheckbox = event.target.closest('input[data-person-key]');
   if (personCheckbox) {
     const key = personCheckbox.dataset.personKey;
@@ -1921,6 +2130,12 @@ function syncContactSelectionUI() {
   el.contactBrowseView.querySelectorAll('input[data-person-key]').forEach((checkbox) => {
     checkbox.checked = state.selectedPeople.has(checkbox.dataset.personKey);
   });
+  el.contactBrowseView.querySelectorAll('input[data-category-select]').forEach((checkbox) => {
+    const current = selectionStateForKeys(categoryPersonKeys(checkbox.dataset.categoryId));
+    checkbox.checked = current.all;
+    checkbox.indeterminate = current.some;
+    checkbox.setAttribute("aria-checked", current.some ? "mixed" : String(current.all));
+  });
   el.contactBrowseView.querySelectorAll('input[data-major-select]').forEach((checkbox) => {
     const current = selectionStateForKeys(majorPersonKeys(checkbox.dataset.categoryId, checkbox.dataset.major));
     checkbox.checked = current.all;
@@ -1944,6 +2159,7 @@ function syncContactSelectionUI() {
     button.title = `${summary} 대표 정보 ${active ? "해제" : "선택"}`;
   });
   updateFilteredSelectionToggle();
+  updateBulkRepresentativeToggle();
   updateSelectedCount();
 }
 
@@ -2120,7 +2336,7 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.5//KO",
+    "PRODID:-//Dials//Dials v0.7.6//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given

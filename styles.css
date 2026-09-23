@@ -673,3 +673,86 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   .contact-tree-label strong { font-size: 0.92rem; }
   .contact-tree-label small { font-size: 0.76rem; }
 }
+
+/* v0.7.6 — seamless contact UI, native-search cleanup, FAX/facility presentation */
+.password-visibility-button,
+.password-visibility-button:hover,
+.password-visibility-button:active { background: transparent; }
+.password-visibility-button:hover { color: var(--text); }
+.password-visibility-button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+
+/* Keep Dials' own clear button and suppress desktop browser-native search X. */
+.search-bar input[type="search"]::-webkit-search-cancel-button,
+.search-bar input[type="search"]::-webkit-search-decoration,
+.search-bar input[type="search"]::-webkit-search-results-button,
+.search-bar input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: none; appearance: none; display: none; }
+.search-bar input[type="search"]::-ms-clear,
+.search-bar input[type="search"]::-ms-reveal { display: none; width: 0; height: 0; }
+
+.inline-action-sample {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 1px 7px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.25;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.representative-bulk-row { display: flex; align-items: center; gap: 9px; margin: 8px 2px 0; }
+.representative-bulk-row > span { color: var(--muted); font-size: 0.78rem; line-height: 1.45; }
+.representative-bulk-toggle { flex: 0 0 auto; max-width: none; min-height: 30px; }
+
+.organization-option-row { min-width: 0; }
+.organization-option-row > span { flex: 0 0 auto; }
+.option-row-value { margin-left: auto !important; min-width: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; color: var(--muted); font-size: 0.78rem; }
+
+/* A person card is one hover target; the checkbox is not a separate visual cell. */
+.contact-tree-check,
+.contact-person-check { border-left: 0; }
+.contact-person-row:hover { background: var(--surface-hover); }
+.contact-search-person-main:hover,
+.contact-person-check:hover { background: transparent; }
+.contact-tree-row:hover { background: var(--surface-hover); }
+.contact-tree-row:hover .contact-tree-toggle { background: transparent; }
+
+.tree-row-meta { margin-left: auto; color: var(--muted); font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.facility-flat-list { display: grid; gap: 7px; }
+.facility-flat-card { border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); padding: 10px 12px; min-width: 0; }
+.facility-flat-header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.facility-flat-header strong { min-width: 0; overflow-wrap: anywhere; }
+.facility-flat-fax { color: var(--muted); font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.facility-flat-records { display: grid; gap: 9px; margin-top: 8px; }
+.facility-flat-record + .facility-flat-record { padding-top: 9px; border-top: 1px solid var(--border); }
+.facility-flat-person { display: flex; flex-wrap: wrap; gap: 7px; align-items: baseline; margin-bottom: 5px; }
+.facility-flat-person span { color: var(--muted); font-size: 0.8rem; }
+.facility-flat-card .browse-tree-phone-lines { margin-top: 4px; }
+
+.contact-facility-card { border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); overflow: hidden; }
+.contact-facility-head { min-height: 46px; display: grid; grid-template-columns: minmax(0,1fr) 48px; align-items: stretch; }
+.contact-facility-main { min-width: 0; padding: 8px 11px; }
+.contact-facility-title { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.contact-facility-title strong { min-width: 0; overflow-wrap: anywhere; }
+.contact-facility-title span { color: var(--muted); font-size: 0.76rem; white-space: nowrap; }
+.contact-facility-people { display: grid; gap: 5px; padding: 0 7px 7px; }
+.contact-facility-person { display: grid; grid-template-columns: minmax(0,1fr) 48px; align-items: stretch; min-height: 42px; border-radius: 9px; background: var(--surface); }
+.contact-facility-person-main { min-width: 0; padding: 6px 9px; }
+.contact-facility-person-main strong { font-size: 0.9rem; }
+.contact-facility-person-main small { display: block; margin-top: 2px; color: var(--muted); font-size: 0.76rem; }
+.contact-facility-card:hover,
+.contact-facility-person:hover { background: var(--surface-hover); }
+.contact-facility-card:hover .contact-facility-person { background: var(--surface); }
+.contact-facility-person:hover { background: var(--surface-hover) !important; }
+
+@media (max-width: 760px) {
+  .representative-bulk-row { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .tree-row-meta { white-space: normal; text-align: right; }
+  .facility-flat-header { align-items: flex-start; }
+  .facility-flat-fax { white-space: normal; text-align: right; }
+  .option-row-value { max-width: 48%; }
+}
