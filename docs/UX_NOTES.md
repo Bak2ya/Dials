@@ -1,5 +1,12 @@
 # Dials UX notes
 
+## v0.7.8 representative bulk action placement
+
+- In search results, keep the bulk representative action on the same heading line as `검색결과 N명`, immediately before the current-results `모두 선택 / 선택 해제` control.
+- Outside search, keep the same action in the `소속별 선택` heading so category-based selection does not lose access to the feature.
+- Do not show a permanent explanatory sentence. After bulk representative selection, show only `다중 소속 인물은 가장 앞 소속·직함이 대표로 선택됩니다.`; hide it again when bulk representatives are cleared.
+- This is placement/copy only. Representative semantics and all export behavior remain unchanged.
+
 
 ## v0.7.7 preferred contact phone
 

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.7";
+const APP_VERSION = "0.7.8";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -40,6 +40,7 @@ const state = {
   contactSearchDebounceTimer: null,
   selectedPeople: new Set(),
   representativeAffiliations: new Map(),
+  bulkRepresentativeNoticeVisible: false,
   contactFilter: "",
   contactView: { type: "home" },
   contactDepth: 0,
@@ -111,7 +112,7 @@ function cacheElements() {
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
     "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
-    "selectedPeopleCount", "contactBrowseView", "representativeBulkButton",
+    "selectedPeopleCount", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "preferredPhoneMobile", "preferredPhoneExtension", "includeOrganizationOption", "organizationOptionName",
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
     "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
@@ -196,7 +197,6 @@ function bindEvents() {
   });
   el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
   el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
-  el.representativeBulkButton.addEventListener("click", toggleBulkRepresentativeAffiliations);
   el.contentView.addEventListener("click", handleBrowseTreeClick);
   el.prefixEnabledOption.addEventListener("change", updateNameDecorationControls);
   el.namePrefixInput.addEventListener("input", updateNameDecorationControls);
@@ -313,6 +313,7 @@ function beginDataReplacement() {
   state.categories = [];
   state.selectedPeople.clear();
   state.representativeAffiliations.clear();
+  state.bulkRepresentativeNoticeVisible = false;
   state.searchQuery = "";
   state.contactFilter = "";
   state.currentView = { type: "home" };
@@ -1528,6 +1529,7 @@ function enterContactExport() {
   saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.representativeAffiliations.clear();
+  state.bulkRepresentativeNoticeVisible = false;
   state.contactFilter = "";
   state.contactView = { type: "home" };
   state.contactDepth = 0;
@@ -1590,9 +1592,18 @@ function renderContactBrowse() {
   updateSelectedCount();
 }
 
+function representativeBulkNoteHtml() {
+  return `<p class="representative-bulk-note${state.bulkRepresentativeNoticeVisible ? "" : " hidden"}" data-representative-bulk-note>다중 소속 인물은 가장 앞 소속·직함이 대표로 선택됩니다.</p>`;
+}
+
+function representativeBulkButtonHtml() {
+  return `<button class="representative-toggle representative-bulk-toggle" type="button" data-representative-bulk-toggle disabled>대표 직함 모두 선택</button>`;
+}
+
 function renderContactHome() {
   const rows = state.categories.map((category) => contactCategoryNodeHtml(category)).join("");
-  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading"><strong>소속별 선택</strong><span>필요한 소속을 펼쳐 인물을 선택하세요.</span></div>
+  el.contactBrowseView.innerHTML = `<div class="contact-browse-heading contact-home-heading"><div><strong>소속별 선택</strong><span>필요한 소속을 펼쳐 인물을 선택하세요.</span></div><div class="contact-browse-actions">${representativeBulkButtonHtml()}</div></div>
+    ${representativeBulkNoteHtml()}
     <div class="contact-tree">${rows || renderEmptyHtml("표시할 소속이 없습니다.")}</div>`;
   state.contactAnimateKey = "";
 }
@@ -1903,8 +1914,12 @@ function renderContactSearchResults() {
   const toggleLabel = selection.all ? "선택 해제" : "모두 선택";
   el.contactBrowseView.innerHTML = `<div class="contact-browse-heading search-results-heading">
       <strong>검색결과 ${people.length}명</strong>
-      <button class="text-button search-selection-toggle" type="button" data-search-selection-toggle ${people.length ? "" : "disabled"}>${toggleLabel}</button>
+      <div class="contact-browse-actions">
+        ${representativeBulkButtonHtml()}
+        <button class="text-button search-selection-toggle" type="button" data-search-selection-toggle ${people.length ? "" : "disabled"}>${toggleLabel}</button>
+      </div>
     </div>
+    ${representativeBulkNoteHtml()}
     <p class="contact-search-dedupe-note">같은 인물이 여러 소속에 있어도 하나의 연락처로 저장됩니다.</p>
     <div class="contact-person-list">${rows || renderEmptyHtml("검색 결과가 없습니다.")}</div>`;
 }
@@ -1948,11 +1963,18 @@ function validRepresentativeKey(person) {
 }
 
 function updateBulkRepresentativeToggle() {
-  if (!el.representativeBulkButton) return;
+  if (!el.contactBrowseView) return;
+  const buttons = el.contactBrowseView.querySelectorAll('[data-representative-bulk-toggle]');
   const people = selectedRepresentativePeople();
   const allSet = people.length > 0 && people.every((person) => Boolean(validRepresentativeKey(person)));
-  el.representativeBulkButton.disabled = people.length === 0;
-  el.representativeBulkButton.textContent = allSet ? "대표 직함 선택 해제" : "대표 직함 모두 선택";
+  if (!people.length) state.bulkRepresentativeNoticeVisible = false;
+  buttons.forEach((button) => {
+    button.disabled = people.length === 0;
+    button.textContent = allSet ? "대표 직함 선택 해제" : "대표 직함 모두 선택";
+  });
+  el.contactBrowseView.querySelectorAll('[data-representative-bulk-note]').forEach((note) => {
+    note.classList.toggle("hidden", !state.bulkRepresentativeNoticeVisible);
+  });
 }
 
 function toggleBulkRepresentativeAffiliations() {
@@ -1961,12 +1983,14 @@ function toggleBulkRepresentativeAffiliations() {
   const allSet = people.every((person) => Boolean(validRepresentativeKey(person)));
   if (allSet) {
     people.forEach((person) => state.representativeAffiliations.delete(person.key));
+    state.bulkRepresentativeNoticeVisible = false;
   } else {
     people.forEach((person) => {
       if (validRepresentativeKey(person)) return;
       const first = person.affiliations?.[0];
       if (first?.key) state.representativeAffiliations.set(person.key, first.key);
     });
+    state.bulkRepresentativeNoticeVisible = true;
   }
   syncContactSelectionUI();
 }
@@ -2001,6 +2025,12 @@ function handleRepresentativeButton(button) {
 }
 
 function handleContactBrowseClick(event) {
+  const representativeBulkToggle = event.target.closest("[data-representative-bulk-toggle]");
+  if (representativeBulkToggle) {
+    toggleBulkRepresentativeAffiliations();
+    return;
+  }
+
   const searchSelectionToggle = event.target.closest("[data-search-selection-toggle]");
   if (searchSelectionToggle) {
     toggleFilteredPeopleSelection();
@@ -2361,7 +2391,7 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.7//KO",
+    "PRODID:-//Dials//Dials v0.7.8//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given

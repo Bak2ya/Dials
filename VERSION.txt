@@ -1,1 +1,1 @@
-Dials v0.7.7
+Dials v0.7.8
