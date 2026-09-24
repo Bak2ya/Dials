@@ -171,7 +171,8 @@ HJU Phonebook may include an academic organization whose `major` is exactly `학
 - CONTACT → no `TITLE`
 - Generated VCF starts directly with `BEGIN:VCARD` (no UTF-8 BOM) and uses `text/vcard` for file handoff
 - one `personKey` produces one VCARD entry; unique work/mobile numbers from all included affiliations are merged into that card
-- a user-selected representative affiliation is ordered first for `ORG`/`TITLE`, work-number order and affiliation NOTE order
+- contact-export preference is user-selectable: `mobile` (default) or `extension`; the first available number of the preferred type is serialized first with vCard 3.0 `PREF`, with automatic fallback to the other included type when needed
+- a user-selected representative affiliation is ordered first for `ORG`/`TITLE`, work-number order and affiliation NOTE order, so extension priority uses the representative work number first
 - all included affiliations/titles/duties may be preserved in NOTE according to the user's export options; when multiple distinct work numbers exist, affiliation NOTE lines also carry the corresponding work number
 
 ## Privacy boundary

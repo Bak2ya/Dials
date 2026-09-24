@@ -185,6 +185,13 @@
             <label class="check-row disabled-check"><input type="checkbox" checked disabled><span>이름 <small>필수</small></span></label>
             <label class="check-row"><input id="includeMobileOption" type="checkbox" checked><span>개인번호</span></label>
             <label class="check-row"><input id="includeExtensionOption" type="checkbox" checked><span>내선번호</span></label>
+            <div class="phone-priority-row" role="group" aria-labelledby="preferredPhoneLabel">
+              <span id="preferredPhoneLabel" class="phone-priority-label">기본 전화번호</span>
+              <div class="phone-priority-options">
+                <label class="phone-priority-choice"><input id="preferredPhoneMobile" type="radio" name="preferredPhoneType" value="mobile" checked><span>휴대폰 우선</span></label>
+                <label class="phone-priority-choice"><input id="preferredPhoneExtension" type="radio" name="preferredPhoneType" value="extension"><span>내선번호 우선</span></label>
+              </div>
+            </div>
             <label class="check-row organization-option-row"><input id="includeOrganizationOption" type="checkbox" checked><span>직장 / 기관</span><small id="organizationOptionName" class="option-row-value"></small></label>
           </div>
 

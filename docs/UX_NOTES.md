@@ -1,6 +1,13 @@
 # Dials UX notes
 
 
+## v0.7.7 preferred contact phone
+
+- `연락처에 저장할 정보` includes a compact `기본 전화번호` choice: `휴대폰 우선` / `내선번호 우선`. Default is mobile and the last choice is remembered locally in the browser.
+- The preferred available number is serialized first and receives vCard 3.0 `PREF`. If the chosen type is unavailable or excluded, fall back to the other included type rather than dropping a number.
+- For extension priority, representative-affiliation ordering still decides which work number is first. Do not semantically rank titles.
+- All remaining unique phone numbers stay in the same single-person vCard. OS contact apps may still choose their own visual ordering, so real-device validation remains relevant.
+
 ## v0.7.6 current UX additions
 
 - Preserve the approved overall viewer layout. Changes are local refinements, not a redesign.

@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.6";
+const APP_VERSION = "0.7.7";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -16,6 +16,7 @@ const PREFIX_STORAGE_KEY = "dialsContactPrefix";
 const PREFIX_ENABLED_STORAGE_KEY = "dialsContactPrefixEnabled";
 const SUFFIX_STORAGE_KEY = "dialsContactSuffix";
 const SUFFIX_ENABLED_STORAGE_KEY = "dialsContactSuffixEnabled";
+const PREFERRED_PHONE_STORAGE_KEY = "dialsPreferredPhoneType";
 const THEME_STORAGE_KEY = "dialsThemePreference";
 const HISTORY_STATE_KEY = "dialsRoute";
 const AUTO_LOCK_MS = 10 * 60 * 1000;
@@ -111,7 +112,7 @@ function cacheElements() {
     "menuButton", "overflowMenu", "homeBrandButton", "globalSearchInput",
     "clearSearchButton", "contentView", "contactBackButton", "contactSearchInput",
     "selectedPeopleCount", "contactBrowseView", "representativeBulkButton",
-    "includeMobileOption", "includeExtensionOption", "includeOrganizationOption", "organizationOptionName",
+    "includeMobileOption", "includeExtensionOption", "preferredPhoneMobile", "preferredPhoneExtension", "includeOrganizationOption", "organizationOptionName",
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
     "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
@@ -201,6 +202,8 @@ function bindEvents() {
   el.namePrefixInput.addEventListener("input", updateNameDecorationControls);
   el.suffixEnabledOption.addEventListener("change", updateNameDecorationControls);
   el.nameSuffixInput.addEventListener("input", updateNameDecorationControls);
+  el.preferredPhoneMobile.addEventListener("change", updatePreferredPhoneSetting);
+  el.preferredPhoneExtension.addEventListener("change", updatePreferredPhoneSetting);
   el.createVcardButton.addEventListener("click", createVcardFile);
 
   el.modalCloseButton.addEventListener("click", closeModal);
@@ -1539,6 +1542,7 @@ function showContactExportView() {
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
   restoreNameDecorationSettings();
+  restorePreferredPhoneSetting();
   updateOrganizationOptionLabel();
   renderContactBrowse();
   setVcardMessage("");
@@ -2229,6 +2233,26 @@ function applyNameDecorations(name, prefix, suffix) {
   return `${String(prefix || "")}${name}${String(suffix || "")}`;
 }
 
+
+function normalizePreferredPhoneType(value) {
+  return value === "extension" ? "extension" : "mobile";
+}
+
+function restorePreferredPhoneSetting() {
+  const preferred = normalizePreferredPhoneType(localStorage.getItem(PREFERRED_PHONE_STORAGE_KEY));
+  el.preferredPhoneMobile.checked = preferred === "mobile";
+  el.preferredPhoneExtension.checked = preferred === "extension";
+}
+
+function updatePreferredPhoneSetting() {
+  const preferred = el.preferredPhoneExtension.checked ? "extension" : "mobile";
+  localStorage.setItem(PREFERRED_PHONE_STORAGE_KEY, preferred);
+}
+
+function selectedPreferredPhoneType() {
+  return el.preferredPhoneExtension.checked ? "extension" : "mobile";
+}
+
 function updateOrganizationOptionLabel() {
   const organization = organizationName();
   el.organizationOptionName.textContent = organization || "기관명 없음";
@@ -2246,6 +2270,7 @@ async function createVcardFile() {
     mobile: el.includeMobileOption.checked,
     extension: el.includeExtensionOption.checked,
     organization: el.includeOrganizationOption.checked,
+    preferredPhone: selectedPreferredPhoneType(),
     noteDataDate: el.noteDataDateOption.checked,
     noteAffiliations: el.noteAffiliationsOption.checked,
     noteTitleDuty: el.noteTitleDutyOption.checked,
@@ -2336,7 +2361,7 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.6//KO",
+    "PRODID:-//Dials//Dials v0.7.7//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given
@@ -2345,11 +2370,31 @@ function makeVcard(person, options) {
   ];
 
   const affiliations = orderedAffiliationsForVcard(person);
+  const preferredPhone = normalizePreferredPhoneType(options.preferredPhone);
   const seenPhoneNumbers = new Set();
-  const extensions = options.extension ? uniquePhoneValues(affiliations, "extension", seenPhoneNumbers) : [];
-  const mobiles = options.mobile ? uniquePhoneValues(affiliations, "mobile", seenPhoneNumbers) : [];
-  extensions.forEach((number) => lines.push(`TEL;TYPE=WORK:${vcardEscape(number)}`));
-  mobiles.forEach((number) => lines.push(`TEL;TYPE=${contactRecord ? "WORK" : "CELL"}:${vcardEscape(number)}`));
+  let extensions = [];
+  let mobiles = [];
+  if (preferredPhone === "extension") {
+    extensions = options.extension ? uniquePhoneValues(affiliations, "extension", seenPhoneNumbers) : [];
+    mobiles = options.mobile ? uniquePhoneValues(affiliations, "mobile", seenPhoneNumbers) : [];
+  } else {
+    mobiles = options.mobile ? uniquePhoneValues(affiliations, "mobile", seenPhoneNumbers) : [];
+    extensions = options.extension ? uniquePhoneValues(affiliations, "extension", seenPhoneNumbers) : [];
+  }
+  const extensionGroup = { numbers: extensions, type: "WORK" };
+  const mobileGroup = { numbers: mobiles, type: contactRecord ? "WORK" : "CELL" };
+  const phoneGroups = preferredPhone === "extension"
+    ? [extensionGroup, mobileGroup]
+    : [mobileGroup, extensionGroup];
+  let preferredAssigned = false;
+  for (const group of phoneGroups) {
+    group.numbers.forEach((number, index) => {
+      const isPreferred = !preferredAssigned && index === 0;
+      const type = isPreferred ? `${group.type},PREF` : group.type;
+      lines.push(`TEL;TYPE=${type}:${vcardEscape(number)}`);
+      if (isPreferred) preferredAssigned = true;
+    });
+  }
 
   const representative = representativeAffiliationForPerson(person);
   const organization = options.organization ? organizationName() : "";

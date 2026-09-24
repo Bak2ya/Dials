@@ -708,6 +708,17 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 .representative-bulk-row > span { color: var(--muted); font-size: 0.78rem; line-height: 1.45; }
 .representative-bulk-toggle { flex: 0 0 auto; max-width: none; min-height: 30px; }
 
+
+.phone-priority-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; flex-wrap: wrap; }
+.phone-priority-label { color: var(--text); font-size: 0.9rem; font-weight: 650; }
+.phone-priority-options { display: inline-flex; align-items: center; gap: 3px; padding: 3px; border-radius: 10px; background: var(--surface-soft); }
+.phone-priority-choice { position: relative; cursor: pointer; }
+.phone-priority-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.phone-priority-choice span { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 4px 9px; border: 1px solid transparent; border-radius: 8px; color: var(--muted); font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.phone-priority-choice:hover span { color: var(--text); }
+.phone-priority-choice input:checked + span { background: var(--surface); border-color: var(--border); color: var(--accent); }
+.phone-priority-choice input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .organization-option-row { min-width: 0; }
 .organization-option-row > span { flex: 0 0 auto; }
 .option-row-value { margin-left: auto !important; min-width: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; color: var(--muted); font-size: 0.78rem; }
