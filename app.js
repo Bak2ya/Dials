@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.8.3";
+const APP_VERSION = "0.9.0";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -107,7 +107,7 @@ async function init() {
 
 function cacheElements() {
   [
-    "startView", "mainView", "contactExportView", "connectStateText", "connectStateBadge",
+    "startView", "mainView", "contactExportView", "connectTitle", "connectStateText", "connectStateBadge",
     "noDataActions", "lockedDataActions", "connectDataButton", "replaceDataStartButton",
     "dataFileInput", "unlockForm", "passwordInput", "passwordVisibilityButton", "unlockButton", "unlockMessage",
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
@@ -118,7 +118,7 @@ function cacheElements() {
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
     "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
-    "themeMenuButton", "themeColorMeta", "startVersion",
+    "themeColorMeta", "startVersion",
   ].forEach((id) => { el[id] = document.getElementById(id); });
 }
 
@@ -246,6 +246,8 @@ function showStartState(mode) {
   el.replaceDataStartButton.classList.toggle("hidden", mode !== "locked");
   el.connectStateText.classList.toggle("hidden", mode === "locked");
   el.connectStateBadge.classList.add("hidden");
+  el.connectTitle.classList.toggle("visually-hidden", mode === "empty");
+  el.connectStateText.classList.toggle("empty-connect-title", mode === "empty");
 
   if (mode === "unsupported") {
     el.noDataActions.classList.add("hidden");
@@ -275,7 +277,7 @@ function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
   const dataVersion = String(state.safeMeta?.dataVersion || publicPackageDataVersion(state.encryptedPackage) || "");
-  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준의` : "";
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)}에 배포한` : "";
   el.connectedMetaText.classList.toggle("hidden", !dataVersion);
 }
 
@@ -1359,13 +1361,10 @@ function handleMenuAction(event) {
   if (!button) return;
   closeOverflowMenu();
   const action = button.dataset.action;
-  if (action === "data-info") showDataInfo();
-  else if (action === "replace-data") beginDataReplacement();
-  else if (action === "contact-export") enterContactExport();
+  if (action === "contact-export") enterContactExport();
+  else if (action === "start-screen") lockApp();
   else if (action === "install-app") handleInstallRequest();
-  else if (action === "theme") showThemeChooser();
   else if (action === "about") showAboutInfo();
-  else if (action === "lock") lockApp();
 }
 
 
@@ -1468,25 +1467,56 @@ async function handleInstallRequest() {
 }
 
 function showAboutInfo() {
+  const dataVersion = String(state.payload?.dataVersion || state.safeMeta?.dataVersion || publicPackageDataVersion(state.encryptedPackage) || "");
+  const dateText = dataVersion ? `${formatDate(dataVersion)}에 배포한` : "배포일 정보 없음";
+  const fileName = state.safeMeta?.fileName || "Dials 데이터";
+  const themeOptions = [
+    ["light", "라이트"],
+    ["system", "시스템 설정"],
+    ["dark", "다크"],
+    ["black", "블랙"],
+  ];
+  const themeButtons = themeOptions.map(([value, label]) => `
+    <button type="button" class="about-theme-option${state.themePreference === value ? " selected" : ""}" data-about-theme="${value}" role="radio" aria-checked="${state.themePreference === value ? "true" : "false"}">${label}</button>`).join("");
+
   showModal({
     title: "정보",
-    body: `<div class="about-info">
-      <p><strong>Dials</strong><br>배포받은 전화번호부를 빠르게 찾아보고 필요한 연락처를 저장할 수 있습니다.</p>
-      <section class="about-section" aria-labelledby="privacySecurityTitle">
-        <h3 id="privacySecurityTitle">개인정보 보호</h3>
-        <div class="privacy-feature-list">
-          <div class="privacy-feature">${uiIcon("shield")}<span>연락처 데이터는 <strong>이 기기에만 보관되며 외부로 전송되지 않습니다.</strong></span></div>
-          <div class="privacy-feature">${uiIcon("lock")}<span>입력한 암호는 저장하지 않습니다.</span></div>
-          <div class="privacy-feature">${uiIcon("clock")}<span>개인정보 보호를 위해 <strong>10분이 지나면 자동으로 잠깁니다.</strong></span></div>
-        </div>
-        <p class="about-tech-note">자세한 기술 정보는 GitHub에서 확인할 수 있습니다.</p>
+    body: `<div class="about-info about-info-compact">
+      <section class="about-info-section">
+        <h3>현재 연락처</h3>
+        <p class="about-contact-date">${escapeHtml(dateText)}</p>
+        <p class="about-contact-file">${escapeHtml(fileName)}</p>
       </section>
-      <div class="about-footer">
-        <span>v${APP_VERSION}</span>
-        <a class="github-link" href="https://github.com/Bak2ya/Dials" target="_blank" rel="noopener noreferrer">GitHub에서 보기</a>
-      </div>
+
+      <section class="about-info-section">
+        <h3>화면 모드</h3>
+        <div class="about-theme-segmented" role="radiogroup" aria-label="화면 모드">${themeButtons}</div>
+      </section>
+
+      <section class="about-info-section about-brand-section">
+        <div class="about-brand-row">
+          <img src="./icons/icon-192.png" alt="" aria-hidden="true">
+          <strong>Dials</strong>
+        </div>
+        <p class="about-brand-copy">배포받은 연락처 데이터로 빠르게 조회하는 웹 전화번호부입니다.</p>
+        <div class="about-footer about-footer-compact">
+          <span>버전 ${APP_VERSION}</span>
+          <a class="github-link" href="https://github.com/Bak2ya/Dials" target="_blank" rel="noopener noreferrer">GitHub에서 보기</a>
+        </div>
+      </section>
     </div>`,
     actions: [{ label: "닫기", onClick: closeModal }],
+  });
+
+  el.modalBody.querySelectorAll("[data-about-theme]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyTheme(button.dataset.aboutTheme);
+      el.modalBody.querySelectorAll("[data-about-theme]").forEach((item) => {
+        const selected = item.dataset.aboutTheme === state.themePreference;
+        item.classList.toggle("selected", selected);
+        item.setAttribute("aria-checked", selected ? "true" : "false");
+      });
+    });
   });
 }
 

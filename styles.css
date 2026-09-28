@@ -870,3 +870,53 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 /* v0.8.2 — compact connected-data line + facility duplicate-name suppression across real exported record types. */
 
 /* v0.8.3 — public date first, connection sentence unified, browser-only favicon assets separated from home-screen icons. */
+
+
+/* v0.9.0 — compact action menu, integrated info/settings sheet, simplified empty start state. */
+.empty-connect-title {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.about-info-compact { display: grid; gap: 0; }
+.about-info-section { margin: 0; padding: 0 0 18px; }
+.about-info-section + .about-info-section { padding-top: 18px; border-top: 1px solid var(--border); }
+.about-info-section:last-child { padding-bottom: 0; }
+.about-info-section h3 { margin: 0 0 10px; font-size: 0.98rem; }
+.about-contact-date { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+.about-contact-file { margin: 3px 0 0; color: var(--text); font-size: 1rem; font-weight: 720; line-height: 1.45; overflow-wrap: anywhere; }
+.about-theme-segmented {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--surface-soft);
+  gap: 2px;
+}
+.about-theme-option {
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.about-theme-option:hover { background: var(--surface-hover); color: var(--text); }
+.about-theme-option.selected { background: var(--accent); color: #fff; }
+.about-brand-row { display: flex; align-items: center; gap: 10px; }
+.about-brand-row img { width: 42px; height: 42px; border-radius: 12px; display: block; object-fit: cover; }
+.about-brand-row strong { font-size: 1.12rem; letter-spacing: -0.02em; }
+.about-brand-copy { margin: 9px 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+.about-footer-compact { margin-top: 13px; padding-top: 0; border-top: 0; }
+
+@media (max-width: 420px) {
+  .about-theme-option { font-size: 0.76rem; padding-inline: 4px; }
+}
