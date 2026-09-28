@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.8";
+const APP_VERSION = "0.7.9";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -1037,17 +1037,25 @@ function browseFacilityCardHtml(org) {
   </article>`;
 }
 
-function browseFacilityRecordHtml(record, facilityName) {
+function facilityRecordPresentation(record, facilityName) {
   const name = String(record?.name || "").trim() || facilityName;
   const title = String(record?.title || "").trim();
   const duty = String(record?.duty || "").trim();
   const recordType = record?.recordType || "CONTACT";
-  const showPerson = recordType === "PERSON" || normalizeText(name) !== normalizeText(facilityName) || Boolean(title);
+  const repeatsFacilityName = recordType === "CONTACT" && normalizeText(name) === normalizeText(facilityName);
+  return { name, title, duty, recordType, showName: !repeatsFacilityName };
+}
+
+function browseFacilityRecordHtml(record, facilityName) {
+  const { name, title, duty, recordType, showName } = facilityRecordPresentation(record, facilityName);
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("연락처", record.extension, record.externalNumber));
   if (record?.mobile) lines.push(phoneLineHtml(recordType === "PERSON" ? "개인번호" : "연락번호", record.mobile));
+  const identityHtml = showName || title
+    ? `<div class="facility-flat-person">${showName ? `<strong>${escapeHtml(name)}</strong>` : ""}${title ? `<span>${escapeHtml(title)}</span>` : ""}</div>`
+    : "";
   return `<div class="facility-flat-record">
-    ${showPerson ? `<div class="facility-flat-person"><strong>${escapeHtml(name)}</strong>${title ? `<span>${escapeHtml(title)}</span>` : ""}</div>` : ""}
+    ${identityHtml}
     ${duty ? `<div class="person-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
     ${lines.length ? `<div class="browse-tree-phone-lines">${lines.join("")}</div>` : ""}
   </div>`;
@@ -1700,14 +1708,14 @@ function contactFacilityCardHtml(category, org, orgIndex) {
       const personKey = String(record._personKey || "");
       const person = state.people.find((item) => item.key === personKey);
       const affiliation = recordAffiliation(record);
-      const name = String(record.name || "").trim();
-      const title = String(record.title || "").trim();
-      const showPerson = record.recordType === "PERSON" || normalizeText(name) !== normalizeText(facilityName) || Boolean(title);
-      const representativeButton = showPerson ? contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]) : "";
-      if (showPerson || record.duty || representativeButton) {
+      const { name, title, duty, showName } = facilityRecordPresentation(record, facilityName);
+      const showIdentity = showName || Boolean(title);
+      const representativeButton = showIdentity ? contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]) : "";
+      if (showIdentity || duty || representativeButton) {
         detailHtml = `<div class="contact-facility-person-main">
-          ${showPerson ? `<strong>${escapeHtml(name || "이름 없음")}</strong>${title ? `<small>${escapeHtml(title)}</small>` : ""}` : ""}
-          ${record.duty ? `<small>담당 · ${escapeHtml(record.duty)}</small>` : ""}
+          ${showName ? `<strong>${escapeHtml(name || "이름 없음")}</strong>` : ""}
+          ${title ? `<small>${escapeHtml(title)}</small>` : ""}
+          ${duty ? `<small>담당 · ${escapeHtml(duty)}</small>` : ""}
           ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
         </div>`;
       }
@@ -1723,7 +1731,7 @@ function contactFacilityCardHtml(category, org, orgIndex) {
     </section>`;
   }
 
-  const peopleHtml = records.map((record) => contactFacilityPersonHtml(record)).join("");
+  const peopleHtml = records.map((record) => contactFacilityPersonHtml(record, facilityName)).join("");
   return `<section class="contact-facility-card">
     <div class="contact-facility-head">
       <div class="contact-facility-main"><div class="contact-facility-title"><strong>${escapeHtml(facilityName)}</strong>${fax ? `<span>FAX ${escapeHtml(fax)}</span>` : ""}</div></div>
@@ -1733,24 +1741,23 @@ function contactFacilityCardHtml(category, org, orgIndex) {
   </section>`;
 }
 
-function contactFacilityPersonHtml(record) {
+function contactFacilityPersonHtml(record, facilityName) {
   const personKey = String(record?._personKey || "");
   const selected = state.selectedPeople.has(personKey);
-  const name = String(record?.name || "").trim() || "이름 없음";
+  const { name, title, duty, showName } = facilityRecordPresentation(record, facilityName);
   const affiliation = recordAffiliation(record);
   const person = state.people.find((item) => item.key === personKey);
   const representativeButton = contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]);
-  const title = String(record?.title || "").trim();
   return `<div class="contact-facility-person">
     <div class="contact-facility-person-main">
-      <strong>${escapeHtml(name)}</strong>
+      ${showName ? `<strong>${escapeHtml(name || "이름 없음")}</strong>` : ""}
       ${title ? `<small>${escapeHtml(title)}</small>` : ""}
-      ${record?.duty ? `<small>담당 · ${escapeHtml(record.duty)}</small>` : ""}
+      ${duty ? `<small>담당 · ${escapeHtml(duty)}</small>` : ""}
       ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
     </div>
-    <label class="contact-person-check" title="${escapeAttr(name)} 선택">
+    <label class="contact-person-check" title="${escapeAttr(name || facilityName)} 선택">
       <input type="checkbox" data-person-key="${escapeAttr(personKey)}" ${selected ? "checked" : ""}>
-      <span class="visually-hidden">${escapeHtml(name)} 선택</span>
+      <span class="visually-hidden">${escapeHtml(name || facilityName)} 선택</span>
     </label>
   </div>`;
 }
@@ -2391,7 +2398,7 @@ function makeVcard(person, options) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    "PRODID:-//Dials//Dials v0.7.8//KO",
+    "PRODID:-//Dials//Dials v0.7.9//KO",
     `FN:${vcardEscape(displayName)}`,
     // Keep a non-empty structured name for iOS Contacts. Dials stores one
     // display-name string rather than splitting Korean names into family/given
