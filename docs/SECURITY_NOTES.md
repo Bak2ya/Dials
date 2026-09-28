@@ -40,3 +40,9 @@ Cross-browser/device synchronization was explicitly considered and rejected beca
 ## Password visibility control (v0.6.0)
 
 The inline eye button only switches the password input between hidden and visible presentation in the active page. It does not persist, transmit, copy, or otherwise store the password. Entering a new locked/data-replacement state restores hidden presentation. Unlock backoff continues to disable password entry and the visibility control together while retry is blocked.
+
+## Public data date metadata (v0.8.0)
+
+Dials may read an optional outer-wrapper `dataVersion` in `YYYY-MM-DD` form before the package is decrypted. This field contains only the directory's reference date and is intentionally treated as non-sensitive display metadata; contact records remain inside the AES-GCM encrypted payload.
+
+For packages that include this public date, Dials verifies after successful decryption that it exactly matches the encrypted payload `dataVersion`. A mismatch is rejected. Older packages without the public wrapper field remain readable and reveal the date only after successful decryption.

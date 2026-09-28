@@ -278,3 +278,12 @@ Available through `⋯ → 연락처 저장` so the normal viewer stays unclutte
 - Preview base name is `박주성`. Example placeholders are `직장` for the prefix and `교수` for the suffix.
 - Prefix/suffix are literal. Do not auto-insert, trim, or normalize spaces. Users control spaces and punctuation themselves.
 - Historical note: v0.5.5 used an `application/octet-stream` download wrapper. It is superseded by v0.7.2; current builds keep `text/vcard` and prefer iOS file sharing.
+
+## v0.8.0 start screen / mobile header
+
+- Start-screen copy follows current user thought order: identify connected contact data → replace if needed → enter password → open directory.
+- The locked card intentionally omits redundant labels such as `연결된 데이터` and `데이터 암호`; filename/status/date and the password placeholder carry those meanings directly.
+- Connected-state wording is human-readable (`<파일명>와 연결됨`) rather than a separate technical state badge.
+- `왜 이런 방식인가요?` follows steps 1–3 in the usage guide because the recurring user question appears after learning the file-connect/password flow. It is a disclosure, not a mandatory blocking explanation.
+- On mobile browse, branding is visible on entry but scrolls away with content. Search remains sticky because finding a contact is the primary repeated action.
+- Mobile sticky search honors `safe-area-inset-top`; real iPhone Safari/PWA validation remains required.

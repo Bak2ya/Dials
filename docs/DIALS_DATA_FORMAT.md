@@ -1,6 +1,6 @@
 # Dials data format — schema 1.5
 
-Dials v0.7.6 and HJU Phonebook V0.26.6 build77 use one strict pre-deployment contract: **schema 1.5**.
+Dials v0.8.0 keeps the strict encrypted payload contract at **schema 1.5**. HJU Phonebook V0.26.7 build78 still exports schema 1.5; its next exporter update may add the optional public wrapper `dataVersion` described below.
 
 Schema 1.4 and older payloads are intentionally not accepted. The project is still before broad deployment, so the current release keeps one exact contract instead of carrying fallback branches.
 
@@ -10,6 +10,7 @@ Schema 1.4 and older payloads are intentionally not accepted. The project is sti
 - Encoding: UTF-8 JSON
 - Outer format: `DialsEncryptedData`
 - `formatVersion`: `1`
+- Optional public metadata: `dataVersion` (`YYYY-MM-DD`). This date is safe-to-display metadata only; contact records remain encrypted.
 - KDF: PBKDF2-HMAC-SHA256, 310,000 iterations
 - Cipher: AES-256-GCM
 - Contact records exist only inside the encrypted payload.
@@ -18,6 +19,7 @@ Schema 1.4 and older payloads are intentionally not accepted. The project is sti
 {
   "format": "DialsEncryptedData",
   "formatVersion": 1,
+  "dataVersion": "2026-09-28",
   "kdf": {
     "name": "PBKDF2-HMAC-SHA256",
     "iterations": 310000,
@@ -30,6 +32,8 @@ Schema 1.4 and older payloads are intentionally not accepted. The project is sti
   }
 }
 ```
+
+`dataVersion` in the outer wrapper is optional for compatibility with already-created pre-v0.8.0 files. When present, Dials can show the 기준일 before the password is entered. After decryption, Dials requires the public wrapper `dataVersion` to match the authenticated payload `dataVersion`; a mismatch is rejected. Files without the public field remain readable and reveal the date only after successful decryption.
 
 ## Decrypted payload
 

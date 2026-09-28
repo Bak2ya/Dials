@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.7.9";
+const APP_VERSION = "0.8.0";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -89,7 +89,8 @@ async function init() {
       state.encryptedPackage = parseAndValidateEncryptedPackage(saved.text);
       state.packageFingerprint = await fingerprintEncryptedPackage(state.encryptedPackage);
       await restoreUnlockFailureState();
-      state.safeMeta = meta || null;
+      const wrapperDataVersion = publicPackageDataVersion(state.encryptedPackage);
+      state.safeMeta = { ...(meta || {}), dataVersion: wrapperDataVersion || String(meta?.dataVersion || "") };
       state.connectionNeedsCommit = false;
       showStartState("locked");
       updateStartMeta();
@@ -228,22 +229,26 @@ function showStartState(mode) {
   el.contactExportView.classList.add("hidden");
   el.noDataActions.classList.toggle("hidden", mode !== "empty");
   el.lockedDataActions.classList.toggle("hidden", mode !== "locked");
+  el.replaceDataStartButton.classList.toggle("hidden", mode !== "locked");
+  el.connectStateText.classList.toggle("hidden", mode === "locked");
+  el.connectStateBadge.classList.add("hidden");
 
   if (mode === "unsupported") {
     el.noDataActions.classList.add("hidden");
     el.lockedDataActions.classList.add("hidden");
+    el.replaceDataStartButton.classList.add("hidden");
     el.connectStateText.textContent = "이 브라우저에서는 암호화 데이터 또는 로컬 저장 기능을 사용할 수 없습니다.";
+    el.connectStateBadge.classList.remove("hidden");
     setBadge("지원 안 됨", "warning");
   } else if (mode === "locked") {
-    el.connectStateText.textContent = "데이터가 연결되어 있습니다. 암호를 입력해 전화번호부를 여세요.";
-    setBadge("연결됨", "connected");
     el.passwordInput.value = "";
     setPasswordVisible(false);
+    setUnlockMessage("보안을 위해 10분 후 자동으로 잠깁니다.", false);
     syncUnlockDelayUI();
     if (!isUnlockDelayed()) window.setTimeout(() => el.passwordInput.focus(), 20);
   } else {
-    el.connectStateText.textContent = "배포받은 Dials 데이터 파일을 연결해 주세요.";
-    setBadge("미연결", "neutral");
+    el.connectStateText.textContent = "사용할 연락처를 연결해 주세요.";
+    setUnlockMessage("", false);
   }
 }
 
@@ -255,9 +260,9 @@ function setBadge(text, type) {
 function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
-  const dataVersion = String(state.safeMeta?.dataVersion || "");
-  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준` : "암호 입력 후 기준일을 확인할 수 있습니다.";
-  el.connectedMetaText.classList.toggle("placeholder", !dataVersion);
+  const dataVersion = String(state.safeMeta?.dataVersion || publicPackageDataVersion(state.encryptedPackage) || "");
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준` : "";
+  el.connectedMetaText.classList.toggle("hidden", !dataVersion);
 }
 
 function showAutoLockNoticeIfNeeded() {
@@ -265,7 +270,7 @@ function showAutoLockNoticeIfNeeded() {
   try {
     if (sessionStorage.getItem(AUTO_LOCK_NOTICE_KEY) !== "1") return;
     sessionStorage.removeItem(AUTO_LOCK_NOTICE_KEY);
-    setUnlockMessage("개인정보 보호를 위해 10분이 지나 자동으로 잠겼습니다.", false);
+    setUnlockMessage("보안을 위해 10분이 지나 자동으로 잠겼습니다.", false);
   } catch {}
 }
 
@@ -286,11 +291,11 @@ async function handleDataFileSelection() {
     state.encryptedPackage = packageData;
     state.packageFingerprint = await fingerprintEncryptedPackage(packageData);
     await restoreUnlockFailureState();
-    state.safeMeta = { fileName: file.name, dataVersion: "", generatedAt: "", title: "" };
+    state.safeMeta = { fileName: file.name, dataVersion: publicPackageDataVersion(packageData), generatedAt: "", title: "" };
     state.connectionNeedsCommit = true;
     showStartState("locked");
     updateStartMeta();
-    if (!isUnlockDelayed()) setUnlockMessage("데이터를 선택했습니다. 암호를 입력해 확인해 주세요.", false, true);
+    if (!isUnlockDelayed()) setUnlockMessage("보안을 위해 10분 후 자동으로 잠깁니다.", false);
   } catch (error) {
     console.error(error);
     showModal({
@@ -407,9 +412,25 @@ function parseAndValidateEncryptedPackage(text) {
   try { data = JSON.parse(text); } catch { throw new Error("파일 형식을 읽을 수 없습니다."); }
   if (!data || data.format !== "DialsEncryptedData") throw new Error("Dials 데이터 파일이 아닙니다.");
   if (Number(data.formatVersion) !== 1) throw new Error(`지원하지 않는 데이터 형식 버전입니다: ${data.formatVersion ?? "알 수 없음"}`);
+  if (Object.prototype.hasOwnProperty.call(data, "dataVersion")) {
+    if (typeof data.dataVersion !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(data.dataVersion)) {
+      throw new Error("공개 데이터 기준일 형식이 올바르지 않습니다.");
+    }
+  }
   if (data.kdf?.name !== "PBKDF2-HMAC-SHA256" || !data.kdf?.salt || !data.kdf?.iterations) throw new Error("암호화 키 정보가 올바르지 않습니다.");
   if (data.cipher?.name !== "AES-256-GCM" || !data.cipher?.nonce || !data.cipher?.ciphertext) throw new Error("암호화 데이터가 올바르지 않습니다.");
   return data;
+}
+
+function publicPackageDataVersion(packageData) {
+  return typeof packageData?.dataVersion === "string" ? packageData.dataVersion : "";
+}
+
+function validatePublicMetadataAgainstPayload(packageData, payload) {
+  const publicDataVersion = publicPackageDataVersion(packageData);
+  if (publicDataVersion && publicDataVersion !== String(payload?.dataVersion || "")) {
+    throw new Error("파일의 공개 기준일과 암호화된 데이터 기준일이 일치하지 않습니다.");
+  }
 }
 
 async function fingerprintEncryptedPackage(packageData) {
@@ -566,6 +587,7 @@ async function handleUnlock(event) {
 
   try {
     validatePayload(payload);
+    validatePublicMetadataAgainstPayload(state.encryptedPackage, payload);
   } catch (error) {
     console.error(error);
     await clearUnlockFailureState();
@@ -584,7 +606,7 @@ async function handleUnlock(event) {
     prepareDirectoryData(payload);
     state.safeMeta = {
       fileName: state.safeMeta?.fileName || "Dials 데이터",
-      dataVersion: String(payload.dataVersion || ""),
+      dataVersion: publicPackageDataVersion(state.encryptedPackage) || String(payload.dataVersion || ""),
       generatedAt: String(payload.generatedAt || ""),
       title: String(payload.title || "전화번호부"),
       schemaVersion: String(payload.schemaVersion || ""),
@@ -2639,7 +2661,7 @@ function base64ToBytes(base64) {
 function formatDate(value) {
   const text = String(value || "");
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
-  return match ? `${match[1]}. ${match[2]}. ${match[3]}.` : text;
+  return match ? `${match[1]}. ${Number(match[2])}. ${Number(match[3])}.` : text;
 }
 
 function formatDateTime(value) {

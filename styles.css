@@ -772,3 +772,94 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   .facility-flat-fax { white-space: normal; text-align: right; }
   .option-row-value { max-width: 48%; }
 }
+
+/* v0.8.0 — compact start flow, architecture rationale, mobile search-first header */
+.connect-heading-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.connected-file-row {
+  display: block;
+  margin-top: 13px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.connected-file-line { margin: 0; line-height: 1.45; overflow-wrap: anywhere; }
+.connected-file-line > strong:first-child { font-weight: 760; }
+.connected-file-line > span { color: var(--muted); }
+.connected-status { color: var(--success); font-weight: 800; }
+.connected-data-date { display: block; margin-top: 3px; color: var(--muted); font-size: 0.84rem; font-weight: 560; line-height: 1.4; }
+.unlock-form { margin-top: 14px; }
+.unlock-form .form-message { margin-top: 7px; font-size: 0.82rem; }
+
+.why-architecture { margin: 17px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+.why-architecture summary {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 32px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.why-architecture summary::-webkit-details-marker { display: none; }
+.why-marker {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-weight: 850;
+}
+.why-architecture summary strong { font-size: 0.96rem; }
+.why-architecture-body { margin: 10px 0 0 40px; }
+.why-architecture-body p { margin: 0; color: var(--muted); font-size: 0.87rem; line-height: 1.6; }
+.why-architecture-body p + p { margin-top: 6px; }
+.why-architecture-body p strong { color: var(--text); font-weight: 760; }
+.why-architecture-body a { display: inline-flex; min-height: 38px; align-items: center; margin-top: 5px; color: var(--accent); font-size: 0.84rem; font-weight: 740; text-decoration: none; }
+.why-architecture-body a:hover { text-decoration: underline; }
+.security-note { margin-top: 14px; padding-top: 14px; }
+
+@media (max-width: 760px) {
+  .start-shell { padding-top: 18px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+  .brand-block { gap: 12px; margin-bottom: 14px; align-items: center; }
+  .brand-block h1 { font-size: clamp(1.8rem, 8vw, 2.35rem); }
+  .data-connect-card, .guide-card { padding: 16px; }
+  .guide-card { margin-top: 12px; }
+  .section-heading-row { align-items: center; }
+  .connect-actions { margin-top: 14px; }
+  .connected-file-row { margin-top: 10px; }
+  .unlock-form { margin-top: 11px; }
+  .password-row { gap: 7px; }
+  .guide-list { margin: 14px 0; gap: 11px; }
+  .guide-list li { gap: 10px; }
+  .security-note { margin-top: 12px; padding-top: 12px; }
+  .why-architecture { margin-top: 14px; padding-top: 12px; }
+  .start-footer { margin-top: 14px; }
+
+  /* Only the search control remains at the top while the brand row scrolls away. */
+  #mainView > .app-header { display: contents; }
+  #mainView > .app-header > .header-inner {
+    position: relative;
+    min-height: 58px;
+    background: var(--bg);
+  }
+  #mainView > .app-header > .search-bar-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    width: 100%;
+    padding: max(6px, env(safe-area-inset-top)) 12px 8px;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  #mainView > .app-header > .search-bar-wrap .search-bar { width: min(100%, var(--content-width)); margin: 0 auto; }
+}
+
+@media (max-width: 430px) {
+  .connect-heading-actions .text-button { padding-inline: 0; font-size: 0.86rem; }
+  .why-architecture-body { margin-left: 38px; }
+}

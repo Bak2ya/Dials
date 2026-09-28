@@ -17,7 +17,6 @@ iPhone, iPad, Android, Windows, macOS의 최신 웹브라우저에서 사용할 
 - 전화번호를 눌러 바로 전화
 - 여러 명을 선택해 휴대폰 연락처로 저장
 - 다중 소속 인물의 대표 소속·직함 선택
-- 최신 전화번호부 데이터가 있을 때 업데이트 안내
 - 시스템 / 라이트 / 다크 / 블랙(OLED) 화면 모드
 - 모바일과 데스크톱에 대응하는 반응형 화면
 - 홈 화면이나 앱 형태로 추가해 빠르게 실행
@@ -84,6 +83,8 @@ Dials 웹앱과 실제 연락처 데이터도 서로 분리되어 있습니다.
 
 GitHub에는 조회용 웹앱만 공개하며, 실제 운영 연락처는 별도로 배포되는 암호화 `.dials` 파일에 들어 있습니다.
 
+새 형식의 `.dials` 파일은 연락처 내용과 분리된 공개 가능한 기준일 메타데이터를 포함할 수 있습니다. 이 값은 암호를 입력하기 전 현재 연결된 데이터의 기준일을 보여주는 데만 사용되며, 실제 연락처 내용은 계속 암호화되어 있습니다.
+
 ### 보안을 위한 구성
 
 - **실제 연락처 데이터를 GitHub에 포함하지 않습니다.**  
@@ -110,9 +111,6 @@ GitHub에는 조회용 웹앱만 공개하며, 실제 운영 연락처는 별도
 - **외부 분석도구와 광고를 사용하지 않습니다.**
 
 - **외부 CDN을 사용하지 않습니다.**
-
-- **업데이트 정보와 실제 연락처를 분리합니다.**  
-  공개된 업데이트 확인 정보에는 최신 데이터 기준일처럼 공개 가능한 정보만 들어가며 실제 연락처는 포함하지 않습니다.
 
 ## HJU Phonebook과의 관계
 
@@ -171,7 +169,6 @@ Dials works in modern browsers on iPhone, iPad, Android, Windows, and macOS.
 - Tap phone numbers to call
 - Select and export multiple people to device contacts
 - Choose representative organization and title information for people with multiple affiliations
-- Notification when newer contact data is available
 - System / Light / Dark / Black (OLED) appearance modes
 - Responsive mobile and desktop interface
 - Home-screen / app-style shortcut support
@@ -221,6 +218,8 @@ The design is intended to **reduce the number of places where contact data could
 
 The public Dials web application and the operational contact data remain separate.
 
+Newer `.dials` files may include a public, non-contact data date outside the encrypted payload so Dials can show which dataset is connected before unlock. Actual contact records remain encrypted.
+
 ### Security and privacy measures
 
 - Operational contact data is not committed to the public GitHub repository.
@@ -232,7 +231,6 @@ The public Dials web application and the operational contact data remain separat
 - Locking Dials reloads the page and releases the decrypted active-page state.
 - No external analytics or advertising services are used.
 - No external CDN is used.
-- Public update metadata contains no actual contact records.
 
 ## Relationship with HJU Phonebook
 
