@@ -275,7 +275,7 @@ function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
   const dataVersion = String(state.safeMeta?.dataVersion || publicPackageDataVersion(state.encryptedPackage) || "");
-  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준의` : "";
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 에 만든` : "";
   el.connectedMetaText.classList.toggle("hidden", !dataVersion);
 }
 
