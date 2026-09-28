@@ -1,614 +1,269 @@
 # Dials
 
-**별도로 배포되는 로컬 연락처 데이터 파일을 사용하는 웹 기반 연락처 조회 도구**
+**별도로 배포되는 암호화 연락처 데이터 파일을 사용하는 웹 기반 전화번호부**
 
-🌐 <a href="https://bak2ya.github.io/Dials/" target="_blank" rel="noopener noreferrer">Dials 웹앱 열기</a>
+🌐 [Dials 열기](https://bak2ya.github.io/Dials/)
 
-<img src="./icons/icon-192.png" alt="Dials 아이콘" width="96" height="96">
+Dials는 조직의 연락처를 빠르게 검색하고 조회하기 위한 웹앱입니다.
 
-Dials는 조직의 연락처를 빠르게 조회하기 위한 가볍고 반응형인 웹앱입니다. 웹앱 자체와 실제 전화번호부 데이터는 완전히 분리되어 있으며, 사용자는 Windows 관리 프로그램에서 생성해 별도로 배포된 암호화 `.dials` 파일을 불러와 사용합니다.
+웹앱 자체와 실제 전화번호부 데이터는 분리되어 있으며, 사용자는 별도로 배포받은 암호화 `.dials` 파일을 연결해 사용합니다.
 
-## 기본 사용 흐름
-
-1. 브라우저 또는 홈 화면 아이콘에서 Dials를 엽니다.
-2. 배포받은 `.dials` 데이터 파일을 최초 1회 연결합니다.
-3. 파일을 연결하면 같은 화면에 나타나는 암호 입력란에서 데이터 암호를 입력합니다.
-4. 이름, 소속, 직함, 담당, 내선번호, 개인번호, FAX로 검색하거나 `행정부서 / 학과 / 기타시설`을 따라 조회합니다.
-5. 이후 다시 실행할 때는 이전에 연결한 암호화 파일을 브라우저가 기억하므로 파일을 다시 선택하지 않고 암호만 입력하면 됩니다.
+iPhone, iPad, Android, Windows, macOS의 최신 웹브라우저에서 사용할 수 있습니다.
 
 ## 주요 기능
 
-- iPhone / iPad / Android / Windows / macOS 브라우저 반응형 화면
-- 확정된 Dials 공식 아이콘을 웹 헤더 / PWA / iPhone 홈 화면 아이콘에 공통 적용
-- iOS 파일 선택기에서 `.dials` 파일이 비활성화되던 문제 수정
-- `⋯ → 화면 모드`에서 시스템 / 라이트 / 다크 / 블랙(OLED) 선택 (기본값은 시스템)
-- House Palette 기준 라이트 / 다크 / 블랙(OLED) 테마
-- `⋯ → 정보`에서 개인정보 보호·보안 방식, 현재 버전, GitHub 링크 확인
-- `⋯ → 바로가기 추가`에서 지원 브라우저의 앱 설치 안내를 사용하고, iPhone/iPad에서는 `공유 → 홈 화면에 추가` 방법 안내
-- 암호화 `.dials` 파일 불러오기 및 IndexedDB 재사용
-- 암호 미저장
-- 동일한 암호화 `.dials` 패키지는 파일명이 바뀌어도 SHA-256 지문으로 식별하여, 현재 브라우저 안에서 암호 실패 횟수와 재시도 지연을 이어서 적용
-- 암호 4회 실패부터 10초 → 30초 → 1분 → 5분 → 최대 15분으로 재시도 지연
-- 강한 Content Security Policy(CSP)로 외부 스크립트·외부 통신·iframe/플러그인 등 사용하지 않는 경로를 제한
-- 복호화된 연락처 데이터는 현재 열린 페이지 메모리에서만 사용
-- 잠금 해제 시점부터 10분이 지나면 자동 잠금(백그라운드 복귀 시에도 만료 여부 재확인)
-- 여러 검색어를 AND 조건으로 처리하는 통합 검색
-- Windows 프로그램의 시트1 출력순서를 그대로 사용하는 소속/인물 조회
-- `personKey` 기준으로 동일인의 여러 소속을 검색 결과 한 카드에 통합
-- 이름이 같은 다른 사람은 서로 다른 `personKey`로 별도 표시
-- 전화번호를 누르면 전화 앱 연결
-- HJU Phonebook에서 내선 연결 불가로 지정한 번호는 전체 번호 뒤에 **`(외부번호)`** 표시
-- `⋯ → 연락처 저장`에서 `구분 → 주요 소속 → 하위 소속 → 인물`을 필요할 때만 펼쳐 선택
-- 소속 전체 선택 및 일부 선택(혼합 상태) 지원
-- 다중소속 인물은 `personKey` 하나의 선택 상태를 공유하며 vCard에 중복 저장되지 않음
-- 연락처 여러 명 선택 및 하나의 vCard (`.vcf`) 파일 생성
-- vCard 기본 필드에 넣을 개인번호 / 내선번호 / 직장·기관 선택
-- 연락처 기본 전화번호를 `휴대폰 우선 / 내선번호 우선`으로 선택(기본 휴대폰, 해당 번호가 없으면 자동 대체)
-- 연락처 저장 목록에서는 번호를 반복 표시하지 않고 이름 + 직함 대표 버튼 + 연락처 선택 체크박스에 집중
-- 연락처별 대표 버튼으로 다중소속 중 하나의 **부서 + 직함**을 대표 정보로 선택(대표를 선택하지 않는 것도 가능)
-- 이름은 항상 포함
-- 이름 앞/뒤에 원하는 문자열을 그대로 붙이는 옵션과 각각의 마지막 사용값 기억
-- `메모에 기록할 내용`에서 데이터 기준일 / 전체 소속 / 전체 직함·담당을 각각 선택
-- 최초 정상 접속 뒤 앱 화면의 오프라인 캐시 지원
-- 광고, 분석도구, 외부 API, CDN 및 연락처 원격 업로드 없음
-
-
-
-## v0.7.9 기타시설 동일 시설명 중복 표시 수정
-
-- `기타시설` 카드 제목과 동일한 이름의 일반 `CONTACT`는 카드 안에서 같은 시설명을 다시 반복 표시하지 않습니다.
-- 같은 규칙을 일반 조회와 `연락처 저장` 화면 모두에 적용했습니다.
-- 동일명 `CONTACT`의 직함·담당·전화번호는 그대로 유지하며, 실제 `PERSON` 담당자와 시설명과 다른 `CONTACT` 이름은 기존처럼 표시합니다.
-- `.dials` schema 1.5, 연락처 저장/vCard 규칙, 대표 직함, 기본 전화번호 우선순위, FAX 동작은 변경하지 않았습니다.
-
-## v0.7.8 대표 직함 일괄선택 위치 정리
-
-- 검색 중에는 `검색결과 N명`과 같은 줄에서 **대표 직함 모두 선택 → 모두 선택** 순서로 일괄 작업을 바로 사용할 수 있습니다.
-- 검색하지 않을 때도 `소속별 선택` 헤더 우측에서 대표 직함 일괄선택을 사용할 수 있습니다.
-- 일괄 대표 선택을 실행한 경우에만 `다중 소속 인물은 가장 앞 소속·직함이 대표로 선택됩니다.` 안내가 나타나며, 대표 직함 선택을 일괄 해제하면 다시 숨겨집니다.
-- 연락처 저장 방식, 기본 전화번호 우선순위, schema 1.5는 변경하지 않았습니다.
-
-## v0.7.7 연락처 기본 전화번호 우선순위
-
-- `연락처에 저장할 정보`에 **기본 전화번호** 선택을 추가했습니다. 기본값은 `휴대폰 우선`이며 마지막 선택을 현재 브라우저에 기억합니다.
-- `휴대폰 우선`이면 휴대폰/개인번호를 vCard의 첫 전화번호이자 `PREF` 선호 번호로 기록하고, 휴대폰이 없으면 대표/첫 내선번호로 자동 대체합니다.
-- `내선번호 우선`이면 대표 소속의 내선번호를 우선하고, 내선번호가 없으면 휴대폰으로 자동 대체합니다.
-- 나머지 번호는 기존처럼 같은 연락처 카드 안에 모두 유지합니다. 여러 내선 병합, 대표 직함 우선, 메모, iOS `text/vcard` 공유 경로는 변경하지 않았습니다.
-- `.dials` schema는 **1.5 그대로**이며 HJU Phonebook V0.26.7 build78과 호환됩니다.
-
-## v0.7.6 FAX · 기타시설 평면화 · 연락처 저장 UI 정리
-
-- HJU Phonebook V0.26.6 build77 / **schema 1.5**와 짝을 이룹니다. 조직 객체에 FAX를 추가했고, Dials의 내선·개인번호는 Excel 시트 번호표시 설정과 분리해 명시적 `전화번호 비노출`만 존중합니다.
-- 행정부서/학과의 FAX는 소속 헤더 우측에, 기타시설의 FAX는 시설 카드 안에 표시합니다. FAX도 검색할 수 있습니다.
-- `기타시설`을 펼치면 중복 계층 없이 시설 카드가 바로 보입니다. 담당 인물이 있는 시설은 이름/직함/담당/번호를 같은 시설 카드 안에서 보여주며 특정 업체명 예외처리는 하지 않습니다.
-- 연락처 저장의 대분류에도 체크박스를 추가해 범주 전체선택/부분선택(mixed)을 지원합니다.
-- `대표 직함 모두 선택`으로 현재 선택된 인물의 빈 대표 직함을 현재 정렬 첫 소속으로 채울 수 있고, 모두 선택된 뒤에는 `대표 직함 선택 해제`로 바뀝니다.
-- 암호 눈 아이콘 배경, 연락처 카드와 체크박스 사이 세로 구분선을 없애고 브라우저 기본 검색 X를 숨겨 기존 화면을 더 심리스하게 정리했습니다.
-- `연락처에 저장할 정보`, 같은 줄의 `직장 / 기관`, `예: 조교`, 테마 대응 `[연락처 저장하기]` 안내 표기를 사용합니다.
-- v0.7.5의 한 사람=한 vCard, 번호 병합/대표 우선, 전공심화 제외와 실기기로 확인한 iOS vCard 생성·공유 방식은 그대로 유지합니다.
-
-## v0.7.5 다중소속 vCard 병합 · 대표 우선 · 전공심화 중복 제외
-
-- Dials 화면 레이아웃은 v0.7.4 그대로 유지합니다. 이번 변경은 Dials 내부 데이터 필터와 vCard 생성 규칙만 다룹니다.
-- 하나의 `personKey`는 항상 vCard 연락처 **한 장**으로 저장합니다. 여러 소속의 서로 다른 내선/개인번호는 한 카드 안에 모으고 동일 번호는 한 번만 기록합니다.
-- 사용자가 대표 부서/직함을 선택하면 해당 소속을 vCard의 `ORG/TITLE`뿐 아니라 내선 생성 순서와 소속 메모의 첫 줄에서도 우선합니다. 대표를 선택하지 않으면 기존 Dials 소속 순서를 유지합니다.
-- 서로 다른 내선이 여러 개이고 `소속` 메모를 켠 경우, 각 소속 메모 줄에 해당 내선을 함께 적어 번호의 의미를 보존합니다. 임의의 플랫폼 전용 전화 라벨은 사용하지 않습니다.
-- HJU Phonebook이 Excel 표시용으로 합성해 보내는 `학사학위 전공심화` 조직은 Dials에서 조회/검색/대표 후보/vCard/다중소속 계산 대상에서 제외합니다. 원 학과 데이터는 그대로 사용하며 이름/번호 패턴으로 추정하지 않습니다.
-- schema 1.4, iOS `text/vcard` Web Share, Android 다운로드, 보안·잠금·검색·History/Back·테마는 그대로입니다.
-
-## v0.7.4 연락처 저장 안내 · 검색결과 선택 UX · iOS 전달 경로 확정
-
-- 실제 iPhone 테스트에서 v0.7.3의 `data:text/vcard` 직접 열기는 새 창의 검은 화면을 만들었고, 주소를 다시 실행했을 때도 멀티 VCF의 첫 연락처만 표시되었습니다. 이 경로는 폐기했습니다.
-- v0.7.2에서 실기기로 검증한 vCard 본문은 그대로 유지합니다. 메시지 첨부로 열었을 때 여러 연락처가 정상적으로 한 번에 표시되는 것을 확인했습니다.
-- iPhone/iPad에서는 `text/vcard` 파일을 시스템 공유 시트로 전달하고, 사용자가 **메시지 → 내 전화번호 → 첨부 연락처 파일 열기** 순서로 가져오도록 항상 보이는 안내를 제공합니다. Android에서는 일반 `.vcf` 저장/가져오기 경로를 사용합니다.
-- 버튼 이름을 `연락처 파일 만들기`에서 **`연락처 저장하기`**로 바꾸고, 플랫폼별 저장 방법을 버튼 바로 아래에 표시합니다. OS 감지 결과와 무관하게 안내는 항상 보입니다.
-- 검색창 바로 아래에 대표 직함 안내를 두고 예시는 `팀장`으로 변경했습니다. 대표 직함을 선택하면 해당 소속과 직함이 연락처의 소속·직함 필드에 저장된다는 점을 명확히 설명합니다.
-- 검색 중에는 `검색결과 N명`과 `모두 선택 / 선택 해제` 토글을 같은 줄에 표시합니다. 토글은 현재 검색결과에만 적용되며, 같은 인물이 여러 소속에 있어도 하나의 연락처로 저장된다는 안내를 결과 바로 아래에 표시합니다.
-- schema 1.4, 직함/담당/PERSON·CONTACT 의미, 보안·잠금·검색·History/Back·테마는 변경하지 않았습니다.
-
-## v0.7.3 iPhone 연락처 바로 열기 우선 — 실기기 테스트 후 폐기
-
-- 실제 iPhone에서 v0.7.2의 vCard 내용은 정상으로 확인되었습니다. 메시지 첨부로 열었을 때 여러 연락처가 iOS 연락처 가져오기 화면에서 정상 표시됩니다.
-- 따라서 vCard 직렬화는 그대로 동결하고, iPhone/iPad의 전달 UX만 조정했습니다.
-- 이 빌드는 `data:text/vcard` 직접 열기를 실험했습니다. 실제 iPhone에서는 새 창이 검은 화면으로 열리고, 주소를 다시 실행하면 멀티 VCF의 첫 연락처만 표시되어 **v0.7.4에서 폐기**했습니다.
-- 현재 릴리스에서는 이 직접 열기 분기와 `공유로 다시 시도` 버튼을 사용하지 않습니다.
-- schema 1.4와 HJU Phonebook exporter 계약, vCard 본문(`FN/N/TEL/ORG/TITLE/NOTE`)은 변경하지 않았습니다.
-
-## v0.7.2 iPhone vCard 가져오기 호환성
-
-- 실제 iPhone 테스트에서 `.vcf`가 파일로는 전달되지만 연락처 미리보기에서 `알 수 없음`으로 표시되던 문제를 수정했습니다.
-- 생성 vCard 앞의 UTF-8 BOM을 제거하고, PERSON/CONTACT 모두 `FN`과 비어 있지 않은 구조화 이름 `N`을 기록합니다. CONTACT는 여전히 `TITLE`을 만들지 않습니다.
-- iPhone/iPad에서는 가능하면 Web Share API로 실제 `text/vcard` 파일을 시스템 공유 시트에 전달합니다. 공유 파일을 지원하지 않는 환경에서만 일반 `.vcf` 다운로드로 돌아갑니다.
-- 과거 iOS 다운로드 우회용 `application/octet-stream` 재포장은 제거했습니다. 파일명만 `.vcf`인 일반 바이너리로 위장하지 않고 MIME을 끝까지 vCard로 유지합니다.
-- `.dials` schema 1.4, 직함/담당/PERSON·CONTACT 의미 및 HJU Phonebook build75+ exporter 계약은 변경하지 않았습니다.
-
-
-## v0.7.1 배포 전 스키마 단일화
-
-- 아직 실제 배포 전이므로 레거시 호환 분기를 제거하고 **schema 1.4 하나만** 허용합니다.
-- 연락처 레코드는 `title=직함`, `duty=담당`, `recordType=PERSON|CONTACT`만 사용합니다. `job`, `role` 같은 중복/레거시 alias는 더 이상 규격에 존재하지 않습니다.
-- schema 버전이 다르거나 필수 필드가 빠졌거나 허용되지 않은 필드가 섞여 있으면 추측해서 열지 않고 명확한 오류를 표시합니다.
-- `personKey`, 이름, 유형도 누락 시 추정하지 않습니다. 같은 `personKey`가 `PERSON`과 `CONTACT` 유형을 섞어 쓰는 데이터는 거부합니다.
-- 담당 검색·보조표시, CONTACT의 `시설·업체` 표시, vCard NOTE 저장, 대표 부서/직함 기능은 v0.7.0 설계를 그대로 유지합니다.
-- 대응 exporter는 **HJU Phonebook V0.26.4 build75**입니다.
-
-
-## v0.6.0 연락처 대표 정보 · 메모 옵션 · 스크롤/화면 정리
-
-- 큰 화면에서도 Dials의 주요 콘텐츠 폭을 시작 화면과 같은 최대 폭으로 통일해, 넓은 모니터에서 조회/저장 UI가 과도하게 늘어나지 않도록 정리했습니다.
-- 시작 화면의 데이터 암호 입력칸 안에 눈 모양의 표시/숨기기 버튼을 추가했습니다. 입력값·커서 위치는 유지하며, 잠금/데이터 교체 등 새 암호 입력 상태에서는 다시 숨김으로 시작합니다.
-- v0.4.1부터 사용하던 JS 기반 `no-page-scroll` 잠금/해제 로직을 제거하고 브라우저의 기본 페이지 스크롤에 맡깁니다. 펼침 애니메이션과 viewport 재계산 타이밍에 따라 연락처 저장 화면의 스크롤이 간헐적으로 잠기던 원인을 제거했습니다.
-- 조회/연락처 저장의 펼친 카드에서 헤더와 하위 내용 사이의 얇은 구분선을 제거하고 기존 내부 여백만 유지합니다.
-- 연락처 저장의 왼쪽 영역은 별도 `저장할 사람` 제목 없이 `저장할 사람을 선택하세요.` 안내로 시작합니다. 선택 목록에서는 어차피 저장되는 전화번호를 숨기고 **이름 + 직위/역할 대표 버튼 + 오른쪽 사람 선택 체크박스**만 표시합니다.
-- 직위/역할 버튼(예: `처장`, `교수`)을 선택하면 그 카드가 속한 소속을 vCard의 대표 **부서**로, 해당 직위/역할을 `TITLE`로 기록합니다. 한 사람에게 대표 정보는 최대 하나이며, 다른 소속의 대표 버튼을 누르면 기존 대표에서 새 대표로 바꿀지 확인합니다. 대표 버튼을 다시 누르면 대표 정보 없음 상태로 돌아갈 수 있습니다.
-- `직장 / 기관`은 별도 전역 옵션으로 두며 현재 전화번호부 제목에서 기관명(예: `혜전대학교`)을 가져옵니다. 대표 부서가 함께 있으면 vCard `ORG`는 `기관;부서` 형태로 기록됩니다.
-- 기존의 소속/직책 저장 옵션과 `메모에 항상 포함` 안내를 재구성해 `메모에 기록할 내용` 하위 카드에서 **데이터 기준일 / 소속 / 직책·역할**을 각각 선택할 수 있게 했습니다. 다중소속의 전체 정보는 메모에 보존하면서 기본 연락처 필드는 대표 하나만 깔끔하게 표시할 수 있습니다.
-- `.dials` 포맷/schema는 변경하지 않았습니다. `personKey`, CSP, 암호 실패 지연, 10분 고정 자동 잠금, IME-safe 검색, History/Back, 안전한 데이터 교체, v0.5.5 Safari vCard 우회와 이름 앞/뒤 문자열 기능을 그대로 유지합니다.
-
-## v0.5.5 iPhone 연락처 파일 저장 호환성 · 이름 앞/뒤 문자열
-
-- 당시 iPhone/iPad Safari의 Blob 다운로드 문제를 피하기 위해 `application/octet-stream` 재포장을 사용했습니다. **이 방식은 v0.7.2에서 실제 iOS 연락처 가져오기 호환성 문제 때문에 폐기되었고, 현재는 `text/vcard` Web Share/다운로드 경로를 사용합니다.**
-- `이름 앞에 글자 추가`의 예시는 `직장`, `이름 뒤에 글자 추가`의 예시는 `교수`로 정리했습니다.
-- 앞/뒤 문자열에는 앱이 공백을 자동으로 넣거나 제거하지 않습니다. 사용자가 입력한 문자열을 이름에 그대로 붙입니다.
-- 앞/뒤 옵션은 독립적으로 켜고 끌 수 있고 마지막 입력값과 활성 상태를 각각 브라우저에 기억합니다.
-- 두 옵션의 최종 결과를 같은 설정 묶음 아래에서 `박주성`을 기준으로 실시간 미리보기합니다.
-
-## v0.5.4 펼침 상태의 배경 강조 제거
-
-- 조회 화면과 연락처 저장 화면에서 펼침 상태 자체를 지속적인 배경색 변화로 표현하지 않습니다. 펼침 여부는 chevron 방향과 실제 하위 항목 노출만으로 전달합니다.
-- 모바일 Safari/Chrome처럼 터치 뒤 `:hover`가 잠시 유지될 수 있는 환경에서 카드가 선택된 것처럼 보이지 않도록, 트리 카드의 hover 배경은 실제 hover를 지원하는 정밀 포인터(마우스/트랙패드)에서만 적용합니다.
-- 연락처 저장의 선택 상태는 기존대로 오른쪽 체크박스/혼합 상태만 담당하며, 펼침 상태와 선택 상태를 시각적으로 분리합니다.
-- 계층, 카드 배경 토큰, 펼침 애니메이션, 체크 동작, 데이터/보안 기능은 변경하지 않았습니다.
-
-## v0.5.3 펼친 카드 배경 연속성
-
-- 조회 화면과 연락처 저장 화면에서 부모 카드를 펼쳤을 때, 확장된 내부 영역이 부모 헤더와 동일한 배경색을 그대로 이어받도록 수정했습니다.
-- 계층 구조, 들여쓰기, 테두리, 애니메이션, 선택 동작은 v0.5.2와 동일하며 색상 연속성만 조정했습니다.
-
-## v0.5.2 중첩 카드 계층 · 펼침 애니메이션
-
-- 일반 조회와 연락처 저장의 계층 UI를 같은 중첩 카드 문법으로 통일했습니다.
-- 하위 소속을 오른쪽으로 크게 밀지 않고, 상위 카드가 펼쳐지면서 내부에 하위 카드가 나타나는 구조로 바꿨습니다. 모바일 가로 공간 손실을 줄이면서 부모/자식 관계를 더 명확하게 보여줍니다.
-- 최상위는 House `Surface`, 내부 조직은 `Secondary Surface`를 사용하고 더 깊은 단계는 새 색을 추가하지 않고 내부 여백·테두리·타이포그래피로 구분합니다. Black(OLED)에서는 색상 차이보다 경계와 구조가 계층을 전달합니다.
-- 펼침/접힘에는 약 180ms의 짧은 CSS 기반 높이/투명도 애니메이션을 적용하고, `prefers-reduced-motion` 사용자는 애니메이션을 사용하지 않습니다. 지속적인 렌더링 루프는 없습니다.
-- 연락처 저장은 기존의 왼쪽 disclosure / 오른쪽 체크박스 문법, 전체/부분 선택, `personKey` 동기화와 중복 제거를 그대로 유지합니다.
-
-## v0.5.1 조회 화면 트리 통일
-
-- 일반 조회 화면도 연락처 저장 화면과 같은 단계형 펼침/접힘 계층으로 통일했습니다.
-- 처음에는 `행정부서 / 학과 / 기타시설`만 닫힌 상태로 보이고, 구분 → 주요 소속 → 하위 소속 순서로 필요한 항목만 펼칩니다.
-- 주요 소속을 펼치면 그 소속에 직접 속한 책임자/인물이 먼저 나오고, 하위 부서는 같은 깊이에 이어집니다. 하위 부서를 펼치면 그 안의 연락처가 표시됩니다.
-- 조회 화면에는 선택 체크박스를 두지 않고, 연락처 저장 화면과 조직 계층·순서만 공유합니다.
-- 첫 화면의 `소속별 조회` 제목은 제거하고 안내 문구를 `소속을 선택하거나 검색창에서 바로 찾아보세요.`로 간결하게 정리했습니다.
-- 검색 결과, 전화 링크, 외부번호 표기, History/Back, IME-safe 검색 등 기존 조회 동작은 유지합니다.
-
-## v0.5.0 보안 강화 · 암호 실패 지연 · 시작 화면 정리
-
-- Content Security Policy(CSP)를 추가해 기본 리소스 허용 범위를 닫고, 스크립트·스타일·이미지·Service Worker/PWA 리소스만 필요한 범위에서 허용합니다. 앱 페이지의 `fetch`/XHR/WebSocket 계열 외부 통신은 `connect-src 'none'`으로 차단합니다.
-- 기존 인라인 테마 초기화 코드는 `theme-init.js`로 분리해 `script-src 'self'` 정책에서 `unsafe-inline` 없이 동작하도록 정리했습니다.
-- `.dials`의 암호화 핵심 필드로 SHA-256 지문을 계산해 파일명이 바뀌어도 같은 암호화 패키지의 암호 실패 기록을 현재 브라우저에서 이어갑니다. 지문은 연락처 평문이나 암호가 아닙니다.
-- 암호 실패 1~2회는 즉시 재시도, 3회째에는 다음 실패 시 10초 지연을 사전 안내합니다. 4회부터 10초 → 30초 → 1분 → 5분 → 15분 순으로 대기 시간이 증가하며, 성공적으로 열면 해당 파일 지문의 실패 기록을 초기화합니다.
-- 이 제한은 브라우저 로컬 저장소 기반의 UI 보조 방어입니다. 다른 브라우저/기기와 실패 횟수를 공유하려면 중앙 서버가 필요하고 Dials의 로컬 우선·개인정보 비전송 구조와 충돌하므로 적용하지 않습니다. 오프라인 암호 추측 방어는 계속 파일 암호화/KDF와 충분히 강한 암호가 담당합니다.
-- 시작 화면 상단은 Dials 이름에 집중하도록 소개 문구를 제거했습니다. 하단 바깥쪽에 `배포받은 연락처 데이터로 빠르게 조회하는 웹 전화번호부입니다.`와 실제 앱 버전을 표시합니다.
-- 사용 방법 문구를 `배포받은 파일(.dials)을 불러옵니다.` / `연결 후 암호를 입력하면 연락처가 열립니다.` / `연결한 다음부터는 암호만 입력하면 됩니다.`로 간결하게 정리했습니다.
-
-## v0.4.2 연락처 저장 트리 · 선택 문법 정리
-
-- 연락처 저장 화면을 별도 페이지를 계속 들어가는 방식 대신 **한 화면의 펼침/접힘 트리**로 정리했습니다.
-- 처음에는 `행정부서 / 학과 / 기타시설`만 닫힌 상태로 보이고, 구분을 열면 `총무처 / 교무처 ...` 같은 주요 소속만 나타납니다. 주요 소속을 열면 직속 책임자/인물이 먼저 나오고 그 아래 하위 부서가 같은 위계로 이어지며, 하위 부서를 열면 인물이 표시됩니다.
-- 일반적인 트리 문법에 맞춰 **펼침/접힘은 왼쪽**, **선택 체크박스는 오른쪽**으로 분리했습니다. 두 조작 영역은 서로 독립되어 체크하다가 항목이 열리거나, 열다가 체크되는 오작동을 막습니다.
-- 주요 소속과 하위 소속의 체크박스는 해당 범위의 인물을 전체 선택하며, 일부만 선택되면 혼합 상태를 표시합니다. 다중소속 인물은 기존처럼 `personKey` 하나의 선택 상태를 공유합니다.
-- 부처 자체에 직접 속한 책임자/인물은 하위 부서보다 먼저 표시하면서 하위 부서와 같은 깊이에 둡니다.
-- 일반 조회 화면의 `시트1 기준의 소속 순서로 표시됩니다.` 문구는 제거했습니다. 실제 순서는 기존 데이터 순서를 계속 따릅니다.
-- 검색 결과도 선택 체크박스를 오른쪽에 두어 같은 선택 문법을 사용합니다.
-- 잠금 해제 성공 직후에는 전화번호부 준비/렌더링보다 먼저 모바일 키보드와 visual viewport 정리를 시작하도록 순서를 보강했습니다.
-
-## v0.4.1 모바일 첫 터치 · 안전한 데이터 교체 · 연락처 계층
-
-- 잠금 해제 직후 암호 입력 포커스와 모바일 키보드/visual viewport 전환을 정리해 상단 `⋯`의 첫 터치가 바로 동작하도록 보강했습니다. 실제 iPhone의 키보드 전환은 최종 실기기 확인 대상으로 남깁니다.
-- `⋯ → 새 데이터 불러오기`는 최초 데이터 연결 화면으로 돌아갑니다. 새 파일은 암호가 정상 확인된 뒤에만 기존 저장 데이터를 교체하므로 중간 취소·잘못된 파일·틀린 암호로 마지막 정상 데이터가 사라지지 않습니다.
-- 화면 내용이 실제 viewport보다 짧으면 불필요한 세로 스크롤/바운스를 억제하고, 길 때만 정상 스크롤합니다.
-- 연락처 저장의 소속 탐색에서 부처 자체에 직접 속한 책임자/인물은 `총무처 → 총무처` 같은 중복 소속 행 대신 부서들과 같은 위계의 인물 행으로 표시합니다. `.dials`에 들어온 조직/인물 순서는 그대로 유지합니다.
-- 직속 인물도 기존 `personKey` 선택 상태를 공유하므로 다중소속 인물 체크 동기화와 vCard 중복 제거가 그대로 적용됩니다.
-
-## v0.4.0 연락처 저장 구조 · 자동 잠금 · 정보 계층
-
-- 연락처 저장 화면을 긴 전체 인물 목록에서 메인 화면과 같은 `구분 → 소속 → 인물` 탐색 구조로 변경했습니다.
-- 소속 행과 소속 상세 화면에서 전체 선택할 수 있으며, 일부만 선택되면 체크박스가 혼합 상태로 표시됩니다.
-- 동일한 `personKey`를 가진 다중소속 인물은 어느 소속/검색 결과에서 체크해도 같은 선택 상태를 공유하고 vCard에는 한 번만 저장됩니다.
-- 연락처 저장 화면의 행 높이를 줄여 모바일에서 더 많은 항목을 한눈에 볼 수 있게 했습니다.
-- 잠금 해제 시점부터 10분이 지나면 활동 여부와 관계없이 자동으로 잠기며, 모바일 브라우저가 백그라운드에서 타이머를 늦춰도 화면 복귀 시 만료 여부를 다시 확인합니다.
-- 시작 화면에 사용자 친화적인 보안 안내를 추가하고, 연결된 데이터의 기준일을 더 잘 보이게 표시합니다.
-- `⋯ → 정보`는 사용자에게 필요한 보호 원칙만 간단히 보여주고 암호화/저장 방식의 기술 세부사항은 GitHub 문서에서 확인하도록 정리했습니다.
-- 공개 최신 데이터 확인 기능과 `data-status.json` 의존성을 제거했습니다. 기준일은 연결된 `.dials` 데이터 자체의 `dataVersion`을 표시합니다.
-
-## v0.3.2 모바일 IME · 메뉴 사용성 · 정보 화면
-
-- 모바일 한글 입력에서 첫 자모 뒤 다음 자모를 입력할 때 조합이 끊길 수 있던 문제를 다시 수정했습니다.
-- 검색 중에는 History/스크롤 상태를 계속 갱신하지 않고, 검색 입력 자체는 브라우저/키보드에 맡긴 뒤 짧은 debounce 후 결과만 갱신합니다.
-- 메인 검색과 `연락처 저장` 검색에 같은 IME-safe 입력 방식을 적용했습니다.
-- 상단 `⋯`의 실제 터치 영역을 48×48px로 넓히고 메뉴 항목도 최소 48px 높이로 보강했습니다.
-- `⋯ → 정보`를 추가해 Dials 설명, 개인정보 보호 및 보안 방식, 현재 버전, GitHub 링크를 확인할 수 있습니다.
-- 정보 화면은 일반 사용자가 필요한 보호 원칙만 설명하고, AES/PBKDF2 같은 기술 세부사항은 이 README와 데이터 형식 문서에 유지합니다.
-- v0.3.0의 뒤로가기/History, 스크롤 복원, 접근성, Light/Dark/Black(OLED), v0.2.0의 외부번호 표시는 그대로 유지합니다.
-
-## v0.3.1 한글·IME 검색 입력 수정
-
-- 한글, 일본어, 중국어처럼 IME 조합 입력이 필요한 검색에서는 조합 중간 상태로 검색 결과를 다시 렌더링하지 않습니다.
-- `compositionend`에서 글자가 확정된 뒤 검색/History를 한 번만 갱신하여 첫 글자가 사라지거나 조합이 끊기는 문제를 수정했습니다.
-- 영문·숫자 검색은 기존처럼 즉시 반영됩니다.
-- v0.3.0의 뒤로가기, 검색 History, 스크롤 복원, OLED 테마 동작은 그대로 유지합니다.
-
-## v0.3.0 웹 내비게이션 · 접근성 · OLED
-
-- 브라우저/Android 시스템 **뒤로가기**가 Dials 내부의 `홈 → 분류 → 소속` 이동과 자연스럽게 연결됩니다.
-- 검색 진입은 History에 한 번만 기록되며, 뒤로가기를 누르면 검색 이전 화면과 스크롤 위치로 돌아갑니다.
-- `연락처 저장`도 History에 연결되어 브라우저/시스템 뒤로가기로 전화번호부에 복귀합니다.
-- 목록으로 돌아왔을 때 이전 스크롤 위치를 복원합니다.
-- 모달은 Tab 포커스를 내부에 유지하고 닫을 때 원래 조작하던 컨트롤로 포커스를 돌려줍니다.
-- `⋯`는 ARIA menu 역할을 억지로 선언하지 않고 일반 popover 버튼 목록으로 정리했습니다.
-- 화면 모드는 실제 radio group이며 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 제공합니다.
-- 라이트/다크/블랙은 공통 House Palette 기준으로 정리했습니다.
-- `내선번호`라는 익숙한 전화번호부 용어는 유지합니다. 외부번호도 같은 번호 자리에서 `(외부번호)`만 덧붙여 표시합니다.
-
-## v0.2.0 외부번호 표시
-
-HJU Phonebook의 `번호 기반`에서 `내선 연결 가능`을 끈 번호는 Dials에서 전체 번호를 그대로 유지하면서 뒤에 **`(외부번호)`**를 표시합니다. 이 표시는 번호의 성격을 알려주는 정보이며 전화 링크 자체는 전체 번호를 그대로 사용합니다.
-
-기존 schema 1.1 데이터에는 이 필드가 없으므로 일반 내선번호와 동일하게 표시됩니다.
-
-## iPhone / iPad 데이터 파일 선택
-
-Dials v0.1.2에서는 iOS 파일 선택기에서 커스텀 확장자 `.dials` 파일이 회색으로 비활성화되어 선택되지 않던 문제를 수정했습니다. 브라우저의 파일 형식 필터에 의존하지 않고 파일을 선택한 뒤, Dials가 내부의 `DialsEncryptedData` 형식을 직접 검사합니다.
-
-따라서 iPhone/iPad에서는 배포받은 `.dials` 파일을 **파일 앱 / iCloud Drive 등에서 그대로 선택**할 수 있습니다. 잘못된 파일을 고르면 가져온 뒤 Dials가 형식 오류를 안내합니다.
-
-## 화면 모드와 바로가기
-
-상단 `⋯` 메뉴의 **화면 모드**에서 `시스템 / 라이트 / 다크 / 블랙(OLED)`을 선택할 수 있습니다. 기본값은 시스템이며, 사용자가 직접 선택한 모드는 현재 브라우저에 기억됩니다.
-
-- 라이트: House Palette의 warm-neutral 기준 (`#F6F1E8` 배경)
-- 다크: developer-neutral 기준 (`#0D1117` 배경)
-- 블랙(OLED): 넓은 배경과 surface를 `#000000`으로 유지하여 OLED 발광 면적을 줄이는 모드
-- Accent: 웹 fallback `#3478F6`
-
-화면 모드 선택은 실제 radio group을 사용합니다.
-
-`⋯ → 바로가기 추가`는 설치를 직접 지원하는 브라우저에서는 PWA 설치 안내를 사용합니다. iPhone/iPad에서는 웹페이지가 홈 화면 추가 창을 직접 실행할 수 없기 때문에 **Safari 공유 → 홈 화면에 추가** 순서를 화면에서 안내합니다.
-
-## Windows 프로그램과의 관계
-
-Dials v0.7.6은 **HJU Phonebook V0.26.6 build77**이 생성하는 `.dials` schema **1.5만** 지원합니다. 아직 배포 전이므로 1.4 이하 호환 분기는 의도적으로 두지 않습니다.
-
-현재 규격은 다음과 같습니다.
-
-- 확장자: `.dials`
-- 외부 포맷: `DialsEncryptedData`
-- 포맷 버전: `1`
-- 암호 키 파생: PBKDF2-HMAC-SHA256, 310,000회
-- 암호화: AES-256-GCM
-- payload 스키마: `1.5`
-- 조직 FAX: organization의 `fax`
-- 직함: `title`
-- 담당: `duty` (직함/TITLE과 분리)
-- 연락처 유형: `recordType` = `PERSON` / `CONTACT`
-- 외부번호 표시: `externalNumber: true`이면 전체 번호 뒤에 `(외부번호)` 표시
-- 동일인 식별: 실제 DB ID가 아닌 비표시 `personKey`
-- 소속 및 인물 순서: Windows의 시트1 출력순서
-
-Dials는 Windows 관리용 SQLite DB를 직접 읽지 않습니다. 관리 프로그램이 조회에 필요한 데이터만 추려 만든 `.dials` 파일을 읽습니다.
-
-상세 규격은 [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md)를 참고하세요.
-
-## GitHub Pages 배포
-
-별도의 빌드 과정이 없는 정적 웹앱입니다.
-
-1. 이 파일들을 `Bak2ya/Dials` 저장소 루트에 업로드합니다.
-2. GitHub에서 **Settings → Pages**로 이동합니다.
-3. **Deploy from a branch**를 선택합니다.
-4. `main` 브랜치와 `/ (root)`를 선택합니다.
-5. 배포 완료 후 아래 링크에서 실행합니다.
-
-🌐 <a href="https://bak2ya.github.io/Dials/" target="_blank" rel="noopener noreferrer">https://bak2ya.github.io/Dials/</a>
-
-모든 리소스는 상대경로를 사용하여 `/Dials/` 프로젝트 경로에서 동작합니다.
-
-## 새 전화번호부 데이터 배포
-
-실제 운영 `.dials` 파일은 **공개 GitHub 저장소에 올리지 않습니다.** 기관 내부 게시판 등 기존 비공개 배포 경로를 통해 별도로 전달합니다.
-
-Dials는 공개 서버에서 최신 버전 여부를 별도로 조회하지 않습니다. 사용자는 연결 화면과 전화번호부 데이터 정보에서 `.dials` 파일 자체에 포함된 **기준일(`dataVersion`)**을 확인할 수 있습니다. 새 전화번호부가 배포되면 `⋯ → 새 데이터 불러오기`로 교체합니다.
+- 이름, 소속, 직함·담당, 전화번호 통합 검색
+- 행정부서 / 학과 / 기타시설별 탐색
+- 전화번호를 눌러 바로 전화
+- 여러 명을 선택해 휴대폰 연락처로 저장
+- 다중 소속 인물의 대표 소속·직함 선택
+- 최신 전화번호부 데이터가 있을 때 업데이트 안내
+- 시스템 / 라이트 / 다크 / 블랙(OLED) 화면 모드
+- 모바일과 데스크톱에 대응하는 반응형 화면
+- 홈 화면이나 앱 형태로 추가해 빠르게 실행
+- 암호화된 `.dials` 데이터의 로컬 사용
+
+## 기본 사용 방법
+
+1. Dials를 엽니다.
+2. 배포받은 `.dials` 파일을 처음 한 번 연결합니다.
+3. 데이터 암호를 입력합니다.
+4. 이름이나 전화번호로 검색하거나 소속별로 조회합니다.
+5. 이후에는 연결한 암호화 파일을 브라우저가 기억하므로 파일을 다시 선택할 필요 없이 암호만 입력하면 됩니다.
 
 ## 연락처 저장
 
-`⋯ → 연락처 저장`에서는 `행정부서 / 학과 / 기타시설`부터 시작해 필요한 소속만 단계적으로 펼쳐 연락처를 선택할 수 있습니다. 펼침/접힘은 왼쪽, 선택 체크박스는 오른쪽으로 분리되어 있으며, 주요 소속/하위 소속 전체 선택과 일부 선택(혼합 상태)을 지원합니다. 여러 소속에 함께 등장하는 동일 연락처의 체크 상태는 서로 동기화됩니다. **다중소속 연락처는 vCard에 중복 저장되지 않습니다.**
+`⋯ → 연락처 저장`에서 필요한 사람을 하나 또는 여러 명 선택해 휴대폰 연락처로 저장할 수 있습니다.
 
-저장 항목은 다음 중 선택합니다.
+필요에 따라 다음 정보를 포함할 수 있습니다.
 
-- 이름: 항상 포함
 - 개인번호
 - 내선번호
-- 직장 / 기관
-- 대표 부서 / 직함
-- 메모: 데이터 기준일 / 소속 / 직함·담당
+- 소속
+- 직함·담당
 
-필요하면 이름 앞과 뒤에 원하는 문자열을 붙일 수 있습니다. 예시 입력은 앞 `직장`, 뒤 `교수`이며, 공백과 기호를 포함해 사용자가 입력한 문자열을 그대로 사용합니다. 앞/뒤 문자열은 vCard 생성 시에만 적용되고 Dials 원본 데이터의 이름은 변경하지 않습니다.
+한 사람이 여러 소속이나 직함을 가지고 있다면 연락처에 사용할 대표 정보를 선택할 수 있습니다.
 
-메모 항목은 각각 선택할 수 있습니다. `직함 / 담당`을 켜면 담당은 NOTE에만 보존되며 대표 `TITLE`에는 들어가지 않습니다. 따라서 `방사선`, `통신` 같은 담당 정보가 직함처럼 보이는 일을 막습니다.
+필요한 경우 연락처 이름 앞에 접두어를 추가할 수도 있습니다.
 
-## 개인정보 및 보안 구조
+저장된 연락처의 메모에는 Dials에서 가져온 연락처임을 알 수 있도록 데이터 기준일이 함께 기록됩니다.
 
-- GitHub 저장소에는 **조회용 웹앱만** 둡니다.
-- 실제 이름, 개인번호, 내선번호, 소속 데이터, 운영 암호, 암호화 키, Windows 관리 DB, 운영 `.dials` 파일은 저장소에 포함하지 않습니다.
-- 연결한 암호화 `.dials` 패키지는 편의를 위해 브라우저 IndexedDB에 저장할 수 있습니다.
-- 데이터 암호는 저장하지 않습니다.
-- 복호화된 전화번호부는 브라우저 영구 저장소에 저장하지 않습니다.
-- `잠금`을 누르면 페이지를 다시 불러와 현재 페이지 메모리에 있는 복호화 데이터를 내려놓습니다.
-- 잠금 해제 후 10분이 지나면 자동으로 같은 잠금 상태로 돌아가며, 복호화 데이터와 선택/검색 상태가 함께 내려갑니다.
-- CSP는 페이지가 필요로 하지 않는 외부 스크립트·외부 통신·프레임/플러그인 경로를 제한합니다. GitHub Pages의 정적 배포 특성상 문서의 `<meta http-equiv="Content-Security-Policy">`로 적용합니다.
-- 암호 실패 지연 기록은 암호화 패키지의 SHA-256 지문별로 **현재 브라우저의 IndexedDB에만** 저장됩니다. 파일명을 바꾸거나 같은 브라우저를 다시 열어도 이어지지만, 다른 브라우저/기기에는 공유되지 않습니다.
-- 브라우저 간 실패 기록 공유는 중앙 서버가 필요해 로컬 우선 설계와 충돌하므로 의도적으로 적용하지 않습니다. 이 제한은 Dials 화면에서의 반복 입력을 늦추는 보조장치이며 오프라인 공격 방어를 대신하지 않습니다.
+## 왜 이런 구성인가요?
+
+일반적인 웹 서비스처럼 연락처 데이터를 중앙 서버에 저장하고 API를 통해 조회하도록 만들 수도 있습니다.
+
+Dials는 대신 **필요한 연락처 정보만 암호화해 사용자의 기기에서 직접 사용하는 구조**를 선택했습니다.
+
+처음 한 번 `.dials` 파일을 별도로 연결해야 하는 과정이 조금 번거로울 수 있지만, 실제 연락처 데이터가 외부 서버·API·서비스를 거쳐야 하는 지점을 줄이기 위한 선택입니다.
+
+이 구조를 선택한 이유와 적용된 보호 방식은 아래 **[개인정보 및 보안](#개인정보-및-보안)**에서 자세히 설명합니다.
+
+## 개인정보 및 보안
+
+### 이 형태로 만들게 된 이유
+
+Dials는 연락처 조회를 위해 외부 서버나 API가 꼭 필요하지 않다고 판단했습니다.
+
+연락처 데이터를 중앙 서버에 모아두고 API를 통해 조회하는 대신, **관리 프로그램에서 필요한 정보만 추출해 암호화한 뒤 사용자의 기기에서 직접 사용하는 로컬 우선 구조**를 사용합니다.
+
+```text
+관리 DB
+  ↓
+필요한 정보만 추출
+  ↓
+암호화된 .dials 파일 생성
+  ↓
+사용자 기기에 보관
+  ↓
+브라우저에서 로컬 복호화
+```
+
+이 구조의 목적은 모든 위험을 없애는 것이 아니라, **서버 침해·API 노출·외부 서비스 설정 문제 등으로 연락처 데이터가 외부에 노출될 수 있는 지점을 가능한 한 줄이는 것**입니다.
+
+Dials 웹앱과 실제 연락처 데이터도 서로 분리되어 있습니다.
+
+GitHub에는 조회용 웹앱만 공개하며, 실제 운영 연락처는 별도로 배포되는 암호화 `.dials` 파일에 들어 있습니다.
+
+### 보안을 위한 구성
+
+- **실제 연락처 데이터를 GitHub에 포함하지 않습니다.**  
+  실제 이름, 개인번호, 내선번호, 소속 데이터, 운영 `.dials` 파일과 관리 DB는 공개 저장소에 두지 않습니다.
+
+- **외부 API를 사용하지 않습니다.**  
+  연락처 조회를 위해 외부 서버나 API로 연락처 데이터를 전송하지 않습니다.
+
+- **연락처를 원격 서버에 업로드하지 않습니다.**  
+  복호화된 전화번호부는 사용자의 브라우저 안에서 사용됩니다.
+
+- **암호화된 `.dials` 파일만 기기에 보관할 수 있습니다.**  
+  한 번 연결한 파일을 다시 선택하지 않아도 되도록 암호화된 패키지는 브라우저의 로컬 저장소에 보관할 수 있습니다.
+
+- **데이터 암호를 저장하지 않습니다.**  
+  Dials를 다시 열거나 잠근 뒤에는 암호를 다시 입력해야 합니다.
+
+- **복호화된 연락처를 영구 저장하지 않습니다.**  
+  실제 연락처 내용은 브라우저의 영구 저장소에 기록하지 않습니다.
+
+- **잠금 시 현재 복호화 상태를 내려놓습니다.**  
+  `잠금`을 실행하면 페이지를 다시 불러와 현재 페이지 메모리에 있던 복호화 데이터를 제거합니다.
+
+- **외부 분석도구와 광고를 사용하지 않습니다.**
+
+- **외부 CDN을 사용하지 않습니다.**
+
+- **업데이트 정보와 실제 연락처를 분리합니다.**  
+  공개된 업데이트 확인 정보에는 최신 데이터 기준일처럼 공개 가능한 정보만 들어가며 실제 연락처는 포함하지 않습니다.
+
+## HJU Phonebook과의 관계
+
+Dials는 전화번호부 **조회용 Viewer**이며, 연락처 자체를 관리하거나 편집하는 프로그램은 아닙니다.
+
+전화번호부 데이터는 별도의 **HJU Phonebook** 관리 프로그램에서 관리합니다.
+
+```text
+HJU Phonebook
+  ↓
+전화번호부 데이터 관리
+  ↓
+암호화된 .dials 생성
+  ↓
+별도 배포
+  ↓
+Dials에서 연결하여 조회
+```
+
+Dials는 HJU Phonebook의 관리용 데이터베이스를 직접 읽지 않습니다.
+
+두 프로그램은 암호화된 `.dials` 파일을 통해서만 연결됩니다.
+
+## 변경 내역
+
+버전별 주요 변화는 [`CHANGELOG.md`](CHANGELOG.md)에서 확인할 수 있습니다.
+
+## 기술 문서
+
+구현이나 데이터 형식에 대한 자세한 내용은 다음 문서를 참고하세요.
+
+- [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md) — `.dials` 데이터 형식
+- [`docs/SECURITY_NOTES.md`](docs/SECURITY_NOTES.md) — 보안 구조
+- [`CHANGELOG.md`](CHANGELOG.md) — 버전별 변경 내역
+
+실제 운영 `.dials` 파일과 연락처 데이터는 공개 GitHub 저장소에 업로드하지 않습니다.
 
 ---
 
 # English
 
-**Web-based contact viewer with separately distributed local data files**
+**A web-based contact directory using separately distributed encrypted local data files**
 
-🌐 <a href="https://bak2ya.github.io/Dials/" target="_blank" rel="noopener noreferrer">Open Dials</a>
+🌐 [Open Dials](https://bak2ya.github.io/Dials/)
 
-Dials is a lightweight, responsive contact viewer. The web app and the actual contact directory are distributed separately: users import an encrypted `.dials` file generated by the Windows management program, and that encrypted package is kept locally in the browser for later use.
+Dials is a lightweight web app for quickly searching and browsing organizational contact information.
 
-## Core flow
+The web application and the actual contact directory are distributed separately. Users connect an encrypted `.dials` file that is provided through a separate distribution channel.
 
-1. Open Dials in a browser or from a home-screen icon.
-2. Import a distributed `.dials` data file once.
-3. Enter the data password on the same connection screen.
-4. Search by name, organization, extension, or mobile number, or browse by organization.
-5. On later visits, the previously connected encrypted file is reused; only the password is required again.
+Dials works in modern browsers on iPhone, iPad, Android, Windows, and macOS.
 
 ## Features
 
-- Responsive viewer for iPhone, iPad, Android, Windows, and macOS browsers
-- Final Dials icon applied consistently to the web header, PWA, and iPhone Home Screen icon
-- Fixed iOS file-picker compatibility for custom `.dials` files
-- System/light/dark/Black(OLED) appearance selector, with system mode as the default
-- House Palette themes: warm-neutral Light, developer-neutral Dark, and true-black OLED
-- `⋯ → 정보` About/privacy view with current version and GitHub link
-- `⋯ → Add shortcut` flow using the browser install prompt when available, with iPhone/iPad home-screen instructions as fallback
-- Local encrypted `.dials` import and IndexedDB reuse
-- Password never stored by Dials
-- The same encrypted `.dials` package is identified by a SHA-256 fingerprint even if its filename changes, so unlock-failure count and retry delay persist within the current browser
-- Retry backoff begins after the fourth failed password attempt: 10 seconds → 30 seconds → 1 minute → 5 minutes → up to 15 minutes
-- A restrictive Content Security Policy (CSP) limits external scripts, external connections, frames/plugins, and other unused execution paths
-- Decrypted contact data kept only in the active page memory
-- Fixed 10-minute auto-lock measured from unlock time, with expiry rechecked when returning from the background
-- Unified multi-keyword AND search
-- Organization browsing in the exact order supplied by the Windows exporter
-- Search results grouped by `personKey`, so one person with multiple affiliations appears once
-- Same-name people remain separate when their `personKey` differs
-- Tap-to-call phone numbers
-- Numbers marked as non-extension-callable by HJU Phonebook are shown with **`(외부번호)`** while keeping the full number callable
-- Contact export uses an expandable category → major organization → child organization → person disclosure tree
-- Organization-wide selection with mixed/partial checkbox state
-- Multi-affiliation people share one `personKey` selection and are exported only once
-- Dedicated multi-select vCard (`.vcf`) contact-export screen
-- Selectable standard vCard fields: mobile, extension, and company/organization
-- Contact-selection rows omit repeated phone numbers and focus on name + representative title/affiliation button + person checkbox
-- A per-person representative button chooses at most one department + title for standard contact fields; leaving all representative buttons off is supported
-- Optional literal contact-name prefix and suffix, with independent saved values
-- Memo content is independently selectable: data-version date, all affiliations, and all titles/duties
-- Offline app-shell support after the first successful visit
-- No analytics, ads, external APIs, CDNs, or remote contact-data upload
+- Search by name, organization, title/role, or phone number
+- Browse administrative departments, academic departments, and other facilities
+- Tap phone numbers to call
+- Select and export multiple people to device contacts
+- Choose representative organization and title information for people with multiple affiliations
+- Notification when newer contact data is available
+- System / Light / Dark / Black (OLED) appearance modes
+- Responsive mobile and desktop interface
+- Home-screen / app-style shortcut support
+- Local use of encrypted `.dials` data
 
+## Basic use
 
-## v0.7.5 multi-affiliation vCard merge, representative priority, and advanced-course filtering
+1. Open Dials.
+2. Connect the distributed `.dials` file once.
+3. Enter the data password.
+4. Search or browse the contact directory.
+5. On later visits, the encrypted package can be reused locally, so only the password needs to be entered again.
 
-- Keep the v0.7.4 visible layout unchanged. This patch only changes Dials data filtering and vCard export logic.
-- One explicit `personKey` always exports as one VCARD entry. Unique work/mobile numbers across included affiliations are merged into that card.
-- A user-selected representative affiliation is ordered first for `ORG`/`TITLE`, work-number order, and affiliation NOTE order. No title/rank inference is performed.
-- When multiple distinct work numbers are exported and affiliation notes are enabled, each affiliation note carries its corresponding work number instead of relying on platform-specific custom TEL labels.
-- The exact synthetic major `학사학위 전공심화`, generated as an Excel/display duplicate by HJU Phonebook, is excluded from Dials browsing, search, representative choices, affiliation counts, and vCard export.
-- Schema 1.4, iOS `text/vcard` Web Share, Android download, security, auto-lock, search, History/Back, and themes remain unchanged.
+## Why is Dials built this way?
 
-## v0.7.4 contact-save guidance, search-result selection, and final iOS handoff
+A contact directory could be stored on a central server and accessed through an API.
 
-- Real iPhone testing rejected the v0.7.3 direct `data:text/vcard` navigation experiment: it opened a black browsing context, and manually reloading the URL exposed only the first entry of a multi-contact VCF.
-- The proven v0.7.2 vCard serialization stays frozen. On iOS-like browsers Dials hands a real `text/vcard` file to the system share sheet; ordinary `.vcf` download remains the fallback.
-- The primary action is now `연락처 저장하기`. Android/iPhone instructions are always visible directly below the button. The iPhone path is Messages → send to your own phone number → open the attached contact file.
-- Representative-title guidance now sits directly below contact search and uses `팀장` as the example.
-- While searching, `검색결과 N명` and a single `모두 선택 / 선택 해제` toggle share one line. The toggle affects only current filtered results, and the UI explains that one person with multiple affiliations is saved as one contact.
-- Schema 1.4 and the title/duty/PERSON-CONTACT contract are unchanged.
+Dials instead uses **an encrypted data file that is kept and decrypted locally on the user's device**.
 
-## v0.6.0 representative contact fields, memo options, and scroll/layout cleanup
+Connecting a separate `.dials` file once adds a small extra step, but this design reduces the number of external servers, APIs, and services through which the actual contact data must pass.
 
-- The main content width on large screens now follows the same maximum width as the start/connection screen instead of stretching across wide monitors.
-- The password field now includes an inline eye/eye-off control. Toggling visibility keeps the value and caret/selection, and new locked/replacement states start hidden again.
-- The JavaScript `no-page-scroll` lock/unlock mechanism introduced for short pages was removed. Dials now relies on native document scrolling, eliminating an intermittent contact-export scroll lock caused by disclosure-animation/viewport timing.
-- The thin divider between an expanded card header and its revealed body is removed in both browsing and contact export; existing internal spacing remains.
-- Contact export removes the redundant `저장할 사람` subheading and hides phone numbers from selection rows. Rows focus on **name + compact representative title button + right-side person checkbox**.
-- A representative title button (for example `처장` or `교수`) selects that affiliation's department and title for the standard vCard fields. At most one representative affiliation can be active per `personKey`; choosing a different one asks for confirmation, and the active one can be toggled off to save no representative department/title.
-- `직장 / 기관` is a separate global option. The organization name is derived from the directory title (for example `혜전대학교`); with a representative department, vCard `ORG` is emitted as `organization;department`, while the representative title is emitted as `TITLE`.
-- The old affiliation/title export controls and always-on memo notice are replaced by a `메모에 기록할 내용` sub-card with independent options for the data-version date, all affiliations, and all titles/roles. This keeps rich multi-affiliation context in `NOTE` while allowing the standard contact fields to stay concise.
-- The `.dials` package/schema is unchanged. Existing `personKey` de-duplication, CSP, unlock backoff, fixed 10-minute auto-lock, IME-safe search, History/Back, safe data replacement, and v0.5.5 Safari/name-affix behavior are preserved.
+See **[Privacy and security](#privacy-and-security)** below for more information.
 
-## v0.5.5 iPhone contact-file download compatibility and name affixes
+## Privacy and security
 
-- v0.5.5 originally used an `application/octet-stream` re-wrap for iOS Blob-download compatibility. **That workaround is superseded in v0.7.2 by real `text/vcard` file sharing/download because the binary disguise interfered with reliable Contacts import.**
-- Contact export now supports both a literal prefix and a literal suffix around the name. Example placeholders are `직장` and `교수`.
-- Dials no longer inserts or trims spacing for these fields: the exact strings typed by the user are concatenated around the contact name.
-- Prefix/suffix enabled states and values are remembered independently, and the combined result is previewed using `박주성`.
+### Why this architecture was chosen
 
-## v0.5.4 no persistent background emphasis for disclosure state
+Dials does not require an external server or API to perform ordinary contact lookups.
 
-- Expanded browse/contact-export nodes no longer rely on a persistent background highlight. Expansion is communicated by the chevron direction and the revealed children.
-- To avoid touch browsers making a tapped disclosure look selected because `:hover` can linger after a tap, tree-row hover backgrounds now apply only to hover-capable fine pointers such as a mouse or trackpad.
-- Contact-export selection remains represented only by the right-side checkbox/mixed state, keeping selection and disclosure visually separate.
-- Hierarchy, palette tokens, disclosure animation, selection behavior, data handling and security behavior are unchanged.
+Instead, only the required information is extracted by the management application, encrypted, distributed as a `.dials` file, and decrypted locally in the user's browser.
 
-## v0.5.3 expanded-card background continuity
+```text
+Management database
+  ↓
+Extract only required information
+  ↓
+Create encrypted .dials file
+  ↓
+Store on the user's device
+  ↓
+Decrypt locally in the browser
+```
 
-- In both normal browse and contact export, an expanded parent now keeps the same background color through its revealed child area instead of switching the body to a different tint.
-- Hierarchy, spacing, borders, animation and selection behavior are unchanged from v0.5.2; this patch adjusts background continuity only.
+The goal is not to claim that all security risks are eliminated.
 
-## v0.5.2 nested hierarchy cards and disclosure motion
+The design is intended to **reduce the number of places where contact data could be exposed through server compromise, API exposure, or external-service configuration problems.**
 
-- Normal browse and contact export now use the same nested-card hierarchy grammar.
-- Child organizations no longer consume large horizontal indentation; expanding a parent grows that card and reveals child cards inside it.
-- Existing House palette tokens are reused: top-level Surface, nested organization Secondary Surface, then spacing/borders/typography for deeper levels instead of inventing extra colors.
-- Expand/collapse uses a short ~180ms CSS grid-row/opacity transition and respects `prefers-reduced-motion`; there is no continuous rendering loop.
-- Contact export keeps disclosure on the left and the stable checkbox lane on the right, including mixed selection, `personKey` synchronization and vCard de-duplication.
+The public Dials web application and the operational contact data remain separate.
 
-## v0.5.1 unified disclosure tree for browsing
+### Security and privacy measures
 
-- The main browse screen now uses the same progressive disclosure hierarchy as contact export.
-- It starts with only the top-level categories collapsed, then expands category → major organization → child organization as needed.
-- People directly attached to a major organization appear before its child departments at the same hierarchy level; expanding a child department reveals its contacts.
-- The browse screen has no selection checkboxes; it shares only the organization hierarchy and ordering with contact export.
-- The redundant `소속별 조회` heading was removed and the helper copy is now `소속을 선택하거나 검색창에서 바로 찾아보세요.`
-- Existing search, phone links, external-number labels, History/Back, and IME-safe input behavior remain unchanged.
+- Operational contact data is not committed to the public GitHub repository.
+- Dials does not use an external contact-data API.
+- Decrypted contact data is not uploaded to a remote server.
+- The encrypted `.dials` package may be retained locally for convenient reuse.
+- The data password is not stored.
+- Decrypted contact data is not written to persistent browser storage.
+- Locking Dials reloads the page and releases the decrypted active-page state.
+- No external analytics or advertising services are used.
+- No external CDN is used.
+- Public update metadata contains no actual contact records.
 
-## v0.5.0 security hardening, password backoff, and start-screen cleanup
+## Relationship with HJU Phonebook
 
-- Added a restrictive Content Security Policy (CSP). The page permits only the same-origin scripts/styles/PWA resources it needs, allows the existing embedded data-image texture, and blocks page-level fetch/XHR/WebSocket connections with `connect-src 'none'`.
-- Moved the early theme initializer from inline JavaScript to `theme-init.js`, allowing `script-src 'self'` without `unsafe-inline`.
-- Dials now fingerprints the encrypted package fields with SHA-256. Renaming the same `.dials` file does not reset its browser-local unlock-failure state. The fingerprint does not contain the plaintext directory or the password.
-- Attempts 1–2 can retry immediately. The third failure warns that the next failure will trigger a 10-second delay. From the fourth failure onward the backoff is 10 seconds → 30 seconds → 1 minute → 5 minutes → 15 minutes. A successful unlock clears the fingerprint's failure state.
-- Browser-to-browser/device-to-device failure sharing was considered and intentionally not implemented: it would require a central shared service and conflict with Dials' local-first/no-contact-upload model. The UI delay is only an auxiliary local control; the encrypted file, KDF, and password strength remain the protection against offline guessing.
-- The start-screen tagline was moved out of the header into a quiet footer together with the live app version. The three usage steps were shortened accordingly.
+Dials is a **read-only contact viewer**.
 
-## v0.4.2 contact-export disclosure tree and selection grammar
+Contact information is managed separately in **HJU Phonebook**, which creates the encrypted `.dials` file used by Dials.
 
-- Contact export now uses one expandable disclosure tree instead of repeatedly navigating into separate category/organization pages.
-- The initial state shows only top-level categories, all collapsed. Expanding a category shows major organizations; expanding a major organization shows direct major-level people first and child departments at the same depth; expanding a child department shows its people.
-- Familiar interaction grammar is restored: disclosure/navigation is on the left, while selection checkboxes are isolated on the right. Expanding never changes selection and checking never expands a row.
-- Major-organization and child-organization checkboxes select the unique people in their subtree and show the native mixed state for partial selection. Multi-affiliation people continue to share one `personKey` selection.
-- The normal viewer no longer displays the implementation-oriented Sheet1-order explanation, while still preserving source order internally.
-- Search results use the same right-side selection grammar.
-- Successful unlock starts soft-keyboard/visual-viewport settling before directory preparation/rendering to further protect the first overflow-menu tap on mobile.
+```text
+HJU Phonebook
+  ↓
+Manage contact data
+  ↓
+Create encrypted .dials file
+  ↓
+Distribute separately
+  ↓
+Open with Dials
+```
 
-## v0.4.1 mobile first tap, safe replacement, overflow, and contact hierarchy
+Dials does not directly access the HJU Phonebook management database.
 
-- Unlock now explicitly releases password focus and allows a likely mobile keyboard/visual-viewport transition to settle before the main viewer is shown, targeting the first-tap overflow-menu issue observed on iPhone. Real-device validation remains necessary.
-- `⋯ → 새 데이터 불러오기` returns to the initial data-connection screen. A new encrypted package replaces the stored package only after successful decryption, preserving the last known-good package if selection is cancelled or validation fails.
-- Root scrolling/overscroll is suppressed only when the current page is shorter than the viewport; long pages continue to scroll normally.
-- In contact-export hierarchy browsing, people assigned directly to a major organization are expanded inline beside child department rows when both exist, preserving source order and the shared `personKey` selection model.
+The encrypted `.dials` file is the interface between the two applications.
 
-## v0.4.0 contact export navigation, auto-lock, and clearer privacy UI
+## Changelog
 
-- Contact export now follows the same category → organization → person hierarchy as the main viewer instead of showing one very long list.
-- Organization-level checkboxes select all people in that organization and show a mixed state when only some are selected.
-- The same `personKey` shares selection across multiple affiliations and search results, and each person is written to the VCF only once.
-- Contact-selection rows are more compact on mobile.
-- Dials auto-locks 10 minutes after unlock, regardless of interaction; the expiry is rechecked when a suspended mobile browser returns to the foreground.
-- The start screen has a clearer privacy/security notice and emphasizes the connected data date.
-- About now presents user-facing privacy facts, while detailed encryption/storage information remains in the GitHub documentation.
-- The public latest-data check and `data-status.json` dependency were removed; the viewer displays the `dataVersion` embedded in the connected `.dials` file.
+See [`CHANGELOG.md`](CHANGELOG.md) for notable changes between versions.
 
-## v0.3.2 mobile IME, touch targets, and About
+## Technical documentation
 
-- Search input is no longer coupled to repeated History updates while the mobile IME is composing. The browser owns the text field, while Dials debounces result rendering.
-- The same IME-safe search behavior is used in the main viewer and Contact export.
-- The top `⋯` control now has a 48×48px touch target, and overflow actions use at least 48px row heights.
-- `⋯ → 정보` adds an About/privacy view with the current version and a GitHub link.
-- The in-app privacy explanation stays user-facing; encryption algorithm details remain documented here and in `docs/DIALS_DATA_FORMAT.md`.
-- Back/History, scroll restoration, accessibility, House Palette themes, OLED Black, and external-number behavior remain unchanged.
+- [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md) — `.dials` data format
+- [`docs/SECURITY_NOTES.md`](docs/SECURITY_NOTES.md) — security architecture
+- [`CHANGELOG.md`](CHANGELOG.md) — version history
 
-## v0.3.1 IME search input fix
-
-- Search no longer rerenders while Korean, Japanese, Chinese, or other IME text is still being composed.
-- The query and browser History are committed after `compositionend`, preventing the first composed character from disappearing or composition from being interrupted.
-- Latin letters and numeric input still update immediately.
-- v0.3.0 Back navigation, search History, scroll restoration, and OLED theme behavior remain unchanged.
-
-## v0.3.0 navigation, accessibility, and OLED
-
-- Browser/Android system Back now follows Dials internal navigation.
-- Search adds only one history entry per search session; Back restores the previous view and scroll position.
-- Contact export participates in browser history.
-- Dialogs trap keyboard focus and restore it to the control that opened the dialog.
-- The overflow list uses ordinary buttons instead of incomplete ARIA menu semantics.
-- Appearance uses a real radio group and adds a true-black OLED mode alongside System/Light/Dark.
-- Light/Dark/Black palettes now follow the shared House Palette.
-
-## v0.2.0 external-number display
-
-When HJU Phonebook marks a number as not reachable through the internal extension system, Dials keeps the full number callable and appends **`(외부번호)`** to its display. Schema 1.1 files without this field continue to behave as ordinary extension-callable numbers.
-
-## iPhone / iPad data-file selection
-
-Dials v0.1.2 fixes an iOS file-picker issue where the custom `.dials` extension could appear disabled and could not be selected. The web app no longer relies on the browser file-type filter. It allows file selection first and then validates the internal `DialsEncryptedData` wrapper itself.
-
-This lets iPhone/iPad users select a distributed `.dials` file directly from Files or iCloud Drive. If the selected file is not a valid Dials package, the app reports the format error after selection.
-
-## Appearance and shortcut
-
-The overflow menu includes **Add shortcut** and **Appearance**. Appearance can follow the system setting or be fixed to Light, Dark, or Black (OLED). The themes follow the shared House Palette: warm-neutral Light, developer-neutral Dark, and true-black large surfaces for Black/OLED.
-
-For installation, Dials uses the browser/PWA installation prompt when the platform exposes it. On iPhone/iPad, where a web page cannot directly trigger Home Screen installation, Dials shows the standard **Share → Add to Home Screen** instructions.
-
-## Windows exporter compatibility
-
-Dials v0.7.6 supports only `.dials` schema **1.5** generated by **HJU Phonebook V0.26.6 build77**. Because the project is still pre-deployment, schema 1.4 and older fallbacks are intentionally not carried.
-
-Current format:
-
-- Extension: `.dials`
-- Wrapper: `DialsEncryptedData`
-- `formatVersion`: `1`
-- KDF: PBKDF2-HMAC-SHA256, 310,000 iterations
-- Cipher: AES-256-GCM
-- Payload `schemaVersion`: `1.5`
-- Organization FAX: `fax`
-- Title: `title` only
-- Duty: `duty` only
-- Record type: `recordType` = `PERSON` or `CONTACT`
-- External-number marker: `externalNumber: true` adds `(외부번호)` to the displayed full number
-- Person identity: opaque `personKey`
-- Organization and person order: Windows Sheet1 output order
-
-The Windows management database itself is not read by the web app and must not be distributed to Dials users.
-
-See [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md) for the package format.
-
-## GitHub Pages
-
-This repository is a static web app and requires no build process.
-
-1. Upload the repository files to `Bak2ya/Dials`.
-2. Open **Settings → Pages** in GitHub.
-3. Choose **Deploy from a branch**.
-4. Select the `main` branch and `/ (root)`.
-5. After deployment, open the link below.
-
-🌐 <a href="https://bak2ya.github.io/Dials/" target="_blank" rel="noopener noreferrer">https://bak2ya.github.io/Dials/</a>
-
-All app asset paths are relative, so the app works from the `/Dials/` project path.
-
-## Publishing a new contact-data version
-
-Actual `.dials` files must **not** be uploaded to this public repository. Distribute them through the organization's private/internal channel.
-
-Dials does not query a public service to decide whether a newer directory exists. The connection screen and data-info view display the **`dataVersion` embedded in the connected `.dials` file**. When a newer file is distributed, users replace it through the app's data-replacement action.
-
-## Contact export
-
-Contact export mirrors the main category → organization → person hierarchy. Organization-wide selection is supported, selection follows the shared `personKey` across multiple affiliations and search results, and one person is written to the generated VCF only once. Selection rows intentionally omit phone numbers. A compact per-affiliation title button can choose one representative department/title for the standard vCard fields, while the global company/organization option and memo-content options remain independent. Literal name-prefix/name-suffix options remain available.
-
-## Privacy and security model
-
-- GitHub Pages contains the viewer only.
-- Real names, phone numbers, departments, operational passwords, encryption keys, Windows DB files, and operational `.dials` files are never committed.
-- The imported encrypted package is stored in IndexedDB for convenience.
-- The password is not saved.
-- The decrypted payload is not written to persistent browser storage.
-- Locking Dials reloads the page, releasing the decrypted payload from the active page state.
-- Dials automatically locks 10 minutes after unlock and rechecks expiry when a mobile browser returns from the background.
-- CSP restricts unneeded external scripts, page-level external network connections, frames/plugins, and other unused resource paths. On GitHub Pages it is applied with a document `<meta http-equiv="Content-Security-Policy">`.
-- Password-failure state is stored only in the current browser's IndexedDB, keyed by a SHA-256 fingerprint of the encrypted package. Renaming the file or reopening the same browser does not reset it; another browser/device has separate storage.
-- Cross-browser sharing of failure state is intentionally not implemented because it would require a central service and conflict with the local-first design. The delay is an auxiliary UI control, not a replacement for file encryption/KDF/password strength.
-
-## Repository description
-
-> Web-based contact viewer with separately distributed local data files
+Operational `.dials` files and real contact data must not be uploaded to the public GitHub repository.
