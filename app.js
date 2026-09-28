@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.8.2";
+const APP_VERSION = "0.8.3";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -275,7 +275,7 @@ function updateStartMeta() {
   if (!state.encryptedPackage) return;
   el.connectedFileName.textContent = state.safeMeta?.fileName || "Dials 데이터";
   const dataVersion = String(state.safeMeta?.dataVersion || publicPackageDataVersion(state.encryptedPackage) || "");
-  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준` : "";
+  el.connectedMetaText.textContent = dataVersion ? `${formatDate(dataVersion)} 기준의` : "";
   el.connectedMetaText.classList.toggle("hidden", !dataVersion);
 }
 

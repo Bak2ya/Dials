@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "dials-app-v0.8.2";
+const CACHE_NAME = "dials-app-v0.8.3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,7 +11,8 @@ const APP_SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
-  "./icons/favicon-64.png"
+  "./icons/favicon-64.png",
+  "./icons/favicon-192.png"
 ];
 
 self.addEventListener("install", (event) => {

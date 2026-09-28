@@ -782,11 +782,10 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   border-radius: 0;
   background: transparent;
 }
-.connected-file-line { display: flex; align-items: baseline; min-width: 0; margin: 0; line-height: 1.45; }
-.connected-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 760; }
-.connected-file-suffix { flex: 0 0 auto; white-space: nowrap; color: var(--muted); }
-.connected-status { color: var(--success); font-weight: 800; }
-.connected-data-date { display: block; margin-top: 3px; color: var(--muted); font-size: 0.84rem; font-weight: 560; line-height: 1.4; }
+.connected-file-line { display: flex; align-items: baseline; gap: 0.28em; min-width: 0; margin: 2px 0 0; color: var(--text); font-size: 1rem; font-weight: 760; line-height: 1.45; }
+.connected-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.connected-file-suffix { flex: 0 0 auto; white-space: nowrap; color: inherit; font: inherit; }
+.connected-data-date { display: block; margin: 0; color: var(--muted); font-size: 0.84rem; font-weight: 560; line-height: 1.4; }
 .unlock-form { margin-top: 14px; }
 .unlock-form .form-message { margin-top: 7px; font-size: 0.82rem; }
 
@@ -869,3 +868,5 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 
 /* v0.8.1 — mobile overflow-menu stacking regression fix; search submit now dismisses virtual keyboard. */
 /* v0.8.2 — compact connected-data line + facility duplicate-name suppression across real exported record types. */
+
+/* v0.8.3 — public date first, connection sentence unified, browser-only favicon assets separated from home-screen icons. */
