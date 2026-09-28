@@ -782,9 +782,9 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   border-radius: 0;
   background: transparent;
 }
-.connected-file-line { margin: 0; line-height: 1.45; overflow-wrap: anywhere; }
-.connected-file-line > strong:first-child { font-weight: 760; }
-.connected-file-line > span { color: var(--muted); }
+.connected-file-line { display: flex; align-items: baseline; min-width: 0; margin: 0; line-height: 1.45; }
+.connected-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 760; }
+.connected-file-suffix { flex: 0 0 auto; white-space: nowrap; color: var(--muted); }
 .connected-status { color: var(--success); font-weight: 800; }
 .connected-data-date { display: block; margin-top: 3px; color: var(--muted); font-size: 0.84rem; font-weight: 560; line-height: 1.4; }
 .unlock-form { margin-top: 14px; }
@@ -842,6 +842,7 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   #mainView > .app-header { display: contents; }
   #mainView > .app-header > .header-inner {
     position: relative;
+    z-index: 30;
     min-height: 58px;
     background: var(--bg);
   }
@@ -857,9 +858,14 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
     -webkit-backdrop-filter: blur(18px);
   }
   #mainView > .app-header > .search-bar-wrap .search-bar { width: min(100%, var(--content-width)); margin: 0 auto; }
+  #mainView .menu-wrap { z-index: 31; }
+  #mainView .overflow-menu { z-index: 40; }
 }
 
 @media (max-width: 430px) {
   .connect-heading-actions .text-button { padding-inline: 0; font-size: 0.86rem; }
   .why-architecture-body { margin-left: 38px; }
 }
+
+/* v0.8.1 — mobile overflow-menu stacking regression fix; search submit now dismisses virtual keyboard. */
+/* v0.8.2 — compact connected-data line + facility duplicate-name suppression across real exported record types. */

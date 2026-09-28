@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.8.0";
+const APP_VERSION = "0.8.2";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -161,6 +161,13 @@ function bindEvents() {
     if (state.searchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
     scheduleGlobalSearchCommit();
   });
+  el.globalSearchInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || state.searchComposing || event.isComposing) return;
+    event.preventDefault();
+    cancelGlobalSearchCommit();
+    commitGlobalSearchInput();
+    el.globalSearchInput.blur();
+  });
   el.globalSearchInput.addEventListener("blur", () => {
     window.setTimeout(syncGlobalSearchHistoryState, 0);
   });
@@ -195,6 +202,13 @@ function bindEvents() {
   el.contactSearchInput.addEventListener("input", (event) => {
     if (state.contactSearchComposing || event.isComposing || event.inputType === "insertCompositionText") return;
     scheduleContactSearchCommit();
+  });
+  el.contactSearchInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || state.contactSearchComposing || event.isComposing) return;
+    event.preventDefault();
+    cancelContactSearchCommit();
+    commitContactSearchInput();
+    el.contactSearchInput.blur();
   });
   el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
   el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
@@ -1064,17 +1078,21 @@ function facilityRecordPresentation(record, facilityName) {
   const title = String(record?.title || "").trim();
   const duty = String(record?.duty || "").trim();
   const recordType = record?.recordType || "CONTACT";
-  const repeatsFacilityName = recordType === "CONTACT" && normalizeText(name) === normalizeText(facilityName);
-  return { name, title, duty, recordType, showName: !repeatsFacilityName };
+  // Facility cards already present the facility identity in their header. Legacy/operational
+  // rows can still be PERSON even when the record is only the facility's representative line,
+  // so duplicate suppression is based on the visible text rather than recordType.
+  const repeatsFacilityName = normalizeText(name) === normalizeText(facilityName);
+  const repeatsFacilityTitle = Boolean(title) && normalizeText(title) === normalizeText(facilityName);
+  return { name, title, duty, recordType, showName: !repeatsFacilityName, showTitle: !repeatsFacilityTitle };
 }
 
 function browseFacilityRecordHtml(record, facilityName) {
-  const { name, title, duty, recordType, showName } = facilityRecordPresentation(record, facilityName);
+  const { name, title, duty, recordType, showName, showTitle } = facilityRecordPresentation(record, facilityName);
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("연락처", record.extension, record.externalNumber));
   if (record?.mobile) lines.push(phoneLineHtml(recordType === "PERSON" ? "개인번호" : "연락번호", record.mobile));
-  const identityHtml = showName || title
-    ? `<div class="facility-flat-person">${showName ? `<strong>${escapeHtml(name)}</strong>` : ""}${title ? `<span>${escapeHtml(title)}</span>` : ""}</div>`
+  const identityHtml = showName || (showTitle && title)
+    ? `<div class="facility-flat-person">${showName ? `<strong>${escapeHtml(name)}</strong>` : ""}${showTitle && title ? `<span>${escapeHtml(title)}</span>` : ""}</div>`
     : "";
   return `<div class="facility-flat-record">
     ${identityHtml}
@@ -1730,13 +1748,13 @@ function contactFacilityCardHtml(category, org, orgIndex) {
       const personKey = String(record._personKey || "");
       const person = state.people.find((item) => item.key === personKey);
       const affiliation = recordAffiliation(record);
-      const { name, title, duty, showName } = facilityRecordPresentation(record, facilityName);
-      const showIdentity = showName || Boolean(title);
+      const { name, title, duty, showName, showTitle } = facilityRecordPresentation(record, facilityName);
+      const showIdentity = showName || Boolean(showTitle && title);
       const representativeButton = showIdentity ? contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]) : "";
       if (showIdentity || duty || representativeButton) {
         detailHtml = `<div class="contact-facility-person-main">
           ${showName ? `<strong>${escapeHtml(name || "이름 없음")}</strong>` : ""}
-          ${title ? `<small>${escapeHtml(title)}</small>` : ""}
+          ${showTitle && title ? `<small>${escapeHtml(title)}</small>` : ""}
           ${duty ? `<small>담당 · ${escapeHtml(duty)}</small>` : ""}
           ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
         </div>`;
@@ -1766,14 +1784,15 @@ function contactFacilityCardHtml(category, org, orgIndex) {
 function contactFacilityPersonHtml(record, facilityName) {
   const personKey = String(record?._personKey || "");
   const selected = state.selectedPeople.has(personKey);
-  const { name, title, duty, showName } = facilityRecordPresentation(record, facilityName);
+  const { name, title, duty, showName, showTitle } = facilityRecordPresentation(record, facilityName);
   const affiliation = recordAffiliation(record);
   const person = state.people.find((item) => item.key === personKey);
-  const representativeButton = contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]);
+  const hasDistinctIdentity = showName || Boolean(showTitle && title);
+  const representativeButton = hasDistinctIdentity ? contactRepresentativeButtonHtml(personKey, affiliation, person?.affiliations || [affiliation]) : "";
   return `<div class="contact-facility-person">
     <div class="contact-facility-person-main">
       ${showName ? `<strong>${escapeHtml(name || "이름 없음")}</strong>` : ""}
-      ${title ? `<small>${escapeHtml(title)}</small>` : ""}
+      ${showTitle && title ? `<small>${escapeHtml(title)}</small>` : ""}
       ${duty ? `<small>담당 · ${escapeHtml(duty)}</small>` : ""}
       ${representativeButton ? `<div class="representative-button-list">${representativeButton}</div>` : ""}
     </div>

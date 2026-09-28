@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "dials-app-v0.8.0";
+const CACHE_NAME = "dials-app-v0.8.2";
 const APP_SHELL = [
   "./",
   "./index.html",

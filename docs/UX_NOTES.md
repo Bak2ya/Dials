@@ -1,11 +1,11 @@
 # Dials UX notes
 
-## v0.7.9 facility-name de-duplication
+## v0.8.2 facility-name de-duplication
 
-- In the flat `기타시설` view, the facility card header is the canonical visible facility name. An ordinary `CONTACT` whose name normalizes to the same facility name must not repeat that name inside the card.
+- In the flat `기타시설` view, the facility card header is the canonical visible facility name. Operational/legacy facility rows may be either `PERSON` or `CONTACT`, so a record whose visible name normalizes to the same facility name must not repeat that name inside the card regardless of record type.
+- If `title` also exactly repeats the facility name, suppress that repeated title too. Preserve distinct title, duty, phone data, selection identity and accessibility labels.
 - Apply the same rule to both normal browse and contact-export selection UI.
-- Suppress only the duplicated name. Preserve title, duty, phone data, selection identity and accessibility labels.
-- A real `PERSON`, or a `CONTACT` whose name differs from the facility name, remains visible by name.
+- A real contact-person or vendor/contact whose name differs from the facility name remains visible by name.
 - This is a local display correction only; schema 1.5 and vCard/export semantics do not change.
 
 ## v0.7.8 representative bulk action placement

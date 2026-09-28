@@ -1,6 +1,6 @@
 # Dials data format — schema 1.5
 
-Dials v0.8.0 keeps the strict encrypted payload contract at **schema 1.5**. HJU Phonebook V0.26.7 build78 still exports schema 1.5; its next exporter update may add the optional public wrapper `dataVersion` described below.
+Dials v0.8.2 keeps the strict encrypted payload contract at **schema 1.5**. HJU Phonebook V0.26.8 build79 exports schema 1.5 and adds the optional public wrapper `dataVersion` described below.
 
 Schema 1.4 and older payloads are intentionally not accepted. The project is still before broad deployment, so the current release keeps one exact contract instead of carrying fallback branches.
 
@@ -162,8 +162,8 @@ HJU Phonebook may include an academic organization whose `major` is exactly `학
 
 - Regular departments/majors may show `fax` as right-side organization metadata.
 - `facility` uses a flat presentation: expanding `기타시설` shows facility cards directly.
-- A facility CONTACT whose visible name repeats the facility name is not duplicated visually.
-- A PERSON/contact-person associated with a facility is shown inside that same facility card with its own numbers and title/duty.
+- A facility record whose visible name repeats the facility name is not duplicated visually, regardless of whether legacy/operational data marks that row as PERSON or CONTACT. A title that merely repeats the facility name is likewise suppressed.
+- A real contact-person associated with a facility whose name differs from the facility name is shown inside that same facility card with its own numbers and title/duty.
 - FAX is searchable. It is not currently emitted into vCard because there is no user-facing FAX save option.
 
 ## vCard mapping

@@ -4,6 +4,8 @@
 
 🌐 [Dials 열기](https://bak2ya.github.io/Dials/)
 
+<img src="./icons/icon-192.png" alt="Dials 아이콘" width="96" height="96">
+
 Dials는 조직의 연락처를 빠르게 검색하고 조회하기 위한 웹앱입니다.
 
 웹앱 자체와 실제 전화번호부 데이터는 분리되어 있으며, 사용자는 별도로 배포받은 암호화 `.dials` 파일을 연결해 사용합니다.
