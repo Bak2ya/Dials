@@ -23,6 +23,10 @@
   --radius-sm: 10px;
   --content-width: 680px;
   --paper-texture-opacity: 0.06;
+  /* Structural outlines are minimized in Light/Dark/System. Black restores
+     the full House border because all large surfaces stay true black. */
+  --structure-border: transparent;
+  --hierarchy-border: color-mix(in srgb, var(--border) 38%, transparent);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
@@ -68,6 +72,8 @@
   --success: #44D17A;
   --shadow: 0 0 0 1px rgba(255,255,255,0.015);
   --paper-texture-opacity: 0;
+  --structure-border: var(--border);
+  --hierarchy-border: var(--border);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -920,3 +926,48 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 @media (max-width: 420px) {
   .about-theme-option { font-size: 0.76rem; padding-inline: 4px; }
 }
+
+/* v0.9.1 — House border treatment by theme.
+   Light/Dark/System favor seamless surfaces; Black/OLED keeps full structural
+   borders because the large background/surface areas intentionally stay #000. */
+.surface,
+.search-bar,
+.category-card,
+.organization-row,
+.person-card,
+.modal-panel,
+.browse-tree-node,
+.browse-tree-person,
+.facility-flat-card {
+  border-color: var(--structure-border);
+}
+
+/* Contact-save hierarchy keeps a very quiet outline in Light/Dark/System so
+   disclosure/selection groups remain legible after the outer panel borders are
+   removed. In Black this resolves to the original full House border. */
+.contact-category-card,
+.contact-org-row,
+.contact-person-row,
+.contact-tree-node,
+.contact-tree-person,
+.contact-facility-card {
+  border-color: var(--hierarchy-border);
+}
+
+/* Hover in seamless themes is communicated by the existing surface change,
+   not by suddenly drawing a new outline. */
+:root:not([data-theme="black"]) .category-card:hover,
+:root:not([data-theme="black"]) .organization-row:hover {
+  border-color: transparent;
+}
+:root:not([data-theme="black"]) .contact-category-card:hover,
+:root:not([data-theme="black"]) .contact-org-row:hover {
+  border-color: var(--hierarchy-border);
+}
+
+/* Search keeps an accent focus ring even when its resting structural border is
+   hidden. This preserves keyboard/focus visibility. */
+.search-bar:focus-within {
+  border-color: var(--accent);
+}
+

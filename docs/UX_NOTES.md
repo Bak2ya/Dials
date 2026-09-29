@@ -1,5 +1,14 @@
 # Dials UX notes
 
+## v0.9.1 theme-specific border treatment
+
+- Keep the established House Light / Dark / Black palette values unchanged. This change is about border/chrome density, not palette tuning.
+- In Light, Dark, and System modes, large structural outlines are minimized: search field, major browse cards, top-level surfaces/panels, modal shell, and facility cards rely primarily on the existing House surface contrast, spacing, and typography.
+- Contact-save disclosure/selection hierarchy keeps a low-contrast structural outline so nested selection groups remain understandable without restoring the heavier global card treatment.
+- Black/OLED keeps the existing full House border because Background/Surface/Secondary Surface/Elevated Surface/Input Surface are intentionally all `#000000`; the border is therefore an essential hierarchy carrier rather than decorative chrome.
+- Focus rings, dividers, selection indicators, checkboxes, buttons, and other semantic boundaries are not removed.
+- Theme segmented order in the information sheet is `시스템 설정 → 라이트 → 다크 → 블랙`.
+
 ## v0.8.2 facility-name de-duplication
 
 - In the flat `기타시설` view, the facility card header is the canonical visible facility name. Operational/legacy facility rows may be either `PERSON` or `CONTACT`, so a record whose visible name normalizes to the same facility name must not repeat that name inside the card regardless of record type.

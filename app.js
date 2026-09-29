@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.9.0";
+const APP_VERSION = "0.9.1";
 const DIALS_SCHEMA_VERSION = "1.5";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -1471,8 +1471,8 @@ function showAboutInfo() {
   const dateText = dataVersion ? `${formatDate(dataVersion)}에 배포한` : "배포일 정보 없음";
   const fileName = state.safeMeta?.fileName || "Dials 데이터";
   const themeOptions = [
-    ["light", "라이트"],
     ["system", "시스템 설정"],
+    ["light", "라이트"],
     ["dark", "다크"],
     ["black", "블랙"],
   ];

@@ -1,6 +1,6 @@
 # Dials data format — schema 1.5
 
-Dials v0.9.0 keeps the strict encrypted payload contract at **schema 1.5**. HJU Phonebook V0.26.8 build79 exports schema 1.5 and adds the optional public wrapper `dataVersion` described below.
+Dials v0.9.1 keeps the strict encrypted payload contract at **schema 1.5**. HJU Phonebook V0.27.0 build80 exports schema 1.5 and the public wrapper `dataVersion` described below.
 
 Schema 1.4 and older payloads are intentionally not accepted. The project is still before broad deployment, so the current release keeps one exact contract instead of carrying fallback branches.
 
