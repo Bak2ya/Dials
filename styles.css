@@ -237,7 +237,7 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 .phone-line a:hover { color: var(--accent); text-decoration: underline; }
 .search-result-card .person-card-header { margin-bottom: 10px; }
 .affiliation-stack { display: grid; gap: 10px; }
-.affiliation-item { padding: 11px 12px; border-radius: 11px; background: var(--surface-soft); }
+.affiliation-item { position: relative; padding: 11px 12px; border-radius: 11px; background: var(--surface-soft); }
 .affiliation-title { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .affiliation-title strong { font-size: 0.93rem; }
 .affiliation-title span { color: var(--muted); font-size: 0.85rem; }
@@ -979,3 +979,20 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 .privacy-consent-card ol { margin: 0 0 12px; padding-left: 20px; }
 .privacy-consent-card .privacy-consent-check { align-items: flex-start; font-weight: 600; }
 .privacy-consent-card input[type="checkbox"] { flex-shrink: 0; margin-top: 4px; }
+
+/* v0.11.0: 공개·상세 모드와 업무분장 정보 버튼 */
+.responsibility-info { flex: 0 0 auto; margin-left: auto; border: 1px solid var(--border, #949494); border-radius: 50%; background: transparent; color: var(--muted, #777); font-size: 19px; line-height: 1; width: 34px; height: 34px; cursor: pointer; align-self: center; display: inline-grid; place-items: center; }
+.responsibility-info.matching { background: #3478F6; border-color: #3478F6; color: white; }
+.responsibility-matched { font-size: .86rem; color: #3478F6; margin-top: .3rem; }
+.responsibility-detail-list { padding-left: 1.4rem; line-height: 1.65; white-space: pre-line; }
+.responsibility-detail-list li { margin-bottom: .5rem; }
+.responsibility-detail-list li.matching { color: #3478F6; font-weight: 600; }
+.person-card-header { display: flex; align-items: center; gap: .5rem; }
+.browse-tree-static { display: flex; align-items: center; gap: .5rem; }
+.browse-tree-person-content { min-width: 0; flex: 1; }
+.public-security-note { padding: 1.5rem 1.3rem; max-width: 1050px; margin: 0 auto 1.5rem; font-size: .82rem; color: var(--muted, #777); }
+.public-security-note p { margin: .4rem 0 0; }
+
+/* 업무분장 아이콘은 카드 우측 끝에 일관되게 배치합니다. */
+.affiliation-item > .responsibility-info { position: absolute; right: 12px; top: 10px; }
+.affiliation-item:has(> .responsibility-info) { padding-right: 56px; }

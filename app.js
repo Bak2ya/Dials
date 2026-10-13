@@ -1,11 +1,11 @@
 "use strict";
 
-const APP_VERSION = "0.10.0";
-const DIALS_SCHEMA_VERSION = "1.6";
-const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "contactExportEnabled", "categories"]);
+const APP_VERSION = "0.11.0";
+const DIALS_SCHEMA_VERSION = "1.7";
+const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "directoryMode", "contactExportEnabled", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
 const DIALS_ORGANIZATION_FIELDS = Object.freeze(["major", "minor", "fax", "people"]);
-const DIALS_RECORD_FIELDS = Object.freeze(["personKey", "name", "title", "duty", "recordType", "extension", "mobile", "externalNumber"]);
+const DIALS_RECORD_FIELDS = Object.freeze(["personKey", "name", "title", "duty", "responsibilities", "recordType", "extension", "mobile", "externalNumber"]);
 const DIALS_EXCLUDED_SYNTHETIC_MAJOR = "학사학위 전공심화";
 const DB_NAME = "DialsLocalStore";
 const DB_VERSION = 1;
@@ -30,6 +30,9 @@ const state = {
   encryptedPackage: null,
   safeMeta: null,
   payload: null,
+  publicPayload: null,
+  activeDirectoryMode: "public",
+  publicDataError: "",
   people: [],
   categories: [],
   currentView: { type: "home" },
@@ -76,11 +79,10 @@ async function init() {
   initializeTheme();
   try { localStorage.removeItem("dialsLatestStatus"); } catch {}
 
-  if (!window.crypto?.subtle || !window.indexedDB) {
-    showStartState("unsupported");
-    return;
-  }
-
+  // Public directory is the only automatic startup view. No detail information is decrypted.
+  await loadPublicDirectory();
+  activatePublicDirectory();
+  if (!window.crypto?.subtle || !window.indexedDB) return;
   try {
     const saved = await dbGet(DATA_RECORD_KEY);
     const meta = await dbGet(SAFE_META_KEY);
@@ -88,26 +90,65 @@ async function init() {
       state.encryptedText = saved.text;
       state.encryptedPackage = parseAndValidateEncryptedPackage(saved.text);
       state.packageFingerprint = await fingerprintEncryptedPackage(state.encryptedPackage);
-      await restoreUnlockFailureState();
-      const wrapperDataVersion = publicPackageDataVersion(state.encryptedPackage);
-      state.safeMeta = { ...(meta || {}), dataVersion: wrapperDataVersion || String(meta?.dataVersion || "") };
+      state.safeMeta = { ...(meta || {}), dataVersion: publicPackageDataVersion(state.encryptedPackage) || String(meta?.dataVersion || "") };
       state.connectionNeedsCommit = false;
-      showStartState("locked");
-      updateStartMeta();
-      showAutoLockNoticeIfNeeded();
-    } else {
-      showStartState("empty");
+      await restoreUnlockFailureState();
     }
   } catch (error) {
-    console.error(error);
-    showStartState("empty");
-    setUnlockMessage("브라우저에 저장된 데이터를 읽지 못했습니다. 새 데이터 파일을 연결해 주세요.", true);
+    console.warn("Saved detail connection could not be restored", error);
+    state.encryptedPackage = null;
+    state.encryptedText = "";
   }
+}
+
+async function loadPublicDirectory() {
+  const fallback = {
+    schemaVersion: DIALS_SCHEMA_VERSION, directoryMode: "public",
+    dataVersion: "1970-01-01", generatedAt: "", period: "",
+    title: "혜전대학교 공개 전화번호부", contactExportEnabled: false, categories: [],
+  };
+  try {
+    const response = await fetch("./public-directory.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    validatePayload(data);
+    if (data.directoryMode !== "public") throw new Error("공개 전용 데이터가 아닙니다.");
+    state.publicPayload = data;
+    state.publicDataError = "";
+  } catch (error) {
+    console.warn("Public directory unavailable", error);
+    state.publicPayload = fallback;
+    state.publicDataError = "공개 전화번호부 데이터를 확인할 수 없습니다. 관리자에게 문의해 주세요.";
+  }
+}
+
+function activatePublicDirectory() {
+  clearAutoLockTimer();
+  state.payload = state.publicPayload;
+  state.activeDirectoryMode = "public";
+  state.selectedPeople.clear();
+  state.representativeAffiliations.clear();
+  state.contactFilter = "";
+  state.browseExpanded.clear();
+  state.unlockStartedAt = 0;
+  prepareDirectoryData(state.publicPayload);
+  enterMainView();
+}
+
+function openDetailConnection() {
+  if (!window.crypto?.subtle || !window.indexedDB) {
+    showModal({title: "상세 연락처 연결 불가", body: "<p>현재 브라우저에서는 암호화 연락처 연결을 지원하지 않습니다.</p>"});
+    return;
+  }
+  closeOverflowMenu();
+  showStartState(state.encryptedPackage ? "locked" : "empty");
+  updateStartMeta();
+  history.pushState(makeHistoryState({ screen: "detail-connect", scrollY: 0 }), "", window.location.href);
 }
 
 function cacheElements() {
   [
-    "startView", "mainView", "contactExportView", "connectTitle", "connectStateText", "connectStateBadge",
+    "loadingView", "startView", "mainView", "contactExportView", "connectTitle", "connectStateText", "connectStateBadge",
     "noDataActions", "lockedDataActions", "connectDataButton", "replaceDataStartButton",
     "dataFileInput", "unlockForm", "passwordInput", "passwordVisibilityButton", "unlockButton", "unlockMessage",
     "connectedFileName", "connectedMetaText", "directoryTitle", "dataDateLabel",
@@ -118,7 +159,7 @@ function cacheElements() {
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
     "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "privacyConsentCard", "privacyConsentOption", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
-    "themeColorMeta", "startVersion",
+    "themeColorMeta", "startVersion", "detailBackButton", "publicSecurityNote",
   ].forEach((id) => { el[id] = document.getElementById(id); });
 }
 
@@ -138,6 +179,7 @@ function bindEvents() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) checkAutoLock();
   });
+  el.detailBackButton.addEventListener("click", activatePublicDirectory);
   el.connectDataButton.addEventListener("click", openFilePicker);
   el.replaceDataStartButton.addEventListener("click", openFilePicker);
   el.dataFileInput.addEventListener("change", handleDataFileSelection);
@@ -213,6 +255,7 @@ function bindEvents() {
   el.contactBrowseView.addEventListener("change", handleContactSelectionChange);
   el.contactBrowseView.addEventListener("click", handleContactBrowseClick);
   el.contentView.addEventListener("click", handleBrowseTreeClick);
+  el.contentView.addEventListener("click", handleResponsibilityClick);
   el.prefixEnabledOption.addEventListener("change", updateNameDecorationControls);
   el.namePrefixInput.addEventListener("input", updateNameDecorationControls);
   el.suffixEnabledOption.addEventListener("change", updateNameDecorationControls);
@@ -620,7 +663,9 @@ async function handleUnlock(event) {
     // 실제 모바일에서는 성공 판정 직후부터 소프트 키보드를 닫기 시작해
     // 메인 화면의 첫 터치가 키보드/visualViewport 정리에 소비되지 않게 합니다.
     await settleAfterPasswordInput();
+    if (payload.directoryMode !== "detail") throw new Error("상세 연락처 파일이 아닙니다.");
     state.payload = payload;
+    state.activeDirectoryMode = "detail";
     prepareDirectoryData(payload);
     state.safeMeta = {
       fileName: state.safeMeta?.fileName || "Dials 데이터",
@@ -710,6 +755,8 @@ function validatePayload(payload) {
   assertStringField(payload, "generatedAt", "payload", { nonEmpty: true });
   assertStringField(payload, "period", "payload");
   assertStringField(payload, "title", "payload", { nonEmpty: true });
+  if (!["public", "detail"].includes(payload.directoryMode)) throw new Error("전화번호부 모드가 올바르지 않습니다.");
+  if (payload.directoryMode === "public" && payload.contactExportEnabled !== false) throw new Error("공개 데이터는 연락처 저장을 허용하지 않습니다.");
   if (typeof payload.contactExportEnabled !== "boolean") throw new Error("payload.contactExportEnabled 값은 true/false여야 합니다.");
   if (!Array.isArray(payload.categories)) throw new Error("payload.categories 값은 배열이어야 합니다.");
 
@@ -735,6 +782,15 @@ function validatePayload(payload) {
         ["personKey", "name", "title", "duty", "recordType", "extension", "mobile"].forEach((key) => {
           assertStringField(record, key, recordPath, { nonEmpty: key === "personKey" || key === "name" || key === "recordType" });
         });
+        if (!Array.isArray(record.responsibilities) || record.responsibilities.length > 40 ||
+            record.responsibilities.some((line) => typeof line !== "string" || line.length > 500)) {
+          throw new Error(`${recordPath}.responsibilities 값이 올바르지 않습니다.`);
+        }
+        if (payload.directoryMode === "public") {
+          if (record.mobile || !/^[^\s○][○]{2}$/.test(record.name) || !record.extension || record.recordType !== "PERSON") {
+            throw new Error("공개 전화번호부에 허용되지 않은 인물 정보가 있습니다.");
+          }
+        }
         if (record.recordType !== "PERSON" && record.recordType !== "CONTACT") {
           throw new Error(`${recordPath}.recordType 값은 PERSON 또는 CONTACT여야 합니다.`);
         }
@@ -836,6 +892,7 @@ function buildUniquePeople(categories) {
           minor: org.minor,
           title: record.title,
           duty: record.duty,
+          responsibilities: record.responsibilities,
           recordType: record.recordType,
           extension: record.extension,
           mobile: record.mobile,
@@ -854,10 +911,14 @@ function makeAffiliationKey(personKey, org, personIndex) {
 }
 
 function enterMainView() {
+  if (el.loadingView) el.loadingView.classList.add("hidden");
   el.startView.classList.add("hidden");
   el.contactExportView.classList.add("hidden");
   el.mainView.classList.remove("hidden");
   el.directoryTitle.textContent = String(state.payload?.title || "전화번호부");
+  if (el.publicSecurityNote) el.publicSecurityNote.classList.toggle("hidden", state.activeDirectoryMode !== "public");
+  const detailLink = document.querySelector('[data-action="detail-connect"]');
+  if (detailLink) detailLink.textContent = state.activeDirectoryMode === "public" ? "상세 연락처 연결" : "상세 연락처 잠금";
   el.dataDateLabel.textContent = state.payload?.dataVersion ? `${formatDate(state.payload.dataVersion)} 기준` : "";
   state.currentView = { type: "home" };
   state.browseExpanded.clear();
@@ -997,6 +1058,10 @@ function clearGlobalSearch() {
 function handleHistoryNavigation(event) {
   const route = event.state?.[HISTORY_STATE_KEY];
   if (!route || !state.payload) return;
+  if (route.screen === "detail-connect") {
+    showStartState(state.encryptedPackage ? "locked" : "empty");
+    return;
+  }
   closeOverflowMenu();
   closeModal();
   state.currentView = route.view && typeof route.view === "object" ? { ...route.view } : { type: "home" };
@@ -1025,6 +1090,16 @@ function renderContent() {
 }
 
 function renderHome() {
+  // 첫 배포의 공개 파일은 비어 있습니다. 관리자 승인 데이터가 게시되기 전에는
+  // 빈 조직 목록을 펼치게 하지 않고 준비 상태를 알려 줍니다.
+  if (state.activeDirectoryMode === "public" &&
+      !state.categories.some((category) => category.organizations.length)) {
+    el.contentView.innerHTML = renderEmptyHtml(
+      "공개 전화번호부 준비 중",
+      state.publicDataError || "공개 담당자 자료가 게시되면 이곳에서 검색할 수 있습니다.",
+    );
+    return;
+  }
   const rows = state.categories.map((category) => browseCategoryNodeHtml(category)).join("");
   el.contentView.innerHTML = `
     <p class="lookup-intro">소속을 선택하거나 검색창에서 바로 찾아보세요.</p>
@@ -1107,6 +1182,7 @@ function browseFacilityRecordHtml(record, facilityName) {
     ${identityHtml}
     ${duty ? `<div class="person-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
     ${lines.length ? `<div class="browse-tree-phone-lines">${lines.join("")}</div>` : ""}
+    ${responsibilityInfoButton(record)}
   </div>`;
 }
 
@@ -1177,7 +1253,7 @@ function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
         <div class="browse-tree-person-title"><strong>${escapeHtml(primary)}</strong>${!directMajorPerson && title ? `<span>${escapeHtml(title)}</span>` : ""}${recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
         ${duty ? `<div class="person-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
         ${lines.length ? `<div class="browse-tree-phone-lines">${lines.join("")}</div>` : ""}
-      </div>
+      </div>${responsibilityInfoButton(record)}
     </div>
   </article>`;
 }
@@ -1274,6 +1350,55 @@ function renderOrganization(categoryId, orgIndex) {
   bindBreadcrumbs();
 }
 
+function responsibilitiesOf(record) {
+  return Array.isArray(record?.responsibilities) ? record.responsibilities.filter(Boolean) : [];
+}
+
+function responsibilityMatches(line, query) {
+  const joined = normalizeText(line).replace(/\s+/g, "");
+  const tokens = tokenize(query);
+  if (!tokens.length) return false;
+  const queryJoined = tokens.map(normalizeText).join("");
+  return (queryJoined.length > 1 && joined.includes(queryJoined)) ||
+    tokens.some((token) => normalizeText(line).includes(normalizeText(token)));
+}
+
+function responsibilityInfoButton(record, currentQuery = state.searchQuery) {
+  const responsibilities = responsibilitiesOf(record);
+  if (!responsibilities.length) return "";
+  const matched = currentQuery && responsibilities.some((line) => responsibilityMatches(line, currentQuery));
+  const key = String(record._affiliationKey || record.key || "");
+  return `<button class="responsibility-info${matched ? " matching" : ""}" type="button" data-responsibility-key="${escapeAttr(key)}" aria-label="업무분장 보기" title="업무분장 보기">ⓘ</button>`;
+}
+
+function responsibilityMatchedLine(record, query) {
+  if (!query) return "";
+  const found = responsibilitiesOf(record).find((line) => responsibilityMatches(line, query));
+  return found ? `<div class="responsibility-matched">관련 업무 · ${escapeHtml(found)}</div>` : "";
+}
+
+function handleResponsibilityClick(event) {
+  const button = event.target.closest("[data-responsibility-key]");
+  if (!button) return;
+  const key = button.dataset.responsibilityKey;
+  let selected = null;
+  for (const category of state.categories) {
+    for (const org of category.organizations) {
+      selected = org.people.find((item) => item._affiliationKey === key);
+      if (selected) break;
+    }
+    if (selected) break;
+  }
+  if (!selected) return;
+  const work = responsibilitiesOf(selected);
+  showModal({
+    title: "업무분장",
+    body: `<p><strong>${escapeHtml(selected.name)}</strong>${selected.title ? ` · ${escapeHtml(selected.title)}` : ""}</p>
+      <ul class="responsibility-detail-list">${work.map((line) => `<li class="${responsibilityMatches(line, state.searchQuery) ? "matching" : ""}">${escapeHtml(line)}</li>`).join("")}</ul>`,
+    actions: [{ label: "닫기", primary: true, onClick: closeModal }],
+  });
+}
+
 function personCardHtml(person) {
   const title = person.title || "";
   const duty = person.duty || "";
@@ -1282,7 +1407,7 @@ function personCardHtml(person) {
   if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension, person.externalNumber));
   // Do not display personal numbers in directory cards.
   return `<article class="person-card">
-    <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${title ? `<span class="person-title">${escapeHtml(title)}</span>` : ""}${recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
+    <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${title ? `<span class="person-title">${escapeHtml(title)}</span>` : ""}${recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}${responsibilityInfoButton(person)}</div>
     ${duty ? `<div class="person-duty card-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
     <div class="phone-lines">${lines.join("")}</div>
   </article>`;
@@ -1295,7 +1420,19 @@ function phoneLineHtml(label, number, externalNumber = false) {
 
 function renderSearchResults() {
   const tokens = tokenize(state.searchQuery);
-  const results = state.people.filter((person) => personMatchesTokens(person, tokens));
+  const full = state.people.filter((person) => personMatchesTokens(person, tokens));
+  // 업무분장 검색은 띄어쓰기/부분 일치를 허용하고 부분 관련자를 뒤에 배치합니다.
+  const related = tokens.length > 1 ? state.people.filter((person) =>
+    !full.includes(person) && person.affiliations.some((a) =>
+      responsibilitiesOf(a).some((line) => tokens.some((t) => normalizeText(line).includes(normalizeText(t))))
+    )) : [];
+  // 우선 실제 업무분장에 연속구문이 일치한 결과를 먼저 배치합니다.
+  const phrase = normalizeText(state.searchQuery).replace(/\s+/g, "");
+  const results = [...full].sort((a, b) => {
+    const score = (person) => person.affiliations.some((item) =>
+      responsibilitiesOf(item).some((line) => phrase.length >= 2 && normalizeText(line).replace(/\s+/g, "").includes(phrase))) ? 1 : 0;
+    return score(b) - score(a);
+  }).concat(related);
   const cards = results.map(searchPersonCardHtml).join("");
   el.contentView.innerHTML = `
     <div class="page-heading"><h1>검색 결과</h1><p>${results.length}명 · 여러 소속을 가진 사람은 한 카드에 함께 표시됩니다.</p></div>
@@ -1317,7 +1454,9 @@ function searchPersonCardHtml(person) {
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.title ? `<span>${escapeHtml(a.title)}</span>` : ""}${a.recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
       ${a.duty ? `<div class="person-duty">담당 · ${escapeHtml(a.duty)}</div>` : ""}
+      ${responsibilityMatchedLine(a, state.searchQuery)}
       ${phones.length ? `<div class="affiliation-phones">${phones.join("")}</div>` : ""}
+      ${responsibilityInfoButton({ ...a, _affiliationKey: a.key })}
     </div>`;
   }).join("");
   return `<article class="person-card search-result-card">
@@ -1334,12 +1473,16 @@ function personMatchesTokens(person, tokens) {
     a.recordType === "CONTACT" ? "시설 업체 연락처" : "인물",
     a.externalNumber ? "외부번호" : "",
   ));
+  const taskLines = person.affiliations.flatMap((a) => responsibilitiesOf(a));
+  textParts.push(...taskLines);
   const haystack = normalizeText(textParts.filter(Boolean).join(" "));
   const digits = textParts.filter(Boolean).join(" ").replace(/\D/g, "");
   return tokens.every((token) => {
     const normalized = normalizeText(token);
     const tokenDigits = token.replace(/\D/g, "");
-    return haystack.includes(normalized) || (tokenDigits.length >= 2 && digits.includes(tokenDigits));
+    const joined = normalizeText(textParts.filter(Boolean).join(" ")).replace(/\s+/g, "");
+    return haystack.includes(normalized) || joined.includes(normalized.replace(/\s+/g, "")) ||
+      (tokenDigits.length >= 2 && digits.includes(tokenDigits));
   });
 }
 
@@ -1367,7 +1510,9 @@ function handleMenuAction(event) {
   closeOverflowMenu();
   const action = button.dataset.action;
   if (action === "contact-export" && canExportContacts()) enterContactExport();
-  else if (action === "start-screen") lockApp();
+  else if (action === "detail-connect") {
+    if (state.activeDirectoryMode === "detail") lockApp(); else openDetailConnection();
+  }
   else if (action === "install-app") handleInstallRequest();
   else if (action === "about") showAboutInfo();
 }

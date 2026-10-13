@@ -1,48 +1,17 @@
-# Dials Security Notes
+# Dials 보안 구성 (v0.11.0)
 
-Dials is designed as a local-first viewer: the public GitHub Pages deployment contains the viewer, while operational `.dials` files are distributed separately and are not hosted with the app.
+## 공개 전화번호부
 
-## Content Security Policy
+`public-directory.json`은 웹에서 **누구나 직접 내려받을 수 있는 공개 데이터**입니다. 암호화되어 있지 않습니다. 파일 자체에 개인번호·사번·내부 메모·실명·원본 내부 식별자를 넣지 않아야 합니다. 이름 마스킹만으로 익명화됐다고 볼 수 없으므로, 공개 업무분장과 내선 번호는 학교 승인 범위로 제한해야 합니다.
 
-The document applies a restrictive CSP through a `<meta http-equiv="Content-Security-Policy">` tag because GitHub Pages does not expose project-controlled response headers. The current policy intentionally allows only the same-origin app resources required by Dials, plus `data:` images used by the existing CSS texture. Page-level external network connections are disabled with `connect-src 'none'`.
+HJU Phonebook의 `assignments.public_visible`은 기본 OFF이며 관리자가 각 근무정보의 공개 여부를 명시적으로 지정합니다. 공개 JSON은 직접 검토 후 교체·업로드합니다. 자동 서버 업로드는 하지 않습니다.
 
-The early theme initializer is kept in the same-origin `theme-init.js` file so `script-src 'self'` does not need `unsafe-inline`.
+## 상세 연락처
 
-## Encrypted package fingerprint and unlock backoff
+`.dials`는 별도 암호화 파일이며, Web Crypto API로 PBKDF2-HMAC-SHA256(310,000)과 AES-256-GCM을 이용해 브라우저 내에서 복호화합니다. 비밀번호는 저장하지 않고 상세 자료를 잠그면 공개 전화번호부로 복귀합니다. 복호화된 상세 데이터는 원격 서버에 업로드되지 않습니다.
 
-Dials derives a SHA-256 fingerprint from the encrypted package wrapper fields (`format`, `formatVersion`, KDF name/salt/iterations, cipher name/nonce/ciphertext). This makes the identity independent of the filename and JSON whitespace while changing when the encrypted package itself changes. The password and decrypted contacts are not included.
+상세 연락망은 권한이 있는 이용자에게만 전달하며, 개인정보 이용 시 별도로 정해진 이용수칙을 적용합니다.
 
-Browser-local failure policy:
+## 배포 유의
 
-- failures 1–2: immediate retry
-- failure 3: warning that the next failure will incur a 10-second delay
-- failure 4: 10 seconds
-- failure 5: 30 seconds
-- failure 6: 1 minute
-- failure 7: 5 minutes
-- failures 8+: 15 minutes
-- successful unlock: clear that fingerprint's failure state
-
-The failure count and `retryAt` timestamp are stored in IndexedDB for the current browser only. Renaming the same file does not reset the record. Different browsers, profiles, devices, private-browsing stores, or cleared site data do not share the record.
-
-Cross-browser/device synchronization was explicitly considered and rejected because it would require a central shared service, add a network dependency, and conflict with Dials' local-first/no-contact-upload architecture. This backoff is therefore a local UI abuse-control layer only. It does not prevent an attacker who has copied the encrypted `.dials` file from performing offline password guesses with separate tooling; file encryption, KDF cost, and password strength remain the primary protection for that scenario.
-
-## Other protections
-
-- AES-256-GCM encrypted `.dials` package
-- PBKDF2-HMAC-SHA256 key derivation (310,000 iterations in the current format)
-- password not stored
-- decrypted directory not written to persistent browser storage
-- fixed 10-minute auto-lock from unlock time
-- encrypted package may be retained in IndexedDB for convenience
-
-
-## Password visibility control (v0.6.0)
-
-The inline eye button only switches the password input between hidden and visible presentation in the active page. It does not persist, transmit, copy, or otherwise store the password. Entering a new locked/data-replacement state restores hidden presentation. Unlock backoff continues to disable password entry and the visibility control together while retry is blocked.
-
-## Public data date metadata (v0.8.0)
-
-Dials may read an optional outer-wrapper `dataVersion` in `YYYY-MM-DD` form before the package is decrypted. This field contains only the directory's reference date and is intentionally treated as non-sensitive display metadata; contact records remain inside the AES-GCM encrypted payload.
-
-For packages that include this public date, Dials verifies after successful decryption that it exactly matches the encrypted payload `dataVersion`. A mismatch is rejected. Older packages without the public wrapper field remain readable and reveal the date only after successful decryption.
+공개 GitHub 저장소에 암호화 상세 파일, 운영 DB, 로컬 설정(운영 암호·HMAC 키), 검증용 실제 개인정보를 포함하지 마세요. 연락처를 이미 게시한 경우 Git 이력/캐시/사용자 복제본에도 남을 수 있습니다.

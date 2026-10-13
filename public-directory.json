@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.7",
+  "directoryMode": "public",
+  "dataVersion": "2026-10-13",
+  "generatedAt": "2026-10-13T06:45:49+00:00",
+  "period": "",
+  "title": "혜전대학교 공개 전화번호부",
+  "contactExportEnabled": false,
+  "categories": [
+    {
+      "id": "admin",
+      "label": "행정부서",
+      "organizations": []
+    },
+    {
+      "id": "academic",
+      "label": "학과",
+      "organizations": []
+    },
+    {
+      "id": "facility",
+      "label": "기타시설",
+      "organizations": []
+    }
+  ]
+}
