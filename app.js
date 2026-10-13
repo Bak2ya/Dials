@@ -1,8 +1,8 @@
 "use strict";
 
-const APP_VERSION = "0.9.1";
-const DIALS_SCHEMA_VERSION = "1.5";
-const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "categories"]);
+const APP_VERSION = "0.10.0";
+const DIALS_SCHEMA_VERSION = "1.6";
+const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "contactExportEnabled", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
 const DIALS_ORGANIZATION_FIELDS = Object.freeze(["major", "minor", "fax", "people"]);
 const DIALS_RECORD_FIELDS = Object.freeze(["personKey", "name", "title", "duty", "recordType", "extension", "mobile", "externalNumber"]);
@@ -116,7 +116,7 @@ function cacheElements() {
     "selectedPeopleCount", "contactBrowseView",
     "includeMobileOption", "includeExtensionOption", "preferredPhoneMobile", "preferredPhoneExtension", "includeOrganizationOption", "organizationOptionName",
     "noteDataDateOption", "noteAffiliationsOption", "noteTitleDutyOption",
-    "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "createVcardButton", "vcardMessage",
+    "prefixEnabledOption", "namePrefixInput", "suffixEnabledOption", "nameSuffixInput", "namePreview", "privacyConsentCard", "privacyConsentOption", "createVcardButton", "vcardMessage",
     "modalBackdrop", "modalPanel", "modalTitle", "modalBody", "modalActions", "modalCloseButton",
     "themeColorMeta", "startVersion",
   ].forEach((id) => { el[id] = document.getElementById(id); });
@@ -220,6 +220,8 @@ function bindEvents() {
   el.preferredPhoneMobile.addEventListener("change", updatePreferredPhoneSetting);
   el.preferredPhoneExtension.addEventListener("change", updatePreferredPhoneSetting);
   el.createVcardButton.addEventListener("click", createVcardFile);
+  el.includeMobileOption.addEventListener("change", updatePrivacyConsentVisibility);
+  el.privacyConsentOption.addEventListener("change", () => setVcardMessage(""));
 
   el.modalCloseButton.addEventListener("click", closeModal);
   el.modalBackdrop.addEventListener("click", (event) => {
@@ -708,6 +710,7 @@ function validatePayload(payload) {
   assertStringField(payload, "generatedAt", "payload", { nonEmpty: true });
   assertStringField(payload, "period", "payload");
   assertStringField(payload, "title", "payload", { nonEmpty: true });
+  if (typeof payload.contactExportEnabled !== "boolean") throw new Error("payload.contactExportEnabled 값은 true/false여야 합니다.");
   if (!Array.isArray(payload.categories)) throw new Error("payload.categories 값은 배열이어야 합니다.");
 
   const identities = new Map();
@@ -736,7 +739,10 @@ function validatePayload(payload) {
           throw new Error(`${recordPath}.recordType 값은 PERSON 또는 CONTACT여야 합니다.`);
         }
         if (typeof record.externalNumber !== "boolean") throw new Error(`${recordPath}.externalNumber 값은 true/false여야 합니다.`);
-        if (!record.extension.trim() && !record.mobile.trim()) throw new Error(`${recordPath}에는 extension 또는 mobile 중 하나가 필요합니다.`);
+        if (payload.contactExportEnabled && !record.extension.trim() && !record.mobile.trim()) throw new Error(`${recordPath}에는 extension 또는 mobile 중 하나가 필요합니다.`);
+        if (!payload.contactExportEnabled && record.mobile.trim()) {
+          throw new Error(`${recordPath}에 배포 범위를 벗어난 전화번호가 있습니다.`);
+        }
 
         const identity = identities.get(record.personKey);
         if (identity && identity.recordType !== record.recordType) {
@@ -858,6 +864,7 @@ function enterMainView() {
   state.searchQuery = "";
   el.globalSearchInput.value = "";
   el.clearSearchButton.classList.add("hidden");
+  syncContactExportAvailability();
   renderContent();
   history.replaceState(makeHistoryState({ scrollY: 0 }), "", window.location.href);
   window.scrollTo({ top: 0, behavior: "auto" });
@@ -996,7 +1003,7 @@ function handleHistoryNavigation(event) {
   state.searchQuery = String(route.searchQuery || "");
   el.globalSearchInput.value = state.searchQuery;
   el.clearSearchButton.classList.toggle("hidden", !state.searchQuery);
-  if (route.screen === "contact-export") {
+  if (route.screen === "contact-export" && canExportContacts()) {
     el.startView.classList.add("hidden");
     state.contactView = route.contactView && typeof route.contactView === "object" ? { ...route.contactView } : { type: "home" };
     state.contactDepth = Number(route.contactDepth) || 0;
@@ -1092,7 +1099,7 @@ function browseFacilityRecordHtml(record, facilityName) {
   const { name, title, duty, recordType, showName, showTitle } = facilityRecordPresentation(record, facilityName);
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("연락처", record.extension, record.externalNumber));
-  if (record?.mobile) lines.push(phoneLineHtml(recordType === "PERSON" ? "개인번호" : "연락번호", record.mobile));
+  // Mobile numbers are only available in the consent-gated contact flow.
   const identityHtml = showName || (showTitle && title)
     ? `<div class="facility-flat-person">${showName ? `<strong>${escapeHtml(name)}</strong>` : ""}${showTitle && title ? `<span>${escapeHtml(title)}</span>` : ""}</div>`
     : "";
@@ -1162,7 +1169,7 @@ function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
   const primary = directMajorPerson && title && recordType !== "CONTACT" ? `${title} ${name}` : name;
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("내선번호", record.extension, record.externalNumber));
-  if (record?.mobile) lines.push(phoneLineHtml(recordType === "CONTACT" ? "연락번호" : "개인번호", record.mobile));
+  // Mobile numbers are only available in the consent-gated contact flow.
   return `<article class="browse-tree-person" data-tree-level="${Number(level) || 0}">
     <div class="browse-tree-static">
       <span class="browse-tree-chevron-spacer" aria-hidden="true"></span>
@@ -1273,7 +1280,7 @@ function personCardHtml(person) {
   const recordType = person.recordType || "PERSON";
   const lines = [];
   if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension, person.externalNumber));
-  if (person.mobile) lines.push(phoneLineHtml(recordType === "CONTACT" ? "연락번호" : "개인번호", person.mobile));
+  // Do not display personal numbers in directory cards.
   return `<article class="person-card">
     <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${title ? `<span class="person-title">${escapeHtml(title)}</span>` : ""}${recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
     ${duty ? `<div class="person-duty card-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
@@ -1296,8 +1303,7 @@ function renderSearchResults() {
 }
 
 function searchPersonCardHtml(person) {
-  const uniqueMobiles = unique(person.affiliations.map((a) => a.mobile).filter(Boolean));
-  const commonMobile = uniqueMobiles.length === 1 ? uniqueMobiles[0] : "";
+
   const affiliationHtml = person.affiliations.map((a) => {
     const orgPath = affiliationPath(a);
     const phones = [];
@@ -1306,7 +1312,7 @@ function searchPersonCardHtml(person) {
       const display = a.externalNumber ? `${a.extension} (외부번호)` : a.extension;
       phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">${label} ${escapeHtml(display)}</a>`);
     }
-    if (a.mobile && a.mobile !== commonMobile) phones.push(`<a href="tel:${escapeAttr(telHref(a.mobile))}">개인 ${escapeHtml(a.mobile)}</a>`);
+
     if (a.fax) phones.push(`<a href="tel:${escapeAttr(telHref(a.fax))}">FAX ${escapeHtml(a.fax)}</a>`);
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.title ? `<span>${escapeHtml(a.title)}</span>` : ""}${a.recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
@@ -1317,7 +1323,6 @@ function searchPersonCardHtml(person) {
   return `<article class="person-card search-result-card">
     <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span></div>
     <div class="affiliation-stack">${affiliationHtml}</div>
-    ${commonMobile ? `<div class="phone-line common-mobile"><span>개인번호</span><a href="tel:${escapeAttr(telHref(commonMobile))}">${escapeHtml(commonMobile)}</a></div>` : ""}
   </article>`;
 }
 
@@ -1325,7 +1330,7 @@ function personMatchesTokens(person, tokens) {
   if (!tokens.length) return true;
   const textParts = [person.name];
   person.affiliations.forEach((a) => textParts.push(
-    a.categoryLabel, a.major, a.minor, a.title, a.duty, a.extension, a.mobile, a.fax,
+    a.categoryLabel, a.major, a.minor, a.title, a.duty, a.extension, a.fax,
     a.recordType === "CONTACT" ? "시설 업체 연락처" : "인물",
     a.externalNumber ? "외부번호" : "",
   ));
@@ -1361,7 +1366,7 @@ function handleMenuAction(event) {
   if (!button) return;
   closeOverflowMenu();
   const action = button.dataset.action;
-  if (action === "contact-export") enterContactExport();
+  if (action === "contact-export" && canExportContacts()) enterContactExport();
   else if (action === "start-screen") lockApp();
   else if (action === "install-app") handleInstallRequest();
   else if (action === "about") showAboutInfo();
@@ -1603,7 +1608,19 @@ function showDataInfo() {
   });
 }
 
+function canExportContacts() {
+  return state.payload?.contactExportEnabled === true;
+}
+
+function syncContactExportAvailability() {
+  document.querySelectorAll('[data-action="contact-export"]').forEach((button) => {
+    button.classList.toggle("hidden", !canExportContacts());
+    button.disabled = !canExportContacts();
+  });
+}
+
 function enterContactExport() {
+  if (!canExportContacts()) return;
   saveCurrentHistoryScroll();
   state.selectedPeople.clear();
   state.representativeAffiliations.clear();
@@ -1619,6 +1636,9 @@ function enterContactExport() {
 }
 
 function showContactExportView() {
+  if (!canExportContacts()) { enterMainView(); return; }
+  el.privacyConsentOption.checked = false;
+  updatePrivacyConsentVisibility();
   el.mainView.classList.add("hidden");
   el.contactExportView.classList.remove("hidden");
   restoreNameDecorationSettings();
@@ -2368,7 +2388,13 @@ function updateOrganizationOptionLabel() {
   if (!organization) el.includeOrganizationOption.checked = false;
 }
 
+function updatePrivacyConsentVisibility() {
+  el.privacyConsentCard.classList.toggle("hidden", !el.includeMobileOption.checked);
+  if (!el.includeMobileOption.checked) el.privacyConsentOption.checked = false;
+}
+
 async function createVcardFile() {
+  if (!canExportContacts()) return;
   const selected = state.people.filter((person) => state.selectedPeople.has(person.key));
   if (!selected.length) {
     setVcardMessage("저장할 연락처를 한 개 이상 선택해 주세요.", true);
@@ -2385,7 +2411,16 @@ async function createVcardFile() {
     prefix: el.prefixEnabledOption.checked ? el.namePrefixInput.value : "",
     suffix: el.suffixEnabledOption.checked ? el.nameSuffixInput.value : "",
   };
-  const cards = createVcardText(selected, options);
+  const includesPersonalNumber = options.mobile && selected.some((person) =>
+    person.affiliations?.some((affiliation) => String(affiliation.mobile || "").trim())
+  );
+  if (includesPersonalNumber && !el.privacyConsentOption.checked) {
+    el.privacyConsentCard.classList.remove("hidden");
+    setVcardMessage("개인번호 저장 시 이용수칙을 확인하고 체크해 주세요.", true);
+    el.privacyConsentOption.focus();
+    return;
+  }
+  const cards = createVcardText(selected, { ...options, mobile: includesPersonalNumber });
   const filename = `Dials_Contacts_${state.payload?.dataVersion || todayIso()}.vcf`;
 
   try {

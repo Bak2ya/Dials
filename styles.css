@@ -971,3 +971,11 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   border-color: var(--accent);
 }
 
+
+/* Private contact export: only shown when an authorized dataset enables the feature. */
+.privacy-consent-card { margin: 14px 0; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); font-size: .88rem; line-height: 1.6; }
+.privacy-consent-card > strong { display: block; margin-bottom: 7px; }
+.privacy-consent-card p { margin: 0 0 7px; }
+.privacy-consent-card ol { margin: 0 0 12px; padding-left: 20px; }
+.privacy-consent-card .privacy-consent-check { align-items: flex-start; font-weight: 600; }
+.privacy-consent-card input[type="checkbox"] { flex-shrink: 0; margin-top: 4px; }

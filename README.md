@@ -17,8 +17,6 @@ iPhone, iPad, Android, Windows, macOS의 최신 웹브라우저에서 사용할 
 - 이름, 소속, 직함·담당, 전화번호 통합 검색
 - 행정부서 / 학과 / 기타시설별 탐색
 - 전화번호를 눌러 바로 전화
-- 여러 명을 선택해 휴대폰 연락처로 저장
-- 다중 소속 인물의 대표 소속·직함 선택
 - 시스템 / 라이트 / 다크 / 블랙(OLED) 화면 모드
 - 모바일과 데스크톱에 대응하는 반응형 화면
 - 홈 화면이나 앱 형태로 추가해 빠르게 실행
@@ -31,23 +29,6 @@ iPhone, iPad, Android, Windows, macOS의 최신 웹브라우저에서 사용할 
 3. 데이터 암호를 입력합니다.
 4. 이름이나 전화번호로 검색하거나 소속별로 조회합니다.
 5. 이후에는 연결한 암호화 파일을 브라우저가 기억하므로 파일을 다시 선택할 필요 없이 암호만 입력하면 됩니다.
-
-## 연락처 저장
-
-`⋯ → 연락처 저장`에서 필요한 사람을 하나 또는 여러 명 선택해 휴대폰 연락처로 저장할 수 있습니다.
-
-필요에 따라 다음 정보를 포함할 수 있습니다.
-
-- 개인번호
-- 내선번호
-- 소속
-- 직함·담당
-
-한 사람이 여러 소속이나 직함을 가지고 있다면 연락처에 사용할 대표 정보를 선택할 수 있습니다.
-
-필요한 경우 연락처 이름 앞에 접두어를 추가할 수도 있습니다.
-
-저장된 연락처의 메모에는 Dials에서 가져온 연락처임을 알 수 있도록 데이터 기준일이 함께 기록됩니다.
 
 ## 왜 이런 구성인가요?
 
@@ -90,7 +71,7 @@ GitHub에는 조회용 웹앱만 공개하며, 실제 운영 연락처는 별도
 ### 보안을 위한 구성
 
 - **실제 연락처 데이터를 GitHub에 포함하지 않습니다.**  
-  실제 이름, 개인번호, 내선번호, 소속 데이터, 운영 `.dials` 파일과 관리 DB는 공개 저장소에 두지 않습니다.
+  실제 이름, 전화번호, 소속 데이터, 운영 `.dials` 파일과 관리 DB는 공개 저장소에 두지 않습니다.
 
 - **외부 API를 사용하지 않습니다.**  
   연락처 조회를 위해 외부 서버나 API로 연락처 데이터를 전송하지 않습니다.
@@ -144,7 +125,7 @@ Dials는 HJU Phonebook의 관리용 데이터베이스를 직접 읽지 않습�
 
 구현이나 데이터 형식에 대한 자세한 내용은 다음 문서를 참고하세요.
 
-- [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md) — `.dials` 데이터 형식
+- [`데이터 형식 정보`](데이터 형식 정보) — `.dials` 데이터 형식
 - [`docs/SECURITY_NOTES.md`](docs/SECURITY_NOTES.md) — 보안 구조
 - [`CHANGELOG.md`](CHANGELOG.md) — 버전별 변경 내역
 
@@ -169,8 +150,6 @@ Dials works in modern browsers on iPhone, iPad, Android, Windows, and macOS.
 - Search by name, organization, title/role, or phone number
 - Browse administrative departments, academic departments, and other facilities
 - Tap phone numbers to call
-- Select and export multiple people to device contacts
-- Choose representative organization and title information for people with multiple affiliations
 - System / Light / Dark / Black (OLED) appearance modes
 - Responsive mobile and desktop interface
 - Home-screen / app-style shortcut support
@@ -262,7 +241,6 @@ See [`CHANGELOG.md`](CHANGELOG.md) for notable changes between versions.
 
 ## Technical documentation
 
-- [`docs/DIALS_DATA_FORMAT.md`](docs/DIALS_DATA_FORMAT.md) — `.dials` data format
 - [`docs/SECURITY_NOTES.md`](docs/SECURITY_NOTES.md) — security architecture
 - [`CHANGELOG.md`](CHANGELOG.md) — version history
 
