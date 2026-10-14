@@ -1,0 +1,3889 @@
+{
+  "schemaVersion": "1.7",
+  "dataVersion": "2026-10-14",
+  "generatedAt": "2026-10-14T16:42:56+09:00",
+  "period": "2026.10",
+  "title": "혜전대학교 공개 전화번호부",
+  "directoryMode": "public",
+  "contactExportEnabled": false,
+  "categories": [
+    {
+      "id": "admin",
+      "label": "행정부서",
+      "organizations": [
+        {
+          "major": "총장실",
+          "minor": "법인사무국",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "e6013a00bcb16cd11410c0c3",
+              "name": "윤○○",
+              "title": "계장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-3459",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "총무처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "b75faec7332e230ef978a32f",
+              "name": "정○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5140",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "총무처",
+          "minor": "총무팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "8c53d7beec29358435b6ff75",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 총무팀 업무 총괄",
+                "- 직원인사"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5141",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "49ac1fedccb95d941e4328e3",
+              "name": "김○○",
+              "title": "계장",
+              "duty": "통신",
+              "responsibilities": [
+                "- 전기안전관리",
+                "- 통신(구내유선전화)관리",
+                "- 재산관리",
+                "- 승강기안전관리",
+                "- 전자공문서 수발신",
+                "- 시스템냉난방관리",
+                "- 행사장 방송 및 대관업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5147",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9d5110a8086059f6d23ae510",
+              "name": "김○○",
+              "title": "",
+              "duty": "총무",
+              "responsibilities": [
+                "- 구매 및 계약",
+                "- 개인정보보호",
+                "- 용역업무(청소 및 경비, 무인경비)",
+                "- 수리(업무·실습용 기계, 집기)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5149",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "f9917b59f2c8359c5f4589e6",
+              "name": "김○○",
+              "title": "",
+              "duty": "건축",
+              "responsibilities": [
+                "구매 및 계약",
+                "- 시설공사",
+                "- 시설관리",
+                "- 안전관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5135",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "702857607ae4b0562755a37a",
+              "name": "이○○",
+              "title": "",
+              "duty": "급여",
+              "responsibilities": [
+                "- 급여, 4대보험, 사학연금, 교직원공제회 업무",
+                "- 근태 관리",
+                "- 직원교육연수",
+                "- 근로소득원천징수(연말정산)업무",
+                "- 공문서 및 우편물 수발"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5152",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6ebdba942f383bf6b669042f",
+              "name": "이○○",
+              "title": "",
+              "duty": "버스",
+              "responsibilities": [
+                "- 학생버스관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5137",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "f84a7ce4c3ba550c2ac961b9",
+              "name": "이○○",
+              "title": "",
+              "duty": "영선",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5148",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "89bd273ccf44fc2fb9a40ebf",
+              "name": "전○○",
+              "title": "",
+              "duty": "영선",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5150",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fb71161710dc417a4fde0587",
+              "name": "박○○",
+              "title": "",
+              "duty": "방사선",
+              "responsibilities": [
+                "- 방사선 안전관리 업무",
+                "- 업무용 차량관리",
+                "- 출장관리",
+                "- 교직원숙소",
+                "- 소방",
+                "- 오수 정화조",
+                "- 화재보험"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5144",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e210135ca497cf1f60119d4b",
+              "name": "영○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5287",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "총무처",
+          "minor": "회계팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "198e4df0b68837d65ddc8fc7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 회계팀 업무 총괄",
+                "- 자금관리",
+                "- 교육원가분석",
+                "- 기금운용심의회"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5142",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "00f2e3ad546dc93e198a7c07",
+              "name": "최○○",
+              "title": "",
+              "duty": "지출",
+              "responsibilities": [
+                "- 지출 업무",
+                "- 자금 집행",
+                "- 지출결의서 접수",
+                "- 세무업무(원천세)",
+                "- 각종 평가 업무",
+                "- 각종 대장 관리(가불금, 인지대장)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5145",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "37e8278193f810222b7de1fe",
+              "name": "이○○",
+              "title": "",
+              "duty": "수입",
+              "responsibilities": [
+                "- 수입 업무",
+                "- 등록업무(등록금 및 기숙사비)",
+                "- 회계결산",
+                "- 세무업무(부가세)",
+                "- 기부금 수입 및 영수증 발급",
+                "- 시설물 등 사용료 수입",
+                "- 각종 대장 관리(법인카드) 등"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5116",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "총무처",
+          "minor": "부속실",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "ebfc90cbad11b043db5a1002",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5136",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "987b1f9b510fd6494c8539c9",
+              "name": "진○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5201",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "기획처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "919bcbece529a442a45abaa8",
+              "name": "남○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5170",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "기획처",
+          "minor": "기획팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "83e0298b00fb29963f593bf3",
+              "name": "정○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 대학 중장기 발전계획",
+                "- 조직 및 직제",
+                "- 각종 평가"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2451",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1e12dd0c05b99d051c4c2b92",
+              "name": "양○○",
+              "title": "",
+              "duty": "예산",
+              "responsibilities": [
+                "- 예산 관리 총괄",
+                "- 감사",
+                "- 대학정보공시"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2453",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "338f4a5ed0101b2b794c65a9",
+              "name": "설○○",
+              "title": "",
+              "duty": "기획",
+              "responsibilities": [
+                "- 정원 조정",
+                "- 학과 예산",
+                "- 교육 편제 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2452",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "404fc4949e133685ef0ebe01",
+              "name": "이○○",
+              "title": "",
+              "duty": "평가",
+              "responsibilities": [
+                "- 자체평가",
+                "- 교육서비스 만족도",
+                "- 등록금 책정"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2448",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "기획처",
+          "minor": "성과관리팀(IR)",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "83e0298b00fb29963f593bf3",
+              "name": "정○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2451",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "404fc4949e133685ef0ebe01",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2448",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "6a7e60d60506973230e5d87c",
+              "name": "오○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5120",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "교무팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 교원인사, 교원업적평가",
+                "- 각종 평가 관리",
+                "- 유학생 관리",
+                "- 행정정보 공동이용 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "60886e1efcb3d44d54195dd3",
+              "name": "이○○",
+              "title": "",
+              "duty": "학적",
+              "responsibilities": [
+                "- 학적 관리",
+                "- 성적 관리",
+                "- 진급 및 졸업 관리",
+                "- 학칙 및 시행세칙 관리",
+                "- 교원양성팀 운영",
+                "- 교원 자격 검정",
+                "- 졸업식 및 입학식"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5124",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7483543ba01d2078d8a3c008",
+              "name": "한○○",
+              "title": "",
+              "duty": "인사",
+              "responsibilities": [
+                "- 교원 인사",
+                "- 교원 확보율 관리",
+                "- 연봉책정 및 계약",
+                "- 교원 상훈",
+                "- 외부 강의 신고",
+                "- 조교 관리 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5122",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5bfc2f69398a4dff817a4bfa",
+              "name": "곽○○",
+              "title": "",
+              "duty": "수업",
+              "responsibilities": [
+                "- 수업 관리",
+                "- 강사료 책정 및 퇴직금 관리",
+                "- 교원 강의평가",
+                "- 사회봉사",
+                "- 조기 취업 관리",
+                "- 휴·보강 관리",
+                "- 강의실 관리",
+                "- 장애 학생 관련 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5125",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a919f8fa3a26887e9e37e52f",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 교육과정 편성 및 운영",
+                "- 유학생 관리",
+                "- 교양교육팀 운영",
+                "- 실습실 및 기자재·실습재료 관리",
+                "- 비교과 프로그램 운영",
+                "- 연계교육협약, 대학연계 공동교육과정"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5127",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a77d5105c564fc9c9739d595",
+              "name": "이○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [
+                "- 민원 업무(발급기 관리)",
+                "- 교직원 숙소"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5128",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "교수학습개발센터 / 원격교육지원센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "114a43cd03ddb229fd6f6f00",
+              "name": "권○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5285",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "d6b03a8dc07f05ee80e4a5b6",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2437",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fcd1e5e60da53a490ef17e11",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "원격교육지원",
+                "학과 미디어 관련 지원 프로그램 운영",
+                "스튜디오 및 행동분석실 시설관리 및 유지보수"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2436",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "현장실습지원센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "d6b03a8dc07f05ee80e4a5b6",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "현장견학 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2437",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "교원양성팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "60886e1efcb3d44d54195dd3",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5124",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "전공심화운영팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "d6b03a8dc07f05ee80e4a5b6",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2437",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a77d5105c564fc9c9739d595",
+              "name": "이○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5128",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "교양교육팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5ec893ba404784d31106d493",
+              "name": "김○○",
+              "title": "책임교수",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5366",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a919f8fa3a26887e9e37e52f",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5127",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "역량개발팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "d6b03a8dc07f05ee80e4a5b6",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2437",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "성인학습자지원센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교무처",
+          "minor": "전문기술석사운영팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "입학처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "1438c69f840128c94f18c2fb",
+              "name": "한○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5105",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "입학처",
+          "minor": "입학팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "13179b91c1daa93395d9431b",
+              "name": "맹○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 신·편입생 원서 접수 관리 및 입시상담",
+                "- 입학전형 운영 총괄 관리",
+                "- 입학전형 및 홍보계획 수립",
+                "- 외국인 신입생 선발계획 수립"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5106",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "238dfcfadbe328b8fbee78d4",
+              "name": "이○○",
+              "title": "계장",
+              "duty": "입시",
+              "responsibilities": [
+                "- 신·편입생 원서 접수 관리 및 입시상담",
+                "- 입학전형 세부 시행계획 수립",
+                "- 외국인 신입생 선발 관련 업무",
+                "- 입학전형 및 홍보 운영 관리",
+                "- 입학전형 운영 분석",
+                "- 입학전형 관련 위원회 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5107",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "be8a8c6255ffc4aeb2d8443a",
+              "name": "최○○",
+              "title": "",
+              "duty": "입시",
+              "responsibilities": [
+                "- 신·편입생 원서 접수 관리 및 입시상담",
+                "- 입학전형 운영 관련 제반 업무",
+                "- 면접고사 운영 및 관리",
+                "- 입학전형 결과 분석자료집 제작 업무",
+                "- 입학홈페이지 Q&A 게시판 관리",
+                "- 고등교육통계, 대학정보공시 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5108",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "3820f1e92d4114ec018dc789",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [
+                "- 신·편입생 원서 접수 관리 및 입시상담",
+                "- 입학홍보 운영 및 지원 업무",
+                "- 입시홍보 인쇄물 및 기념품 제작 및 관리",
+                "- 고교 특강 및 입시설명회 관련 업무",
+                "- 카카오톡 채널 1:1 입시상담 관리",
+                "- 홍보대사(혜림이) 운영 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5109",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "9585484e3e7801765715b6a5",
+              "name": "전○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5130",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "학생팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 학생팀 업무 총괄",
+                "- 학생복지 및 지도 업무",
+                "- 학생안전관리업무",
+                "- 통학버스 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "40ff29a5f3034ce123c5647c",
+              "name": "김○○",
+              "title": "",
+              "duty": "보건실",
+              "responsibilities": [
+                "- 학교보건 예방교육업무",
+                "- 보건실 운영"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5281",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b6ab3ec8227188d26ffb3365",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5134",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ef08d028c9935e2a0b020386",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 대학안전사고보상공제 접수",
+                "- 통학버스 관리",
+                "- 학생 복지 및 지도 업무",
+                "- 학생증 발급",
+                "- 분실물 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5336",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "30ab4a1490025e27e4d07f30",
+              "name": "최○○",
+              "title": "",
+              "duty": "상담사",
+              "responsibilities": [
+                "- 학생상담센터 업무",
+                "- 개인 심리상담 및 집단상담",
+                "- 정신건강 관련 프로그램 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5255",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "장학팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "국가장학,대출",
+              "responsibilities": [
+                "- 국가장학금",
+                "- 정부학자금대출"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a1abe08fb2e422befc3553d0",
+              "name": "임○○",
+              "title": "",
+              "duty": "교내외장학",
+              "responsibilities": [
+                "- 교내장학금",
+                "- 교외장학금",
+                "- 국가근로장학생 선발/지급",
+                "- 교내근로장학생 선발/지급"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5132",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ef08d028c9935e2a0b020386",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 국가장학금",
+                "- 정부학자금대출"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5336",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "학생생활관",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9585484e3e7801765715b6a5",
+              "name": "전○○",
+              "title": "관장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5130",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "여학생생활관",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "b99397a5de3ee53b2ee41905",
+              "name": "강○○",
+              "title": "",
+              "duty": "야간",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-632-5441",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "24f2cd36ed95b26d728df364",
+              "name": "김○○",
+              "title": "",
+              "duty": "주간",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-632-5441",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "남학생생활관",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "8f758742ef0c293229512358",
+              "name": "김○○",
+              "title": "",
+              "duty": "야간",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5210",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학생처",
+          "minor": "장애학생지원센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "c42406818551e84b6bbdf121",
+              "name": "임○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5292",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "40ff29a5f3034ce123c5647c",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5281",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "글로벌 대외교류처",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "1d30fc13c1beb722d8fa63d4",
+              "name": "이○○",
+              "title": "처장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5215",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "글로벌 대외교류처",
+          "minor": "대외교류팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "ebfc90cbad11b043db5a1002",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 느티나무 어린이집 관련 업무",
+                "- 언론사 관리 업무(보도자료 작성 등)",
+                "- 외부 기관 업무 협의(총동창회, 홍성군청 등)",
+                "- 대외 업무 협약(업무 협약 행사 및 자료)",
+                "- 총장배 요리대회 지원",
+                "- 대학 이미지 홍보(버스, 홍성역 광고 등)",
+                "- 국제교류(자매대학 관련, 해외 연수, 교환 교수 등)",
+                "- 연혁 및 역사 기록 관리",
+                "- 회의자료 작성(부처장, 학과장, 전체 교수 회의, 팀장 회의)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2454",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1e42d3b96dcac424105d63e9",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2457",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "987b1f9b510fd6494c8539c9",
+              "name": "진○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 대학 기부금 유치 관리(발전 기금, 장학금 등)",
+                "- 한국전문대학교육협의회 업무",
+                "- 대전, 세종, 충청 지역 총장 협의회 업무",
+                "- 홍성군 기관장 협의회 업무",
+                "- 기관장 업무추진비",
+                "- 별밭 제작 및 배포",
+                "- 사회봉사단 업무",
+                "- 홈페이지 혜전뉴스, 학과뉴스 관리",
+                "- 보도자료 배포",
+                "- 지출결의서 작성",
+                "- 기타 총장님 지시사항"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2455",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "글로벌 대외교류처",
+          "minor": "국제교육원",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "13179b91c1daa93395d9431b",
+              "name": "맹○○",
+              "title": "부원장",
+              "duty": "",
+              "responsibilities": [
+                "- 외국인 유학생 유치 및 관리",
+                "- 학사 일정 및 운영 계획 수립",
+                "- 자체 평가 보고 및 성과 보고"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5258",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "df321bbe5ba2e0dd79f7657a",
+              "name": "벌○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 해외 교류 및 업무 지원(몽골, 우즈벡)",
+                "- 해외 유학생 대상 홍보",
+                "- 비자 업무 관리(몽골, 우즈벡)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2410",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1d30fc13c1beb722d8fa63d4",
+              "name": "이○○",
+              "title": "원장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5215",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "f4d451ca64b9c3fe8710b915",
+              "name": "진○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 해외 교류 및 업무 지원(베트남)",
+                "- 해외 유학생 대상 홍보",
+                "- 비자 변경 업무 관리(베트남)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2421",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e997ff06aa45cab2d93215e1",
+              "name": "한○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 본과 홍보 업무 지원",
+                "- 교재 업무 및 관리 지원",
+                "- 홍보물 제작 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2422",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "eefd842d5e5625fb5c99c6a8",
+              "name": "황○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 강사 및 강사료 지급 관리",
+                "- 규정 관리",
+                "- 문화 체험 관리",
+                "- 보험 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5259",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "글로벌 대외교류처",
+          "minor": "유학생지원센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "cd1b7e7c6767ce7c76e791ba",
+              "name": "백○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5205",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "df321bbe5ba2e0dd79f7657a",
+              "name": "벌○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2410",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "f4d451ca64b9c3fe8710b915",
+              "name": "진○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2421",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력센터",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "20c86ab14dd511a594bb4c8b",
+              "name": "류○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5160",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력센터",
+          "minor": "취업창업지원팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "552d9926a823bffcb88ecc3d",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 산학협력지원팀 / 취업창업지원팀 업무총괄",
+                "- 교내학술연구비 지원",
+                "- 교내·외 학술활동지원",
+                "- 대학연구활동 실태조사",
+                "- QSC 비교과 프로그램",
+                "- 3S 직무훈련(Self-practice, Simulation, Survival)",
+                "- 생명윤리심의위원회(IRB)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5392",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6651467ce94afd057159cb70",
+              "name": "이○○",
+              "title": "",
+              "duty": "취업",
+              "responsibilities": [
+                "- 취업 및 진로 상담",
+                "- 취·창업 프로그램 운영",
+                "- 진로탐색학점제 운영",
+                "- 창업대체학점제 운영",
+                "- 취업 통계",
+                "- 취업연계 중점대학 운영",
+                "- 대학연계 진로체험 운영"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5188",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력센터",
+          "minor": "산학협력지원팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "552d9926a823bffcb88ecc3d",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 산학협력지원팀 / 취업창업지원팀 업무총괄",
+                "- 교내학술연구비 지원",
+                "- 교내·외 학술활동지원",
+                "- 대학연구활동 실태조사",
+                "- QSC 비교과 프로그램",
+                "- 3S 직무훈련(Self-practice, Simulation, Survival)",
+                "- 생명윤리심의위원회(IRB)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5392",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fcfc0f114f3fdf5090a636eb",
+              "name": "전○○",
+              "title": "계장",
+              "duty": "",
+              "responsibilities": [
+                "- 대학 산학협력발전계획 성과지표 자체평가",
+                "- 가족회사 운영",
+                "- 산업체방문경비 지원",
+                "- 산업체방문 홍보물",
+                "- 산학협력 체결",
+                "- 산업자문, 애로기술지원, 산업체재직자교육",
+                "- 산학협력실태조사(부서 관련 항목)"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5187",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력단",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "20c86ab14dd511a594bb4c8b",
+              "name": "류○○",
+              "title": "단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5160",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력단",
+          "minor": "연구지원팀/사업관리팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "0ec3e84ec28d49a27a3bcfed",
+              "name": "고○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 산학협력단 사업계획 수립",
+                "- 산학연관련 국고, 지자체 재정지원 사업 운영",
+                "- 각종 대외사업, 지자체 및 개별과제 관리",
+                "- 산학협력단 각종 집행관리",
+                "- 학교기업 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5161",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "08625379568ef51ad25a678b",
+              "name": "김○○",
+              "title": "계장",
+              "duty": "",
+              "responsibilities": [
+                "- 산학협력단 회계·세무·결산 및 출납",
+                "- 산학협력단 월별 자금 집행 현황 및 통계 보고",
+                "- 산학협력단 직원 급여 및 퇴직금 관리",
+                "- 연구계약 체결",
+                "- 연구과제 정산",
+                "- 학교기업 회계"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5162",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "42cf9bf1e2a0a6dc107dd5fb",
+              "name": "한○○",
+              "title": "",
+              "duty": "혁신사업",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5163",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "산학협력단",
+          "minor": "치유센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "5ec893ba404784d31106d493",
+              "name": "김○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5366",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "d6b03a8dc07f05ee80e4a5b6",
+              "name": "최○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2437",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "조기취업형계약학과사업단",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "105d11910bef66618a053eab",
+              "name": "송○○",
+              "title": "단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5328",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "조기취업형계약학과사업단",
+          "minor": "조기취업형계약학과사업단",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "0ec3e84ec28d49a27a3bcfed",
+              "name": "고○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5161",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "08625379568ef51ad25a678b",
+              "name": "김○○",
+              "title": "계장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5162",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "20a4463759759523c171f138",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "산업체 및 학생관리, 입학전형관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2408",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "혁신사업단",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "919bcbece529a442a45abaa8",
+              "name": "남○○",
+              "title": "단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5170",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "혁신사업단",
+          "minor": "혁신사업단",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "83e0298b00fb29963f593bf3",
+              "name": "정○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2451",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "8c0f4540228ac9f63c96d21b",
+              "name": "김○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5236",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "cd1b7e7c6767ce7c76e791ba",
+              "name": "백○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5205",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "338f4a5ed0101b2b794c65a9",
+              "name": "설○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2452",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1e12dd0c05b99d051c4c2b92",
+              "name": "양○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2453",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "404fc4949e133685ef0ebe01",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2448",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6b984acd07a07b7c838d201f",
+              "name": "조○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5243",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "앵커사업단",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "20c86ab14dd511a594bb4c8b",
+              "name": "류○○",
+              "title": "단장",
+              "duty": "",
+              "responsibilities": [
+                "- 앵커사업 전반 총괄",
+                "- 대내외 협력 총괄, 정책수립"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5160",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "앵커사업단",
+          "minor": "사업관리팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "0ec3e84ec28d49a27a3bcfed",
+              "name": "고○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5161",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "08625379568ef51ad25a678b",
+              "name": "김○○",
+              "title": "계장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5162",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6aa49ce5415f7aba32bece89",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2432",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "d704fca4be3e0bd9caf814ec",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2434",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1d30fc13c1beb722d8fa63d4",
+              "name": "이○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [
+                "- 앵커사업 총괄 운영",
+                "- 성과관리 제반업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5215",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "2b5c077c4bc292bf5e50e578",
+              "name": "하○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2433",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "앵커사업단",
+          "minor": "정주지원팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "7ff53923d2ca7d6a57732452",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5371",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7ee0ead8ed29f205859dd22c",
+              "name": "손○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2445",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "105d11910bef66618a053eab",
+              "name": "송○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [
+                "- 3-1 단위과제 총괄"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5328",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "88fc2338fa0bf9a80f8a2e84",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5370",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "20a4463759759523c171f138",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2408",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "2b5c077c4bc292bf5e50e578",
+              "name": "하○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2433",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1438c69f840128c94f18c2fb",
+              "name": "한○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [
+                "- 2-2, 3-2 단위과제 총괄"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5352",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "앵커사업단",
+          "minor": "로컬브릿지팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "6aa49ce5415f7aba32bece89",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2432",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "4c05cfb25b47921c65ae1ead",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5380",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a805444ca86e7987a8c1641c",
+              "name": "이○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [
+                "- 4-1, 4-2 단위과제 총괄"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5288",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "74008b980b4cb806b55fa6a2",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2444",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6eb83e28c4580507d7642a5b",
+              "name": "정○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2423",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "앵커사업단",
+          "minor": "늘배움지원팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "b25a09db336553435acf902f",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2443",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "15d4080258596c87c871a415",
+              "name": "양○○",
+              "title": "부단장",
+              "duty": "",
+              "responsibilities": [
+                "- 3-3 지역산업 맞춤형 직업교육 허브대학 육성",
+                "- 3-5 지역자원 기반 덕업일치 평생교육 특화"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5232",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "03bbfc66a2fb77bdd44536b3",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2442",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "AID전환혁신센터",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "6a7e60d60506973230e5d87c",
+              "name": "오○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [
+                "- AID전환사업 총괄 및 추진방향 수립",
+                "- 주요 사업계획 및 성과관리 총괄"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5120",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "AID전환혁신센터",
+          "minor": "AID전환혁신센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "754b722f3ffd92005efb330a",
+              "name": "김○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 세부사업 운영·관리 및 부서 간 업무 조정",
+                "- 사업 추진실적 및 예산 집행 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5121",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "3457f2599dc06199d34b1699",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 사업 관련 자료 취합 및 보고서 작성 지원"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5350",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a919f8fa3a26887e9e37e52f",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 교육과정 및 교육혁신 프로그램 운영",
+                "- 프로그램 실적·성과자료 관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5127",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "치유농업사양성사업단",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "1d30fc13c1beb722d8fa63d4",
+              "name": "이○○",
+              "title": "단장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5215",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학술정보원",
+          "minor": "",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "15d4080258596c87c871a415",
+              "name": "양○○",
+              "title": "원장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5232",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학술정보원",
+          "minor": "IT지원팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "1dd43e0480131d96f7cb9c78",
+              "name": "권○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 통합정보(행정, 비교과, 학사), 서버, 네트워크",
+                "- 정보보안담당관"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5195",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ef656900b82b046f20c643a7",
+              "name": "양○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [
+                "- 통합정보(입시), 홈페이지, 정보보안",
+                "- 정보보안담당자"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5197",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a9639ba473d7893e63bceb3c",
+              "name": "정○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [
+                "- 공용PC실습실 관리",
+                "- 인터넷 장애 해결",
+                "- 프로그램 설치"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5138",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "학술정보원",
+          "minor": "학술정보팀",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "2bf9ca71aeac04be29a71bfe",
+              "name": "조○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 만족도 및 진단요구조사 환류계획 수립",
+                "- 도서관 평가 환류 및 개선",
+                "- 평가지표 관리",
+                "- 부서운영계획 수립",
+                "- 자체평가 보고 및 성과관리"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5361",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "f87cde13badfd5d579ece400",
+              "name": "오○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [
+                "- 학술정보팀 행정업무",
+                "- 수서 업무(도서, 비도서, 전자자료 등)",
+                "- 정리 업무(편목, 배가, 보존, 폐기 등)",
+                "- 열람 업무(대출/열람실, 국시실, Creative Room, DVD룸 등)",
+                "- 근로학생 관리",
+                "- 행사 계획수립 및 운영, 평가"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5168",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "eefd842d5e5625fb5c99c6a8",
+              "name": "황○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5259",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "31f1693891cd37950d1399e4",
+              "name": "윤○○",
+              "title": "",
+              "duty": "Maker Space조교",
+              "responsibilities": [
+                "- Maker Space 담당",
+                "- VR Room 담당"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-2441",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "평생교육원",
+          "minor": "평생교육원",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "15d4080258596c87c871a415",
+              "name": "양○○",
+              "title": "원장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5232",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1e12dd0c05b99d051c4c2b92",
+              "name": "양○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2453",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "31f1693891cd37950d1399e4",
+              "name": "윤○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2441",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "혜전방송국",
+          "minor": "혜전방송국",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "15d4080258596c87c871a415",
+              "name": "양○○",
+              "title": "국장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5232",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fcd1e5e60da53a490ef17e11",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2436",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인권센터",
+          "minor": "인권센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "9585484e3e7801765715b6a5",
+              "name": "전○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5130",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [
+                "- 인권센터 업무 총괄",
+                "- 성희롱 고충상담 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "30ab4a1490025e27e4d07f30",
+              "name": "최○○",
+              "title": "",
+              "duty": "상담사",
+              "responsibilities": [
+                "- 법정의무교육업무(4대폭력, 기타)",
+                "- 성희롱 고충상담 업무",
+                "- 인권교육센터 업무"
+              ],
+              "recordType": "PERSON",
+              "extension": "041-630-5255",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "감염병관리대책본부",
+          "minor": "감염병관리대책본부",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "c42406818551e84b6bbdf121",
+              "name": "임○○",
+              "title": "본부장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5292",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7574b5a8cc0cf1b8e71a8df7",
+              "name": "임○○",
+              "title": "팀장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5133",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "academic",
+      "label": "학과",
+      "organizations": [
+        {
+          "major": "간호계열",
+          "minor": "간호학과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "f6a1b171833056315293fb30",
+              "name": "조○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5297",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a805444ca86e7987a8c1641c",
+              "name": "이○○",
+              "title": "교무학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5288",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "16dcf90867a0aa9b8c57772b",
+              "name": "김○○",
+              "title": "실습학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5340",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "807e513b130c498c37241766",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5367",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5ec893ba404784d31106d493",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5366",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "0ce200b16a6a8a2707632119",
+              "name": "두○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5235",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "535f0d099d6eec70b931614f",
+              "name": "문○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5293",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "2765564e84620100828fb9cd",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5192",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "97195135f31dea51c3c4cb36",
+              "name": "배○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5291",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "841b763a8062003f91a7afd7",
+              "name": "신○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5386",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5f83d40e6f42504556b53294",
+              "name": "안○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5226",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e40e772dce664e545a77bf9d",
+              "name": "유○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5264",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fd5e66cf0b27962bbaa614dc",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5357",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "c42406818551e84b6bbdf121",
+              "name": "임○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5292",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a20cc0c8b486b55edec597e1",
+              "name": "임○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5233",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fec567a3465391f9daef5061",
+              "name": "장○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5387",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b75faec7332e230ef978a32f",
+              "name": "정○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5295",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "8a3450066c0429957853d051",
+              "name": "조○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5294",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6b984acd07a07b7c838d201f",
+              "name": "조○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5243",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ed60b84b326c0eba777544f6",
+              "name": "지○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5183",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1438c69f840128c94f18c2fb",
+              "name": "한○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5352",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "d3b50abd870c8600fe38fd66",
+              "name": "김○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5369",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6a588f131de3ae132df11a76",
+              "name": "박○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5369",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ed0b40a2de1de12d945e6182",
+              "name": "장○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5369",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "743fde3b0d2374a12505d0c1",
+              "name": "정○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5369",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "63a8e032fbd48b6445569a30",
+              "name": "박○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ecd27576ca5a2655ed02d236",
+              "name": "박○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1cd9425be7e36886677e4aa9",
+              "name": "백○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e1919b5303579b45215509c4",
+              "name": "안○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b3229b578a015d3967b54389",
+              "name": "이○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "052b2b11ab1f17c943be0be5",
+              "name": "정○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "630-5382~5",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "527bdd10d8efd03ff76d9a69",
+              "name": "송○○",
+              "title": "",
+              "duty": "행정",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5203",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "c18bad457e7275b978c06982",
+              "name": "이○○",
+              "title": "",
+              "duty": "행정",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5334",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "86c28d1e2916a23d77596d03",
+              "name": "이○○",
+              "title": "",
+              "duty": "행정",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5202",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "40ff29a5f3034ce123c5647c",
+              "name": "김○○",
+              "title": "",
+              "duty": "행정",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5281",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9b1ca5abf98c011a7c03ac6a",
+              "name": "신○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2411",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "246c47393977de860db99aea",
+              "name": "최○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2413",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "간호계열",
+          "minor": "실습시뮬레이션센터",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "0ce200b16a6a8a2707632119",
+              "name": "두○○",
+              "title": "센터장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5235",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "호텔조리계열",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "d05d87dad85c61f971ab20ba",
+              "name": "양○○",
+              "title": "계열장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5289",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "35c832076893b5d0f823de38",
+              "name": "최○○",
+              "title": "서양식전공장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5240",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9585484e3e7801765715b6a5",
+              "name": "전○○",
+              "title": "일식전공장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5360",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "fbd2b84c42dd7883bd810bd7",
+              "name": "이○○",
+              "title": "중식전공장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5223",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "d05d87dad85c61f971ab20ba",
+              "name": "양○○",
+              "title": "한식전공장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5289",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "751ec50c7fc037f2c8530a17",
+              "name": "강○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5252",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9050a9e7a585140380b62c4f",
+              "name": "고○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5339",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "173f44e064797c46cd3f06d6",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5269",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "02e41e082436ad65172d6f0e",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5270",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "499438f0eb7ecee3985f5cc5",
+              "name": "조○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5260",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "eb159554de94e7896c27b72d",
+              "name": "권○○",
+              "title": "",
+              "duty": "한식조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5220",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1db27109e72893ee49454578",
+              "name": "박○○",
+              "title": "",
+              "duty": "서양∙중식조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5230",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "196388ea75f31856cb05c454",
+              "name": "전○○",
+              "title": "",
+              "duty": "일식조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5204",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "제과제빵과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "545482d1fdd0bdb22c1dc78c",
+              "name": "윤○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5244",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5a24e05934013611a08e0ac5",
+              "name": "권○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5194",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b51399d75583925e48ccabd5",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5253",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9265088dcdd66808833a699f",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5263",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "c804064460e1d7781fb47b19",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5228",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5ff995a0a59ddee987d3b39c",
+              "name": "박○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5194",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1619c25fc1c9a0e9e66ab8ff",
+              "name": "배○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5194",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "cd6108277ea9e25f055f991f",
+              "name": "유○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5227",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1bb18d26cb6c3be5e5e2d8f3",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5234",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b03155a0fba33384c8a15af4",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5312",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e250f093eb562adb5aa91d51",
+              "name": "정○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5254",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "56b970755e2ee08330578d63",
+              "name": "한○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5248",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6dfc9d4a9ffdb39bd16b604f",
+              "name": "김○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5239",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b12f80e1440e0604f50fcb69",
+              "name": "김○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5239",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "외식창업조리과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "9cc9faff1f93f57ad59b258d",
+              "name": "김○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5222",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "91300bf64b2f4fbd1f2f936b",
+              "name": "강○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5231",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "반려동물과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "f5b85e4f43a00969dee7c736",
+              "name": "박○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5241",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "4eeb7e768521f932b06f4f30",
+              "name": "이○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5268",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "8c4bfbb62c9da2a285152c9f",
+              "name": "천○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5218",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "임상병리과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "416b244c63109d0536e1b5ea",
+              "name": "이○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5341",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "c870dedf38fab8f46833fe91",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5343",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "9079aa871f60e7a9ec55e814",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5342",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "3ccd5411e0faa5548b815e8d",
+              "name": "조○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5344",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "046ba6b8cac1cd828c67f7ba",
+              "name": "이○○",
+              "title": "",
+              "duty": "초빙",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5345",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "작업치료과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "da6700bdc4ace076bcdfbe77",
+              "name": "김○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5346",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "7991753558723a5df979c5eb",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5347",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "769a177e820927a4c26bbfbc",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5358",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "0601e3218d2a41d726877a0f",
+              "name": "최○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5349",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "스마트팜식품융합과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "1d30fc13c1beb722d8fa63d4",
+              "name": "이○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5215",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "4c05cfb25b47921c65ae1ead",
+              "name": "이○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5380",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "81b27d5969c716e61c251294",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5283",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "치기공과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "114a43cd03ddb229fd6f6f00",
+              "name": "권○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5285",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6fe3195f50cb504a4d2654ba",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5284",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "cc9bdc243eaf25e68deae95d",
+              "name": "신○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5307",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "e7a2af315c59eac1ff6c6c2e",
+              "name": "최○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5286",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자연과학계열",
+          "minor": "치위생과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "6b7ae4009962ec360d224bac",
+              "name": "김○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5327",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "20c86ab14dd511a594bb4c8b",
+              "name": "류○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5279",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "3441691ff9ef68c15eabf2ff",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5356",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "105d11910bef66618a053eab",
+              "name": "송○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5328",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "b53c3653c0d5c8ca9fd76149",
+              "name": "이○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5207",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5901cc05434967939d1d4bf0",
+              "name": "정○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5280",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "446c0a63fcb25a61e55afcd8",
+              "name": "최○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5207",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "공학계열",
+          "minor": "전기과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "0c4672a94aa98586fe1dddab",
+              "name": "박○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5256",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "8c0f4540228ac9f63c96d21b",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5236",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "610eb02c2f2a9b282ec5ede3",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5206",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "919bcbece529a442a45abaa8",
+              "name": "남○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5156",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6a7e60d60506973230e5d87c",
+              "name": "오○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5153",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "a374226d303729d76b1bf0d3",
+              "name": "홍○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5247",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "c2c1f40554e4ab8e5490460d",
+              "name": "정○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5246",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "41e58726f848f727c9a6816f",
+              "name": "신○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5245",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "공학계열",
+          "minor": "소방안전관리과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "b9a5ed3b5e949a89e36188e5",
+              "name": "박○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5157",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "ce16e986b0ecfffa1042bd8d",
+              "name": "지○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2406",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인문사회계열",
+          "minor": "유아교육과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "9f45f41b16e6fe70312022c9",
+              "name": "박○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5261",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "16e4647c6cba364a02bbb0a2",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5272",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "5c9aad7c80473b44ec0d60f2",
+              "name": "장○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5309",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "cea667f483c397642c0978e5",
+              "name": "장○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5213",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6be6cc2b0c3264c1e5cfbf93",
+              "name": "한○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5365",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인문사회계열",
+          "minor": "유통경영과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "edd07305b6bc75b3620f9523",
+              "name": "송○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5278",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6672cda15c001b082b37f996",
+              "name": "박○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5178",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인문사회계열",
+          "minor": "사회복지과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "4761a62f933f22c26ee5de1d",
+              "name": "최○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5311",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "bf04ff8568361152992430b6",
+              "name": "이○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5262",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "1ddf20dc2dea60139d7d4318",
+              "name": "장○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5306",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인문사회계열",
+          "minor": "호텔관광서비스과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "9bc2b687e8c0a8a7ba4be468",
+              "name": "이○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5212",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "01d0c6a4c6894add63e16d83",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5242",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "cd1b7e7c6767ce7c76e791ba",
+              "name": "백○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5205",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "인문사회계열",
+          "minor": "한국어과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "3366f27236fa5f87af3c03e8",
+              "name": "최○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5299",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "daa640e90395f72d6ef5d68c",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5209",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "예체능계열",
+          "minor": "파크골프지도과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "19072919b8dbb8fa14912354",
+              "name": "양○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5359",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "3063d3ac4c8f02ff6c1310fa",
+              "name": "김○○",
+              "title": "",
+              "duty": "조교",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2407",
+              "mobile": "",
+              "externalNumber": false
+            },
+            {
+              "personKey": "6764d97282ca1e604d6359e8",
+              "name": "실○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-2414",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "교양과",
+          "minor": "교양과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "96ca3adba0bd6cddde3e72d0",
+              "name": "김○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5273",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        },
+        {
+          "major": "자율전공",
+          "minor": "자율전공학과",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "15d4080258596c87c871a415",
+              "name": "양○○",
+              "title": "학과장",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5232",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "facility",
+      "label": "기타시설",
+      "organizations": [
+        {
+          "major": "기타시설",
+          "minor": "하나네트웍스",
+          "fax": "",
+          "people": [
+            {
+              "personKey": "8f7cb82c85bf0716533d453b",
+              "name": "박○○",
+              "title": "",
+              "duty": "",
+              "responsibilities": [],
+              "recordType": "PERSON",
+              "extension": "041-630-5117",
+              "mobile": "",
+              "externalNumber": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
