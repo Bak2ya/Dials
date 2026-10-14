@@ -980,7 +980,7 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
 .privacy-consent-card .privacy-consent-check { align-items: flex-start; font-weight: 600; }
 .privacy-consent-card input[type="checkbox"] { flex-shrink: 0; margin-top: 4px; }
 
-/* v0.11.0: 공개·상세 모드와 업무분장 정보 버튼 */
+/* v0.11.x: 공개·상세 모드와 업무분장 정보 버튼 */
 .responsibility-info { flex: 0 0 auto; margin-left: auto; border: 1px solid var(--border, #949494); border-radius: 50%; background: transparent; color: var(--muted, #777); font-size: 19px; line-height: 1; width: 34px; height: 34px; cursor: pointer; align-self: center; display: inline-grid; place-items: center; }
 .responsibility-info.matching { background: #3478F6; border-color: #3478F6; color: white; }
 .responsibility-matched { font-size: .86rem; color: #3478F6; margin-top: .3rem; }

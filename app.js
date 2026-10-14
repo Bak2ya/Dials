@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.11.0";
+const APP_VERSION = "0.11.1";
 const DIALS_SCHEMA_VERSION = "1.7";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "directoryMode", "contactExportEnabled", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -1174,7 +1174,7 @@ function browseFacilityRecordHtml(record, facilityName) {
   const { name, title, duty, recordType, showName, showTitle } = facilityRecordPresentation(record, facilityName);
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("연락처", record.extension, record.externalNumber));
-  // Mobile numbers are only available in the consent-gated contact flow.
+  if (visiblePersonalNumber(record)) lines.push(phoneLineHtml("개인번호", visiblePersonalNumber(record)));
   const identityHtml = showName || (showTitle && title)
     ? `<div class="facility-flat-person">${showName ? `<strong>${escapeHtml(name)}</strong>` : ""}${showTitle && title ? `<span>${escapeHtml(title)}</span>` : ""}</div>`
     : "";
@@ -1245,7 +1245,7 @@ function browseTreePersonRowHtml(record, level, directMajorPerson = false) {
   const primary = directMajorPerson && title && recordType !== "CONTACT" ? `${title} ${name}` : name;
   const lines = [];
   if (record?.extension) lines.push(phoneLineHtml("내선번호", record.extension, record.externalNumber));
-  // Mobile numbers are only available in the consent-gated contact flow.
+  if (visiblePersonalNumber(record)) lines.push(phoneLineHtml("개인번호", visiblePersonalNumber(record)));
   return `<article class="browse-tree-person" data-tree-level="${Number(level) || 0}">
     <div class="browse-tree-static">
       <span class="browse-tree-chevron-spacer" aria-hidden="true"></span>
@@ -1399,13 +1399,18 @@ function handleResponsibilityClick(event) {
   });
 }
 
+function visiblePersonalNumber(record) {
+  // 공개 전화번호부에서는 원본에 잘못된 개인번호가 섞여도 절대 렌더링하지 않는다.
+  return state.activeDirectoryMode === "detail" ? String(record?.mobile || "").trim() : "";
+}
+
 function personCardHtml(person) {
   const title = person.title || "";
   const duty = person.duty || "";
   const recordType = person.recordType || "PERSON";
   const lines = [];
   if (person.extension) lines.push(phoneLineHtml("내선번호", person.extension, person.externalNumber));
-  // Do not display personal numbers in directory cards.
+  if (visiblePersonalNumber(person)) lines.push(phoneLineHtml("개인번호", visiblePersonalNumber(person)));
   return `<article class="person-card">
     <div class="person-card-header"><span class="person-name">${escapeHtml(person.name || "이름 없음")}</span>${title ? `<span class="person-title">${escapeHtml(title)}</span>` : ""}${recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}${responsibilityInfoButton(person)}</div>
     ${duty ? `<div class="person-duty card-duty">담당 · ${escapeHtml(duty)}</div>` : ""}
@@ -1450,6 +1455,9 @@ function searchPersonCardHtml(person) {
       phones.push(`<a href="tel:${escapeAttr(telHref(a.extension))}">${label} ${escapeHtml(display)}</a>`);
     }
 
+    if (visiblePersonalNumber(a)) {
+      phones.push(`<a href="tel:${escapeAttr(telHref(a.mobile))}">개인번호 ${escapeHtml(a.mobile)}</a>`);
+    }
     if (a.fax) phones.push(`<a href="tel:${escapeAttr(telHref(a.fax))}">FAX ${escapeHtml(a.fax)}</a>`);
     return `<div class="affiliation-item">
       <div class="affiliation-title"><strong>${escapeHtml(orgPath || a.categoryLabel)}</strong>${a.title ? `<span>${escapeHtml(a.title)}</span>` : ""}${a.recordType === "CONTACT" ? `<span class="record-type-label">시설·업체</span>` : ""}</div>
