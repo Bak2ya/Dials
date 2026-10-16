@@ -1,1 +1,1 @@
-Dials v0.11.1 · Build 39
+Dials v0.12.0 · Build 40

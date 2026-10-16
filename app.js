@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.11.1";
+const APP_VERSION = "0.12.0";
 const DIALS_SCHEMA_VERSION = "1.7";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "directoryMode", "contactExportEnabled", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);
@@ -786,17 +786,19 @@ function validatePayload(payload) {
             record.responsibilities.some((line) => typeof line !== "string" || line.length > 500)) {
           throw new Error(`${recordPath}.responsibilities 값이 올바르지 않습니다.`);
         }
+        const publicFacility = payload.directoryMode === "public" && category.id === "facility";
         if (payload.directoryMode === "public") {
-          if (record.mobile || !/^[^\s○][○]{2}$/.test(record.name) || !record.extension || record.recordType !== "PERSON") {
-            throw new Error("공개 전화번호부에 허용되지 않은 인물 정보가 있습니다.");
-          }
+          const valid = publicFacility
+            ? (["PERSON", "CONTACT"].includes(record.recordType) && record.name.trim() && (record.extension || record.mobile))
+            : (record.mobile === "" && /^[^\s○][○]{2}$/.test(record.name) && !!record.extension && record.recordType === "PERSON");
+          if (!valid) throw new Error("공개 전화번호부에 허용되지 않은 인물 정보가 있습니다.");
         }
         if (record.recordType !== "PERSON" && record.recordType !== "CONTACT") {
           throw new Error(`${recordPath}.recordType 값은 PERSON 또는 CONTACT여야 합니다.`);
         }
         if (typeof record.externalNumber !== "boolean") throw new Error(`${recordPath}.externalNumber 값은 true/false여야 합니다.`);
         if (payload.contactExportEnabled && !record.extension.trim() && !record.mobile.trim()) throw new Error(`${recordPath}에는 extension 또는 mobile 중 하나가 필요합니다.`);
-        if (!payload.contactExportEnabled && record.mobile.trim()) {
+        if (!payload.contactExportEnabled && record.mobile.trim() && !(category.id === "facility")) {
           throw new Error(`${recordPath}에 배포 범위를 벗어난 전화번호가 있습니다.`);
         }
 
@@ -1400,8 +1402,10 @@ function handleResponsibilityClick(event) {
 }
 
 function visiblePersonalNumber(record) {
-  // 공개 전화번호부에서는 원본에 잘못된 개인번호가 섞여도 절대 렌더링하지 않는다.
-  return state.activeDirectoryMode === "detail" ? String(record?.mobile || "").trim() : "";
+  // Public exception is limited to validated facility-category records.
+  // All school numbers remain hidden even if a malformed payload slips through.
+  return (state.activeDirectoryMode === "detail" || (record?._categoryId === "facility" || record?.categoryId === "facility"))
+    ? String(record?.mobile || "").trim() : "";
 }
 
 function personCardHtml(person) {
