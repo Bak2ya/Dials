@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.7",
-  "dataVersion": "2026-10-16",
-  "generatedAt": "2026-10-16T17:55:28+09:00",
-  "period": "2026.10",
+  "dataVersion": "2026-10-30",
+  "generatedAt": "2026-10-30T17:54:56+09:00",
+  "period": "2026.11",
   "title": "혜전대학교 공개 전화번호부",
   "directoryMode": "public",
   "contactExportEnabled": false,
@@ -17,7 +17,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0fd7c17590ffae15b557ed0b",
+              "personKey": "aa492035f1849578fadf6176",
               "name": "윤○○",
               "title": "계장",
               "duty": "",
@@ -35,7 +35,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "41076c450fdecaf635a9b80b",
+              "personKey": "c554b766f87e5054d0d01d15",
               "name": "정○○",
               "title": "처장",
               "duty": "",
@@ -53,7 +53,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "82941e73f90be558f54ccb73",
+              "personKey": "428ecf60a30627f4aff2ccee",
               "name": "최○○",
               "title": "팀장",
               "duty": "",
@@ -67,7 +67,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "96fb9578af516be9ef90a7de",
+              "personKey": "93b48ddb456ad40d2801ffad",
               "name": "김○○",
               "title": "계장",
               "duty": "통신",
@@ -86,7 +86,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c7467052b02dc19881ef18fc",
+              "personKey": "c5982ee95413ac163588e486",
               "name": "김○○",
               "title": "",
               "duty": "총무",
@@ -102,7 +102,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3b4801259d48549893963836",
+              "personKey": "8ec3983faaa5a3df735c9a63",
               "name": "김○○",
               "title": "",
               "duty": "건축",
@@ -118,7 +118,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3fe33d209f27ad70c6a406fa",
+              "personKey": "c4a26b66c0c52f6934ddf2f4",
               "name": "이○○",
               "title": "",
               "duty": "급여",
@@ -135,7 +135,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "75642ba2c73a1c61c5400a39",
+              "personKey": "6a79de0a3c695419f57c7592",
               "name": "이○○",
               "title": "",
               "duty": "버스",
@@ -148,7 +148,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "df80d6280ae5f7834284661a",
+              "personKey": "917531d933256b83a1a4cfc4",
               "name": "이○○",
               "title": "",
               "duty": "영선",
@@ -159,7 +159,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f495d8ad8568c759d1aab396",
+              "personKey": "de50ba0097dd34cbde476e83",
               "name": "전○○",
               "title": "",
               "duty": "영선",
@@ -170,7 +170,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ec306d4c967940130914b67f",
+              "personKey": "213b5ee10766ec547ec345c5",
               "name": "박○○",
               "title": "",
               "duty": "방사선",
@@ -189,7 +189,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e795e22b30ed7b1a44df7097",
+              "personKey": "6a6c6f815ff1baf554778a31",
               "name": "영○○",
               "title": "",
               "duty": "",
@@ -207,7 +207,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "053cce44d87c29f9b5dd6d7f",
+              "personKey": "db455d1c8250913264409e81",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -223,7 +223,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9ef4f7d411ec3dc6375b2dc8",
+              "personKey": "4f020be8b2fde9d669c5b517",
               "name": "최○○",
               "title": "",
               "duty": "지출",
@@ -241,7 +241,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "80e021a6e5af82d44e3d97c4",
+              "personKey": "328d8da384c5c08beb8c4fde",
               "name": "이○○",
               "title": "",
               "duty": "수입",
@@ -267,7 +267,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "28fef8ea22487bec36edfd41",
+              "personKey": "04e09819d943fd016dd98d40",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -278,7 +278,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d60a2d2496b0ff15e1e816f2",
+              "personKey": "ee9241bdb4d4784e4f3a00d7",
               "name": "진○○",
               "title": "",
               "duty": "",
@@ -296,7 +296,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "c5880b5cbeca10305bed1a92",
+              "personKey": "7eca217d622cab850bd62627",
               "name": "남○○",
               "title": "처장",
               "duty": "",
@@ -314,7 +314,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "ea8aa5929811b416fd15f7eb",
+              "personKey": "62ada3b24c8199ecf4dd090a",
               "name": "정○○",
               "title": "팀장",
               "duty": "",
@@ -329,7 +329,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e28f5d16fb2ec9b8917b3161",
+              "personKey": "fcd0fb664a92b878acb3ab76",
               "name": "양○○",
               "title": "",
               "duty": "예산",
@@ -344,7 +344,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "840c053235ac50de8176eff3",
+              "personKey": "93ff9d6157e70cbc1264c18a",
               "name": "이○○",
               "title": "",
               "duty": "평가",
@@ -359,7 +359,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b78fb7dd913c29b2c35f70f0",
+              "personKey": "cec18f522264bb9dfe3e3f76",
               "name": "설○○",
               "title": "",
               "duty": "기획",
@@ -381,7 +381,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "ea8aa5929811b416fd15f7eb",
+              "personKey": "62ada3b24c8199ecf4dd090a",
               "name": "정○○",
               "title": "팀장",
               "duty": "",
@@ -392,7 +392,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "840c053235ac50de8176eff3",
+              "personKey": "93ff9d6157e70cbc1264c18a",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -410,7 +410,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "299b818722ea55698f86c3ec",
+              "personKey": "88660402d0486e89705cc231",
               "name": "오○○",
               "title": "처장",
               "duty": "",
@@ -428,7 +428,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -444,7 +444,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5cfc2497768faa64ec3e3ce6",
+              "personKey": "b555ad6c2f5aab5ece13766a",
               "name": "이○○",
               "title": "",
               "duty": "학적",
@@ -463,7 +463,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c77c9e162f83c8b1dbc91fac",
+              "personKey": "f662301075a621898122509e",
               "name": "한○○",
               "title": "",
               "duty": "인사",
@@ -481,7 +481,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "625938ebc31889e355d00168",
+              "personKey": "47e1e96b1b11f11ccba7c703",
               "name": "곽○○",
               "title": "",
               "duty": "수업",
@@ -501,7 +501,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "26e3f5a39ffad5cea5f021e2",
+              "personKey": "9bf590b161a9a42fa137f2d2",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -519,7 +519,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "21ea0f1c9b67da403f3e18e2",
+              "personKey": "b36d84dba434407fa4f1186a",
               "name": "이○○",
               "title": "",
               "duty": "조교",
@@ -540,7 +540,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "fa7dbd9f5dfda15ef1cf5bc4",
+              "personKey": "2c47c5a642b0e8b95e449d6b",
               "name": "권○○",
               "title": "센터장",
               "duty": "",
@@ -551,7 +551,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "12c6981edf0bdeb2869e2ff2",
+              "personKey": "f5cc97d3e829496884d13ae6",
               "name": "최○○",
               "title": "팀장",
               "duty": "",
@@ -562,7 +562,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b0b565c2b4f954c48a94fbe0",
+              "personKey": "182cefbc13c8b8ef9897bfc9",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -584,7 +584,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "12c6981edf0bdeb2869e2ff2",
+              "personKey": "f5cc97d3e829496884d13ae6",
               "name": "최○○",
               "title": "팀장",
               "duty": "",
@@ -604,7 +604,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -615,7 +615,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5cfc2497768faa64ec3e3ce6",
+              "personKey": "b555ad6c2f5aab5ece13766a",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -633,18 +633,18 @@
           "fax": "",
           "people": [
             {
-              "personKey": "12c6981edf0bdeb2869e2ff2",
-              "name": "최○○",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
+              "name": "김○○",
               "title": "팀장",
               "duty": "",
               "responsibilities": [],
               "recordType": "PERSON",
-              "extension": "041-630-2437",
+              "extension": "041-630-5121",
               "mobile": "",
               "externalNumber": false
             },
             {
-              "personKey": "21ea0f1c9b67da403f3e18e2",
+              "personKey": "b36d84dba434407fa4f1186a",
               "name": "이○○",
               "title": "",
               "duty": "조교",
@@ -662,7 +662,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f023852697de05ba27b2790e",
+              "personKey": "3d6fd9f157bfb03d1a9de330",
               "name": "김○○",
               "title": "책임교수",
               "duty": "",
@@ -673,7 +673,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -684,7 +684,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "26e3f5a39ffad5cea5f021e2",
+              "personKey": "9bf590b161a9a42fa137f2d2",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -702,7 +702,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "12c6981edf0bdeb2869e2ff2",
+              "personKey": "f5cc97d3e829496884d13ae6",
               "name": "최○○",
               "title": "팀장",
               "duty": "",
@@ -720,7 +720,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -738,7 +738,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -756,7 +756,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "3f04701bc3ac9441a68b9a22",
+              "personKey": "d693f2e8c61cd1ee9d2b79e7",
               "name": "한○○",
               "title": "처장",
               "duty": "",
@@ -774,7 +774,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "e37cb01fe26df44837dbcdae",
+              "personKey": "1d392f0302f6f30a2b3fa822",
               "name": "맹○○",
               "title": "팀장",
               "duty": "",
@@ -790,7 +790,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "fda27e32d834985b331d2b1b",
+              "personKey": "01f244677c958b1380d0cee5",
               "name": "이○○",
               "title": "계장",
               "duty": "입시",
@@ -808,7 +808,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4cc9766a593f710b636a20c7",
+              "personKey": "a0d5b8e1e671606a19b3ab08",
               "name": "최○○",
               "title": "",
               "duty": "입시",
@@ -826,7 +826,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "cad77c3ef6ad26c404b3aaf8",
+              "personKey": "8102c1a29064be59462e22a8",
               "name": "김○○",
               "title": "",
               "duty": "조교",
@@ -851,7 +851,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0d7732046f60bef327297f3a",
+              "personKey": "8f700cef79189557d4426280",
               "name": "전○○",
               "title": "처장",
               "duty": "",
@@ -869,7 +869,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -885,7 +885,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a62d703d30c6833a56f753dc",
+              "personKey": "0cfaa6382c790e124c4b37ee",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -902,7 +902,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a32219545890efebf8bfb7a4",
+              "personKey": "64fac57f8d0de336123409a6",
               "name": "최○○",
               "title": "",
               "duty": "상담사",
@@ -917,7 +917,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b186a7a780ea15375ae111b9",
+              "personKey": "4e52bdc05cd4b8b4fe4163f0",
               "name": "김○○",
               "title": "",
               "duty": "보건실",
@@ -929,17 +929,6 @@
               "extension": "041-630-5281",
               "mobile": "",
               "externalNumber": false
-            },
-            {
-              "personKey": "f47191d64625d2485a9e4fbb",
-              "name": "김○○",
-              "title": "",
-              "duty": "조교",
-              "responsibilities": [],
-              "recordType": "PERSON",
-              "extension": "041-630-5134",
-              "mobile": "",
-              "externalNumber": false
             }
           ]
         },
@@ -949,7 +938,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "국가장학,대출",
@@ -963,7 +952,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3ffa40da4affa5517e769ddd",
+              "personKey": "92dada815f59081cd8350c5b",
               "name": "임○○",
               "title": "",
               "duty": "교내외장학",
@@ -979,7 +968,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a62d703d30c6833a56f753dc",
+              "personKey": "0cfaa6382c790e124c4b37ee",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -1000,7 +989,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0d7732046f60bef327297f3a",
+              "personKey": "8f700cef79189557d4426280",
               "name": "전○○",
               "title": "관장",
               "duty": "",
@@ -1011,7 +1000,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -1029,7 +1018,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "fd11c8b75f3fff476342709e",
+              "personKey": "6c8d02c002fd9ef1cd609986",
               "name": "김○○",
               "title": "",
               "duty": "주간",
@@ -1040,7 +1029,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d5f1b212988f581c869cb75a",
+              "personKey": "2434ef20c02437660c308194",
               "name": "강○○",
               "title": "",
               "duty": "야간",
@@ -1058,7 +1047,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "636eb13893b490774d095ebe",
+              "personKey": "a46e4ec234c0fccff33a76f1",
               "name": "김○○",
               "title": "",
               "duty": "야간",
@@ -1076,7 +1065,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "93914850e6693d4e3da14175",
+              "personKey": "b8f6fb68b54a2205b4a43e8c",
               "name": "임○○",
               "title": "센터장",
               "duty": "",
@@ -1087,7 +1076,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -1098,7 +1087,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b186a7a780ea15375ae111b9",
+              "personKey": "4e52bdc05cd4b8b4fe4163f0",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -1116,7 +1105,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f14324b44bda3f0d5667f792",
+              "personKey": "d34954a03291f3a1fd7e5791",
               "name": "이○○",
               "title": "처장",
               "duty": "",
@@ -1134,7 +1123,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "28fef8ea22487bec36edfd41",
+              "personKey": "04e09819d943fd016dd98d40",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -1155,7 +1144,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d60a2d2496b0ff15e1e816f2",
+              "personKey": "ee9241bdb4d4784e4f3a00d7",
               "name": "진○○",
               "title": "",
               "duty": "",
@@ -1178,7 +1167,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "731126c2af2bc26cd9ec4d18",
+              "personKey": "109b8bbb8f6c36615b0688a6",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -1196,7 +1185,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f14324b44bda3f0d5667f792",
+              "personKey": "d34954a03291f3a1fd7e5791",
               "name": "이○○",
               "title": "원장",
               "duty": "",
@@ -1207,7 +1196,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e37cb01fe26df44837dbcdae",
+              "personKey": "1d392f0302f6f30a2b3fa822",
               "name": "맹○○",
               "title": "부원장",
               "duty": "",
@@ -1222,7 +1211,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6c0f45486dbf223a7fb009ce",
+              "personKey": "fad7fb7cc6f3965ce284f6f2",
               "name": "황○○",
               "title": "계장",
               "duty": "",
@@ -1238,7 +1227,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1e14b75e16eabe11f74bc9f3",
+              "personKey": "1cf1edc4a1a56a7eb52e1946",
               "name": "진○○",
               "title": "",
               "duty": "",
@@ -1253,7 +1242,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9f6db31b3e9680f194f85378",
+              "personKey": "b1d98942f647b697c9055a84",
               "name": "벌○○",
               "title": "",
               "duty": "",
@@ -1268,7 +1257,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "cc5c2e9a8865ae61023b6a45",
+              "personKey": "b7dcc7d802b7332821ab8f18",
               "name": "한○○",
               "title": "",
               "duty": "",
@@ -1290,7 +1279,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "862bf3d6e079cc194d474fa9",
+              "personKey": "5d854175942085a937a275a4",
               "name": "백○○",
               "title": "센터장",
               "duty": "",
@@ -1301,7 +1290,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1e14b75e16eabe11f74bc9f3",
+              "personKey": "1cf1edc4a1a56a7eb52e1946",
               "name": "진○○",
               "title": "",
               "duty": "",
@@ -1312,7 +1301,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9f6db31b3e9680f194f85378",
+              "personKey": "b1d98942f647b697c9055a84",
               "name": "벌○○",
               "title": "",
               "duty": "",
@@ -1330,7 +1319,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "18bcd073cf2b325ec47ee41e",
+              "personKey": "7e63adb1e6b844ec19c6be9a",
               "name": "류○○",
               "title": "센터장",
               "duty": "",
@@ -1348,7 +1337,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "835f99a578fd9f586294dd37",
+              "personKey": "232db5c8a63980df3091faac",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -1367,7 +1356,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "cf911411da634926584bd464",
+              "personKey": "b669ba9773c18b60698e2caf",
               "name": "이○○",
               "title": "",
               "duty": "취업",
@@ -1393,7 +1382,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "835f99a578fd9f586294dd37",
+              "personKey": "232db5c8a63980df3091faac",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -1412,7 +1401,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "752be5707016b100920ed3b6",
+              "personKey": "06295aebd4e4c0060241ec5e",
               "name": "전○○",
               "title": "계장",
               "duty": "",
@@ -1438,7 +1427,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "18bcd073cf2b325ec47ee41e",
+              "personKey": "7e63adb1e6b844ec19c6be9a",
               "name": "류○○",
               "title": "단장",
               "duty": "",
@@ -1456,7 +1445,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "b8a4c4bad5f51e229db527f8",
+              "personKey": "8a272a8322c370daabbc8b8a",
               "name": "고○○",
               "title": "팀장",
               "duty": "",
@@ -1473,7 +1462,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "468555c60f9dbdc317f4a491",
+              "personKey": "10de8e974f977293013eb9f7",
               "name": "김○○",
               "title": "계장",
               "duty": "",
@@ -1491,7 +1480,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b8e8f3c8cd5c6b031d88aa14",
+              "personKey": "5945a1a1cb1957245bf2c261",
               "name": "한○○",
               "title": "",
               "duty": "혁신사업",
@@ -1509,7 +1498,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "1a263c3e02fbb4e3eea4949b",
+              "personKey": "8d09438421aa845b19b23dc8",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -1527,7 +1516,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "fcd6861d0165c228330a62a8",
+              "personKey": "3fbc4ccbaadc30c8fd1c877c",
               "name": "윤○○",
               "title": "",
               "duty": "",
@@ -1545,7 +1534,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f023852697de05ba27b2790e",
+              "personKey": "3d6fd9f157bfb03d1a9de330",
               "name": "김○○",
               "title": "센터장",
               "duty": "",
@@ -1556,13 +1545,13 @@
               "externalNumber": false
             },
             {
-              "personKey": "12c6981edf0bdeb2869e2ff2",
-              "name": "최○○",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
+              "name": "김○○",
               "title": "팀장",
               "duty": "",
               "responsibilities": [],
               "recordType": "PERSON",
-              "extension": "041-630-2437",
+              "extension": "041-630-5121",
               "mobile": "",
               "externalNumber": false
             }
@@ -1574,7 +1563,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "a60f830ab9d2751e91c706f3",
+              "personKey": "759793e5062197686169a36e",
               "name": "송○○",
               "title": "단장",
               "duty": "",
@@ -1592,7 +1581,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "b8a4c4bad5f51e229db527f8",
+              "personKey": "8a272a8322c370daabbc8b8a",
               "name": "고○○",
               "title": "팀장",
               "duty": "",
@@ -1603,7 +1592,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "468555c60f9dbdc317f4a491",
+              "personKey": "10de8e974f977293013eb9f7",
               "name": "김○○",
               "title": "계장",
               "duty": "",
@@ -1614,7 +1603,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ea3700aeba1ff48f5e66798d",
+              "personKey": "e18f415d735f18e6c68f6b88",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1634,7 +1623,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "c5880b5cbeca10305bed1a92",
+              "personKey": "7eca217d622cab850bd62627",
               "name": "남○○",
               "title": "단장",
               "duty": "",
@@ -1652,7 +1641,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "6778a8530d75a38c65c2768c",
+              "personKey": "ddeba0792cc791e93c47b7fc",
               "name": "조○○",
               "title": "부단장",
               "duty": "",
@@ -1663,7 +1652,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "862bf3d6e079cc194d474fa9",
+              "personKey": "5d854175942085a937a275a4",
               "name": "백○○",
               "title": "부단장",
               "duty": "",
@@ -1674,7 +1663,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f2968cca078f88984ac1b3b2",
+              "personKey": "4967e8ec6ce21da60420e8d0",
               "name": "김○○",
               "title": "부단장",
               "duty": "",
@@ -1685,7 +1674,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ea8aa5929811b416fd15f7eb",
+              "personKey": "62ada3b24c8199ecf4dd090a",
               "name": "정○○",
               "title": "팀장",
               "duty": "",
@@ -1696,7 +1685,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e28f5d16fb2ec9b8917b3161",
+              "personKey": "fcd0fb664a92b878acb3ab76",
               "name": "양○○",
               "title": "",
               "duty": "",
@@ -1707,7 +1696,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "840c053235ac50de8176eff3",
+              "personKey": "93ff9d6157e70cbc1264c18a",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1718,7 +1707,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b78fb7dd913c29b2c35f70f0",
+              "personKey": "cec18f522264bb9dfe3e3f76",
               "name": "설○○",
               "title": "",
               "duty": "",
@@ -1736,7 +1725,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "18bcd073cf2b325ec47ee41e",
+              "personKey": "7e63adb1e6b844ec19c6be9a",
               "name": "류○○",
               "title": "단장",
               "duty": "",
@@ -1757,7 +1746,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f14324b44bda3f0d5667f792",
+              "personKey": "d34954a03291f3a1fd7e5791",
               "name": "이○○",
               "title": "부단장",
               "duty": "",
@@ -1771,7 +1760,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b8a4c4bad5f51e229db527f8",
+              "personKey": "8a272a8322c370daabbc8b8a",
               "name": "고○○",
               "title": "팀장",
               "duty": "",
@@ -1782,7 +1771,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "468555c60f9dbdc317f4a491",
+              "personKey": "10de8e974f977293013eb9f7",
               "name": "김○○",
               "title": "계장",
               "duty": "",
@@ -1793,7 +1782,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "dcc4d464fa4792c0e680a4be",
+              "personKey": "3ce0d9c2bc45c11f55de3817",
               "name": "하○○",
               "title": "",
               "duty": "",
@@ -1804,7 +1793,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "490d66c86fbbf174fc9d49b9",
+              "personKey": "c096871b1e5fc2772f4f0c94",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -1815,7 +1804,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "0d96bf6a369bfe35fc493fc4",
+              "personKey": "acbd5f67b10e0f52db0af68c",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1833,7 +1822,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "a60f830ab9d2751e91c706f3",
+              "personKey": "759793e5062197686169a36e",
               "name": "송○○",
               "title": "부단장",
               "duty": "",
@@ -1846,7 +1835,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3f04701bc3ac9441a68b9a22",
+              "personKey": "d693f2e8c61cd1ee9d2b79e7",
               "name": "한○○",
               "title": "부단장",
               "duty": "",
@@ -1859,7 +1848,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "dcc4d464fa4792c0e680a4be",
+              "personKey": "3ce0d9c2bc45c11f55de3817",
               "name": "하○○",
               "title": "",
               "duty": "",
@@ -1870,7 +1859,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ea3700aeba1ff48f5e66798d",
+              "personKey": "e18f415d735f18e6c68f6b88",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1881,7 +1870,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4f42c38b38b0add9392f8bc1",
+              "personKey": "5d2b27e8deaff1f10baecd3b",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1892,7 +1881,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f07290ac06b6aba1cfe130ab",
+              "personKey": "cf5f25a46354418c68582b28",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -1903,7 +1892,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1f5dfbdeb86a29d435357622",
+              "personKey": "b505640465ab027eecd094a0",
               "name": "손○○",
               "title": "",
               "duty": "",
@@ -1921,7 +1910,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "ee4cff5d5ea6d7a8a66f7294",
+              "personKey": "425f4255e34b32dbd486510d",
               "name": "이○○",
               "title": "부단장",
               "duty": "",
@@ -1934,7 +1923,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "490d66c86fbbf174fc9d49b9",
+              "personKey": "c096871b1e5fc2772f4f0c94",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -1945,7 +1934,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4c5c1c24ff01bcb5e37fc277",
+              "personKey": "917c40b3fb47d18e7a5515e0",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1956,7 +1945,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "2f7f1fd4dbb492b026e2ff66",
+              "personKey": "814399d4ed805c7f722d5ed5",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -1967,7 +1956,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a46dd08e32031b817b47d219",
+              "personKey": "078a0a391cba2c8c66cd42b4",
               "name": "정○○",
               "title": "",
               "duty": "",
@@ -1985,7 +1974,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0620e23c3e17e77329895cc9",
+              "personKey": "7732eab19abcf229affc5a2a",
               "name": "양○○",
               "title": "부단장",
               "duty": "",
@@ -1999,7 +1988,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ae506eef870a2a86111c2a93",
+              "personKey": "6436817dfbe38d6565a631c3",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2010,7 +1999,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "8ea346dc66090f348864af3c",
+              "personKey": "d6504b8c4758ec2d19211f9c",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -2028,7 +2017,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "299b818722ea55698f86c3ec",
+              "personKey": "88660402d0486e89705cc231",
               "name": "오○○",
               "title": "센터장",
               "duty": "",
@@ -2049,7 +2038,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "52b0087a92a0364cd868f750",
+              "personKey": "78e91ea991e6f4af5cbcc7b0",
               "name": "김○○",
               "title": "팀장",
               "duty": "",
@@ -2063,7 +2052,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "26e3f5a39ffad5cea5f021e2",
+              "personKey": "9bf590b161a9a42fa137f2d2",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -2077,7 +2066,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e2912475ea4bc3427ba24ea3",
+              "personKey": "c1f1660a9fd1bd29897c96ff",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -2097,7 +2086,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f14324b44bda3f0d5667f792",
+              "personKey": "d34954a03291f3a1fd7e5791",
               "name": "이○○",
               "title": "단장",
               "duty": "",
@@ -2115,7 +2104,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0620e23c3e17e77329895cc9",
+              "personKey": "7732eab19abcf229affc5a2a",
               "name": "양○○",
               "title": "원장",
               "duty": "",
@@ -2133,7 +2122,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "66c14a8267a317c5de3412c7",
+              "personKey": "dbf8f425b653ef45825edddf",
               "name": "권○○",
               "title": "팀장",
               "duty": "",
@@ -2147,7 +2136,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e81af5aa8e7bafd006ccac83",
+              "personKey": "53c0759d338b0a8c8b15b95e",
               "name": "양○○",
               "title": "",
               "duty": "",
@@ -2161,7 +2150,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e1cf62dfa8a9b480fbff5f9f",
+              "personKey": "fd80397f6ebc061874706609",
               "name": "정○○",
               "title": "",
               "duty": "조교",
@@ -2183,7 +2172,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "fcba336d1fc81fafad877a59",
+              "personKey": "5592f75e536d51a61faf3166",
               "name": "조○○",
               "title": "팀장",
               "duty": "",
@@ -2200,7 +2189,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6c0f45486dbf223a7fb009ce",
+              "personKey": "fad7fb7cc6f3965ce284f6f2",
               "name": "황○○",
               "title": "계장",
               "duty": "",
@@ -2211,7 +2200,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "25347c2155f4228c4b5a4567",
+              "personKey": "cb1df439edf9b7dfe6c1629b",
               "name": "오○○",
               "title": "",
               "duty": "조교",
@@ -2229,7 +2218,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9127da38778dd4636eb5e30a",
+              "personKey": "9c2858e87b37da53b12616f3",
               "name": "윤○○",
               "title": "",
               "duty": "Maker Space조교",
@@ -2250,7 +2239,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0620e23c3e17e77329895cc9",
+              "personKey": "7732eab19abcf229affc5a2a",
               "name": "양○○",
               "title": "원장",
               "duty": "",
@@ -2261,7 +2250,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e28f5d16fb2ec9b8917b3161",
+              "personKey": "fcd0fb664a92b878acb3ab76",
               "name": "양○○",
               "title": "",
               "duty": "",
@@ -2272,7 +2261,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9127da38778dd4636eb5e30a",
+              "personKey": "9c2858e87b37da53b12616f3",
               "name": "윤○○",
               "title": "",
               "duty": "조교",
@@ -2290,7 +2279,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0620e23c3e17e77329895cc9",
+              "personKey": "7732eab19abcf229affc5a2a",
               "name": "양○○",
               "title": "국장",
               "duty": "",
@@ -2301,7 +2290,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b0b565c2b4f954c48a94fbe0",
+              "personKey": "182cefbc13c8b8ef9897bfc9",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2319,7 +2308,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0d7732046f60bef327297f3a",
+              "personKey": "8f700cef79189557d4426280",
               "name": "전○○",
               "title": "센터장",
               "duty": "",
@@ -2330,7 +2319,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -2344,7 +2333,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a32219545890efebf8bfb7a4",
+              "personKey": "64fac57f8d0de336123409a6",
               "name": "최○○",
               "title": "",
               "duty": "상담사",
@@ -2366,7 +2355,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "93914850e6693d4e3da14175",
+              "personKey": "b8f6fb68b54a2205b4a43e8c",
               "name": "임○○",
               "title": "본부장",
               "duty": "",
@@ -2377,7 +2366,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4ad8816a458baf2868c04f44",
+              "personKey": "83f1043dac0bf4db8cc1ef14",
               "name": "임○○",
               "title": "팀장",
               "duty": "",
@@ -2401,7 +2390,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "2f64fb71e2546574120af7d3",
+              "personKey": "669007ce91e13d537b4076d6",
               "name": "조○○",
               "title": "학과장",
               "duty": "",
@@ -2412,7 +2401,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ee4cff5d5ea6d7a8a66f7294",
+              "personKey": "425f4255e34b32dbd486510d",
               "name": "이○○",
               "title": "교무학과장",
               "duty": "",
@@ -2423,7 +2412,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ec4e06430310f5f3b5af22da",
+              "personKey": "6965041382a542a9b5a3f1d3",
               "name": "김○○",
               "title": "실습학과장",
               "duty": "",
@@ -2434,7 +2423,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5c61b752f51ec39b85e3aaf0",
+              "personKey": "f727994cf198c5a09a6bff73",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2445,7 +2434,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f023852697de05ba27b2790e",
+              "personKey": "3d6fd9f157bfb03d1a9de330",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2456,7 +2445,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "332f1ae19c47fccc949a368a",
+              "personKey": "73eb07f9060e0e9cd37f3a99",
               "name": "두○○",
               "title": "",
               "duty": "",
@@ -2467,7 +2456,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6bcde09f4e0c0496258c7996",
+              "personKey": "3bcd6af5f10cdf6346d0290c",
               "name": "문○○",
               "title": "",
               "duty": "",
@@ -2478,7 +2467,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "58ce1632d95e2383e5c0d021",
+              "personKey": "1b9eee6ae960255ec8ddabb8",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -2489,7 +2478,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "75cc4621442ac9a9137049ea",
+              "personKey": "08d5477c4215491c44415f1a",
               "name": "배○○",
               "title": "",
               "duty": "",
@@ -2500,7 +2489,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e8b2cf47ba11d56d71ab3af8",
+              "personKey": "ac7fd8e75762399e380a9dc3",
               "name": "신○○",
               "title": "",
               "duty": "",
@@ -2511,7 +2500,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "0da2e35f27beb9df237bcb78",
+              "personKey": "fd1a0d682cb114de494b524e",
               "name": "안○○",
               "title": "",
               "duty": "",
@@ -2522,7 +2511,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "aef4179811b3f74997afdf2a",
+              "personKey": "3ef10358c4f822992f6772d2",
               "name": "유○○",
               "title": "",
               "duty": "",
@@ -2533,7 +2522,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f196b0d774c4027f4274717a",
+              "personKey": "5a3c73d562d5d058a3ae4ec9",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -2544,7 +2533,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "93914850e6693d4e3da14175",
+              "personKey": "b8f6fb68b54a2205b4a43e8c",
               "name": "임○○",
               "title": "",
               "duty": "",
@@ -2555,7 +2544,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "683e6ad57772c9fd2df3948e",
+              "personKey": "7adfac74eb480f1c61038a53",
               "name": "임○○",
               "title": "",
               "duty": "",
@@ -2566,7 +2555,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5232df6264939ca56744c5dd",
+              "personKey": "5df8d4b8d713d111838320cd",
               "name": "장○○",
               "title": "",
               "duty": "",
@@ -2577,7 +2566,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "41076c450fdecaf635a9b80b",
+              "personKey": "c554b766f87e5054d0d01d15",
               "name": "정○○",
               "title": "",
               "duty": "",
@@ -2588,7 +2577,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "186bfbc5bd4256dae7a640aa",
+              "personKey": "a24643d4d3edeb65cf860459",
               "name": "조○○",
               "title": "",
               "duty": "",
@@ -2599,7 +2588,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6778a8530d75a38c65c2768c",
+              "personKey": "ddeba0792cc791e93c47b7fc",
               "name": "조○○",
               "title": "",
               "duty": "",
@@ -2610,7 +2599,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "725f3eced23fe576b973b228",
+              "personKey": "7b8111a2946f988ff4789500",
               "name": "지○○",
               "title": "",
               "duty": "",
@@ -2621,7 +2610,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3f04701bc3ac9441a68b9a22",
+              "personKey": "d693f2e8c61cd1ee9d2b79e7",
               "name": "한○○",
               "title": "",
               "duty": "",
@@ -2632,7 +2621,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "dcec6662a7b8f1a1659a6073",
+              "personKey": "34bc6056a2e11a2b58843211",
               "name": "김○○",
               "title": "",
               "duty": "초빙",
@@ -2643,7 +2632,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "051e45a1c4a60228b17437ea",
+              "personKey": "4a87007ee2fd528d33101df8",
               "name": "박○○",
               "title": "",
               "duty": "초빙",
@@ -2654,7 +2643,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5b843ccc118f0301286902a1",
+              "personKey": "6f0237889b010f7d6381da6b",
               "name": "장○○",
               "title": "",
               "duty": "초빙",
@@ -2665,7 +2654,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "15b56c01e999280155b3e710",
+              "personKey": "ad65a97782e337cbf7cfba2a",
               "name": "정○○",
               "title": "",
               "duty": "초빙",
@@ -2676,7 +2665,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "cf6be177f65452bf59f8fda4",
+              "personKey": "24199165350b6eaa2f64279b",
               "name": "박○○",
               "title": "",
               "duty": "초빙",
@@ -2687,7 +2676,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c0a5ed3f3495999591b5ab85",
+              "personKey": "f6269d16c7d5056cc8ebfba6",
               "name": "박○○",
               "title": "",
               "duty": "초빙",
@@ -2698,7 +2687,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "7f5c70df7aac421bd29950c4",
+              "personKey": "ae3cdb3f5b1dbcfa4b258d47",
               "name": "백○○",
               "title": "",
               "duty": "초빙",
@@ -2709,7 +2698,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9b3faae5528eed3bd287f35c",
+              "personKey": "ace3e0ca9878d61d7cdb8cfd",
               "name": "안○○",
               "title": "",
               "duty": "초빙",
@@ -2720,7 +2709,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "fbe831eaa47f240f74ef14a0",
+              "personKey": "71589a2115f787868c649f50",
               "name": "이○○",
               "title": "",
               "duty": "초빙",
@@ -2731,7 +2720,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9fada714522f944ffefc586e",
+              "personKey": "709b9bd80d13db1f81b5c8d2",
               "name": "정○○",
               "title": "",
               "duty": "초빙",
@@ -2742,7 +2731,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "432bd99f3e366fa82524cffc",
+              "personKey": "bf4d2fc4a9b8cb24415c0d87",
               "name": "이○○",
               "title": "",
               "duty": "행정",
@@ -2753,7 +2742,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "875f1203a9a379d807e00d3b",
+              "personKey": "c495826e9791d9b0ebd7a36e",
               "name": "이○○",
               "title": "",
               "duty": "행정",
@@ -2764,7 +2753,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4ea495eb776bb6a8b5097e9b",
+              "personKey": "83b4a55ec5bb8744f7c6f2e7",
               "name": "송○○",
               "title": "",
               "duty": "행정",
@@ -2775,7 +2764,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b186a7a780ea15375ae111b9",
+              "personKey": "4e52bdc05cd4b8b4fe4163f0",
               "name": "김○○",
               "title": "",
               "duty": "행정",
@@ -2786,7 +2775,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "aba85a43254325830c081b52",
+              "personKey": "09d19f9b772e05c75f0ec743",
               "name": "신○○",
               "title": "",
               "duty": "조교",
@@ -2797,7 +2786,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "8d982044de4e8b19b5772a76",
+              "personKey": "3c8bb88dd4923420dd4dd80d",
               "name": "최○○",
               "title": "",
               "duty": "조교",
@@ -2815,7 +2804,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "332f1ae19c47fccc949a368a",
+              "personKey": "73eb07f9060e0e9cd37f3a99",
               "name": "두○○",
               "title": "센터장",
               "duty": "",
@@ -2833,7 +2822,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "35c0ba9f453665d70547ea00",
+              "personKey": "691b6de159822bdbbab34c07",
               "name": "양○○",
               "title": "계열장",
               "duty": "",
@@ -2844,7 +2833,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4a2ec24d392aaec1179b3b85",
+              "personKey": "9780df9f3ffe6b8468cfeddb",
               "name": "최○○",
               "title": "서양식전공장",
               "duty": "",
@@ -2855,7 +2844,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "0d7732046f60bef327297f3a",
+              "personKey": "8f700cef79189557d4426280",
               "name": "전○○",
               "title": "일식전공장",
               "duty": "",
@@ -2866,7 +2855,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "06a2eefa4eb807066d266d51",
+              "personKey": "d2237d194cd86ff6374582de",
               "name": "이○○",
               "title": "중식전공장",
               "duty": "",
@@ -2877,7 +2866,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "35c0ba9f453665d70547ea00",
+              "personKey": "691b6de159822bdbbab34c07",
               "name": "양○○",
               "title": "한식전공장",
               "duty": "",
@@ -2888,7 +2877,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "aaf3f0e5dc69fd1802355061",
+              "personKey": "8ce5d8ebc6e156bd88c4d6d9",
               "name": "강○○",
               "title": "",
               "duty": "",
@@ -2899,7 +2888,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "2bf36e7d69ec76e94c1c450a",
+              "personKey": "c3c1a1775f0fbe35b38d2727",
               "name": "고○○",
               "title": "",
               "duty": "",
@@ -2910,7 +2899,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d171e81fae492e0d0922fc6a",
+              "personKey": "91641ae4031d49852e0e295d",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2921,7 +2910,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "690874027c8d7b8aa97662e9",
+              "personKey": "92a191dbe5d79825d2c10d68",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -2932,7 +2921,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "090f3bcc9b6b6e8ccab37f55",
+              "personKey": "4da0809e11059760fd5d116e",
               "name": "조○○",
               "title": "",
               "duty": "",
@@ -2943,7 +2932,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "69de0c4955ac27d2d7efa5fd",
+              "personKey": "c55dd83689d575f6a15f6089",
               "name": "권○○",
               "title": "",
               "duty": "한식조교",
@@ -2954,7 +2943,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "344b09db2a9b8c3413ac0e3f",
+              "personKey": "207900ac4fb91c55b6d59092",
               "name": "박○○",
               "title": "",
               "duty": "서양∙중식조교",
@@ -2965,7 +2954,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6d0402b89380f3762fbf94f4",
+              "personKey": "4804b4aeb8ed19901254fc00",
               "name": "전○○",
               "title": "",
               "duty": "일식조교",
@@ -2983,7 +2972,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "7d52ee9802cfc4ff3bf4ea46",
+              "personKey": "ffb331242e22c3d7d4e0dced",
               "name": "윤○○",
               "title": "학과장",
               "duty": "",
@@ -2994,7 +2983,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "45ef4159775559d723a04e66",
+              "personKey": "f50f8440b199e8b1cb7307e0",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3005,7 +2994,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f8721280022dfa6b0b057b56",
+              "personKey": "3c62cff10e43dd707f1e50ac",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3016,7 +3005,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "53d76a308e3473174f4843f9",
+              "personKey": "c1aaefa558c876c7249d8b14",
               "name": "김○○",
               "title": "",
               "duty": "베이커리카페과",
@@ -3027,7 +3016,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "bc7ef29550f94ad97201f458",
+              "personKey": "3da2b5361cdd7f696b59a191",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3038,7 +3027,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "2d4c6433b38273d42e82e0ce",
+              "personKey": "73de089d417888b538abbcb5",
               "name": "유○○",
               "title": "",
               "duty": "",
@@ -3049,7 +3038,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "b110b392fd13354586457400",
+              "personKey": "6b5f88df8df7f83f8df24402",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3060,7 +3049,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "aef37b617b1bf866f224be51",
+              "personKey": "ea78f64f6b5bb09f3aa5ad55",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3071,7 +3060,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "60a0639d974de2d3dde70c4e",
+              "personKey": "238ad60b94841a1191c3d8be",
               "name": "정○○",
               "title": "",
               "duty": "",
@@ -3082,7 +3071,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c496c16f8c012cb134291b3f",
+              "personKey": "c4a54ab17a86eab7a3965da2",
               "name": "한○○",
               "title": "",
               "duty": "",
@@ -3093,7 +3082,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "47ac6cf16bdd48aaeac915da",
+              "personKey": "f5f595f9014bcff09e6b05ff",
               "name": "김○○",
               "title": "",
               "duty": "초빙",
@@ -3104,7 +3093,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1d4a73bd9cfeef99fc8e04ab",
+              "personKey": "2de0d3357a61ade9461cdd6f",
               "name": "김○○",
               "title": "",
               "duty": "초빙",
@@ -3115,7 +3104,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c346c13693348fd794f62320",
+              "personKey": "019488f7c3008fad2bfdfe1b",
               "name": "권○○",
               "title": "",
               "duty": "조교",
@@ -3126,7 +3115,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "e1952eb06392a86357dd53b9",
+              "personKey": "4d2676dd1c60383c1e0cae87",
               "name": "박○○",
               "title": "",
               "duty": "조교",
@@ -3137,7 +3126,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d229b3f595b17dd43ecf0d6d",
+              "personKey": "d95bd66ade88764f28f2a110",
               "name": "배○○",
               "title": "",
               "duty": "조교",
@@ -3155,7 +3144,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f341d6dfc45e5cf5658ab299",
+              "personKey": "05f4ae04e70333c0688306a2",
               "name": "박○○",
               "title": "학과장",
               "duty": "",
@@ -3166,7 +3155,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "bb395a1494b5c79b44641a12",
+              "personKey": "701b61cae32332eeb60e36f0",
               "name": "천○○",
               "title": "",
               "duty": "",
@@ -3177,7 +3166,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d0271b91606c49d26f348dc6",
+              "personKey": "3e44af456257dc38c77b9513",
               "name": "이○○",
               "title": "",
               "duty": "조교",
@@ -3195,7 +3184,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "87c2506241607202e662b932",
+              "personKey": "c83b9f8b83054872e98514b1",
               "name": "이○○",
               "title": "학과장",
               "duty": "",
@@ -3206,7 +3195,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "9d8bc7692f93a62301d4315f",
+              "personKey": "781902ae00b5da826aabef27",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -3217,7 +3206,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "d677c12f1c50858b4cd89ee4",
+              "personKey": "88744578f336677a3351f252",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3228,7 +3217,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1b0f553209d3e4a981d65d22",
+              "personKey": "1a437249dc7a5c9efc663b23",
               "name": "이○○",
               "title": "",
               "duty": "초빙",
@@ -3239,7 +3228,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "be6fd1221fdfb0e9f0b337c6",
+              "personKey": "df10e4bda0242b2a5d6fdd16",
               "name": "조○○",
               "title": "",
               "duty": "조교",
@@ -3257,7 +3246,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f14324b44bda3f0d5667f792",
+              "personKey": "d34954a03291f3a1fd7e5791",
               "name": "이○○",
               "title": "학과장",
               "duty": "",
@@ -3268,7 +3257,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "464e1cd9069f626128192a61",
+              "personKey": "ea17309b1b28ed26b2b22613",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3279,7 +3268,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "2f7f1fd4dbb492b026e2ff66",
+              "personKey": "814399d4ed805c7f722d5ed5",
               "name": "이○○",
               "title": "",
               "duty": "조교",
@@ -3297,7 +3286,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "fa7dbd9f5dfda15ef1cf5bc4",
+              "personKey": "2c47c5a642b0e8b95e449d6b",
               "name": "권○○",
               "title": "학과장",
               "duty": "",
@@ -3308,7 +3297,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "4607dc1f66ab69e3a8cb70fa",
+              "personKey": "becad60be52c67c128e8e5ae",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3319,7 +3308,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "6d249bd7ff69c0a76e844e41",
+              "personKey": "8070b2f31ebe420cf3cffdda",
               "name": "최○○",
               "title": "",
               "duty": "",
@@ -3330,7 +3319,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "896195e654acb837db95be94",
+              "personKey": "71b23df0c7ff2f3c21bb223e",
               "name": "신○○",
               "title": "",
               "duty": "조교",
@@ -3348,7 +3337,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "4990117e2b1e2ee19c5a7ab6",
+              "personKey": "53ebed1d7d590a76f5d16a9c",
               "name": "김○○",
               "title": "학과장",
               "duty": "",
@@ -3359,7 +3348,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "18bcd073cf2b325ec47ee41e",
+              "personKey": "7e63adb1e6b844ec19c6be9a",
               "name": "류○○",
               "title": "",
               "duty": "",
@@ -3370,7 +3359,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "056d02b967f8e7f6d5ea9537",
+              "personKey": "1616e0cdd55d50da0d559fc2",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -3381,7 +3370,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a60f830ab9d2751e91c706f3",
+              "personKey": "759793e5062197686169a36e",
               "name": "송○○",
               "title": "",
               "duty": "",
@@ -3392,7 +3381,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "925814377f0ac939c2f36c9f",
+              "personKey": "a06d397a729abb903c8e37c1",
               "name": "정○○",
               "title": "",
               "duty": "",
@@ -3403,7 +3392,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f31600f685068f6f058f7372",
+              "personKey": "d43eb47bf682a605ead009bc",
               "name": "이○○",
               "title": "",
               "duty": "조교",
@@ -3414,7 +3403,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "003b743708376130dbb520f2",
+              "personKey": "ffae2ec1eb50233dfb7a3fb7",
               "name": "최○○",
               "title": "",
               "duty": "조교",
@@ -3432,7 +3421,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "15be0d89b71b2729d2c4e65f",
+              "personKey": "464271a3d78cd7ac1a9ec7ab",
               "name": "김○○",
               "title": "학과장",
               "duty": "",
@@ -3443,7 +3432,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "81841c2b11d348c73d96420a",
+              "personKey": "49df99d8194dfafe4709746f",
               "name": "강○○",
               "title": "",
               "duty": "조교",
@@ -3461,7 +3450,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "e9f17b43dcf9abd1488d1e2d",
+              "personKey": "1789426158ca99f579336f03",
               "name": "김○○",
               "title": "학과장",
               "duty": "",
@@ -3472,7 +3461,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "5828ffef908272c0a2f93c64",
+              "personKey": "e08dd5d001f9818f275609ea",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3483,7 +3472,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "3d113d3459f062e5f008f610",
+              "personKey": "a3fa14e3571169e2c98d2ec6",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3494,7 +3483,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "0d9757547659b3d6b0cee285",
+              "personKey": "09d9b60a579b74d308656938",
               "name": "최○○",
               "title": "",
               "duty": "조교",
@@ -3512,7 +3501,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "056e937adaebc5164f1b9fb6",
+              "personKey": "da79244908397ba22dfe0a05",
               "name": "박○○",
               "title": "학과장",
               "duty": "",
@@ -3523,7 +3512,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "f2968cca078f88984ac1b3b2",
+              "personKey": "4967e8ec6ce21da60420e8d0",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3534,7 +3523,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "c5880b5cbeca10305bed1a92",
+              "personKey": "7eca217d622cab850bd62627",
               "name": "남○○",
               "title": "",
               "duty": "",
@@ -3545,7 +3534,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "cfdd500b9cbdbfe48f7075ec",
+              "personKey": "d79b168e33f77e2e4e33e870",
               "name": "신○○",
               "title": "",
               "duty": "",
@@ -3556,7 +3545,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "299b818722ea55698f86c3ec",
+              "personKey": "88660402d0486e89705cc231",
               "name": "오○○",
               "title": "",
               "duty": "",
@@ -3567,7 +3556,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "67b11a28c010414365260804",
+              "personKey": "2aefe738f1ba13f0da66241f",
               "name": "정○○",
               "title": "",
               "duty": "",
@@ -3578,7 +3567,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ca361b80af038d410da170d1",
+              "personKey": "e80596d0b6e5af970330d5b7",
               "name": "홍○○",
               "title": "",
               "duty": "",
@@ -3589,7 +3578,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "8c7b7131b42a2cd22c81e603",
+              "personKey": "dbcbe3ceb4c72aec4c64934a",
               "name": "김○○",
               "title": "",
               "duty": "조교",
@@ -3607,7 +3596,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "afe502a345b7ca7e548ffbb9",
+              "personKey": "8d23ef4dd1b7a51255a41a2d",
               "name": "박○○",
               "title": "학과장",
               "duty": "",
@@ -3618,7 +3607,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "95c877841a0d40e1ee4c0d51",
+              "personKey": "3c51fbe914c28b8f11fb7c07",
               "name": "지○○",
               "title": "",
               "duty": "조교",
@@ -3636,7 +3625,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "be60b45117625754bb71811c",
+              "personKey": "4aaea4fbfc9ab044ef9b9bfd",
               "name": "박○○",
               "title": "학과장",
               "duty": "",
@@ -3647,7 +3636,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "0853548e00f08077afe6783d",
+              "personKey": "1f970187957d8b433ddbe1a3",
               "name": "박○○",
               "title": "",
               "duty": "",
@@ -3658,7 +3647,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "40ad82deebce8625e5326cf8",
+              "personKey": "6a8952ece6ca49e8f7947214",
               "name": "장○○",
               "title": "",
               "duty": "",
@@ -3669,7 +3658,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "ee7b013d0dc11aff21ffe55d",
+              "personKey": "aa671a46756760a690872b29",
               "name": "한○○",
               "title": "",
               "duty": "",
@@ -3680,7 +3669,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "a61a91f021ae8ce271a035df",
+              "personKey": "627b4583d1e26a5e064213f7",
               "name": "장○○",
               "title": "",
               "duty": "조교",
@@ -3698,7 +3687,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "4b69a203acc5f0fcf251e6de",
+              "personKey": "9bdba993c0d1b66e039ac07c",
               "name": "이○○",
               "title": "학과장",
               "duty": "",
@@ -3709,7 +3698,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "862bf3d6e079cc194d474fa9",
+              "personKey": "5d854175942085a937a275a4",
               "name": "백○○",
               "title": "",
               "duty": "",
@@ -3720,7 +3709,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "05a8cceee6c2604617d2cde8",
+              "personKey": "5acffe14ceccc488d4deb585",
               "name": "김○○",
               "title": "",
               "duty": "조교",
@@ -3738,7 +3727,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "2be0af2d38f6adbbbc3a6bbf",
+              "personKey": "152e9151f67844a79f11a4de",
               "name": "최○○",
               "title": "학과장",
               "duty": "",
@@ -3749,7 +3738,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1c36e69eecb930cd999b5584",
+              "personKey": "9193b3a574a646dbc1157e02",
               "name": "김○○",
               "title": "",
               "duty": "조교",
@@ -3767,7 +3756,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "dd75fe5e80d0111baca22ed3",
+              "personKey": "84d38a823a4b8464480d399c",
               "name": "송○○",
               "title": "학과장",
               "duty": "",
@@ -3778,8 +3767,8 @@
               "externalNumber": false
             },
             {
-              "personKey": "d792331aa85c3e49e31631ee",
-              "name": "박○○",
+              "personKey": "cb2335a26571d8603e059c8e",
+              "name": "김○○",
               "title": "",
               "duty": "조교",
               "responsibilities": [],
@@ -3796,7 +3785,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f90e43c165eddd85bd89ed4b",
+              "personKey": "99b8ddf342dc62c33606c124",
               "name": "최○○",
               "title": "학과장",
               "duty": "",
@@ -3807,7 +3796,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "83570360db9fd19810ab5dfc",
+              "personKey": "05e209138a8d6fe2cbd59886",
               "name": "이○○",
               "title": "",
               "duty": "",
@@ -3818,7 +3807,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "bb95ad5a427d3df8077d4f9c",
+              "personKey": "f984539c63984c66c89c7bcb",
               "name": "장○○",
               "title": "",
               "duty": "조교",
@@ -3836,7 +3825,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "35b4c08caa9d22befa93be5d",
+              "personKey": "06ce38265cea58891df144f8",
               "name": "양○○",
               "title": "학과장",
               "duty": "",
@@ -3847,7 +3836,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "aa2104617084c4976cb65f41",
+              "personKey": "a3e24a14e012bcdf440635a3",
               "name": "김○○",
               "title": "",
               "duty": "조교",
@@ -3858,7 +3847,7 @@
               "externalNumber": false
             },
             {
-              "personKey": "1caebd01d7b8198070f8c00f",
+              "personKey": "398200fa3e0ae4ff7dd3da72",
               "name": "실○○",
               "title": "",
               "duty": "",
@@ -3876,7 +3865,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "4c7adfa76e6ff6b43df6bada",
+              "personKey": "c400c7ad3607d9133222045c",
               "name": "김○○",
               "title": "",
               "duty": "",
@@ -3894,7 +3883,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "0620e23c3e17e77329895cc9",
+              "personKey": "7732eab19abcf229affc5a2a",
               "name": "양○○",
               "title": "학과장",
               "duty": "",
@@ -3918,7 +3907,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "a19f08377fb666097b1ece0c",
+              "personKey": "2285d268115c510e8b1f4f94",
               "name": "혜전대학교 총동창회",
               "title": "",
               "duty": "",
@@ -3936,7 +3925,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "dd40114604147b7b2337ae1b",
+              "personKey": "9f7ba16776bfdddfa6752a02",
               "name": "전국대학노동조합 혜전대지부",
               "title": "",
               "duty": "",
@@ -3954,7 +3943,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "431ce209703ba9d36f310edc",
+              "personKey": "63d0cd4a989aceb06cf02df1",
               "name": "교직원아파트 경비실",
               "title": "",
               "duty": "",
@@ -3972,7 +3961,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "d9cc2d630cefd55cb0b427f6",
+              "personKey": "683a9b19a46a0fc006f741b0",
               "name": "경비실",
               "title": "",
               "duty": "",
@@ -3990,7 +3979,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "f181c9786a145c9d14a60cc5",
+              "personKey": "925571409f3c8417cb1309bb",
               "name": "당직실",
               "title": "",
               "duty": "",
@@ -4008,7 +3997,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "7ad153c5b048fd512e09229a",
+              "personKey": "6bd052a72499b695cff193db",
               "name": "미화원실",
               "title": "",
               "duty": "",
@@ -4026,7 +4015,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "2230f727758a3e11d4882859",
+              "personKey": "4be62f11f581f5b4bb271b95",
               "name": "카페테리아",
               "title": "",
               "duty": "",
@@ -4044,7 +4033,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "7440d698288c44f8074b7d5c",
+              "personKey": "4f849287e5fe7eef8226f161",
               "name": "베이커리",
               "title": "",
               "duty": "",
@@ -4062,7 +4051,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "691fc4555bd385213c16e9aa",
+              "personKey": "20c816da27eb1ddb4bcaeb04",
               "name": "충남산학융합원",
               "title": "",
               "duty": "",
@@ -4080,7 +4069,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "cdd6c886802bb70add53e646",
+              "personKey": "6562ab6473b91cdb8c7465cb",
               "name": "복사방",
               "title": "",
               "duty": "",
@@ -4098,7 +4087,7 @@
           "fax": "",
           "people": [
             {
-              "personKey": "c8a631b211f551d447a07015",
+              "personKey": "e817e543a36044d4d66f0fd9",
               "name": "안경원",
               "title": "",
               "duty": "",
@@ -4116,7 +4105,7 @@
           "fax": "041-634-7223",
           "people": [
             {
-              "personKey": "174a189aaa94e6115e770100",
+              "personKey": "cdb38e0fdf738df2006ef5ef",
               "name": "박평순",
               "title": "",
               "duty": "",
