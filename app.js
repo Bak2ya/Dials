@@ -1,6 +1,6 @@
 "use strict";
 
-const APP_VERSION = "0.12.0";
+const APP_VERSION = "0.12.1";
 const DIALS_SCHEMA_VERSION = "1.7";
 const DIALS_PAYLOAD_FIELDS = Object.freeze(["schemaVersion", "dataVersion", "generatedAt", "period", "title", "directoryMode", "contactExportEnabled", "categories"]);
 const DIALS_CATEGORY_FIELDS = Object.freeze(["id", "label", "organizations"]);

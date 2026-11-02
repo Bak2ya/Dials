@@ -843,8 +843,16 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
   .why-architecture { margin-top: 14px; padding-top: 12px; }
   .start-footer { margin-top: 14px; }
 
-  /* Only the search control remains at the top while the brand row scrolls away. */
-  #mainView > .app-header { display: contents; }
+  /* Only the search control remains sticky as the brand row scrolls away.
+     In iOS Home Screen standalone mode, the parent display:contents and
+     translucent sticky search backdrop can create an unwanted blur compositing
+     layer over the brand/title on first paint. Avoid both backdrop layers in
+     the mobile composition; the search background stays fully opaque. */
+  #mainView > .app-header {
+    display: contents;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
   #mainView > .app-header > .header-inner {
     position: relative;
     z-index: 30;
@@ -857,10 +865,10 @@ input:disabled { opacity: 0.68; cursor: not-allowed; }
     z-index: 20;
     width: 100%;
     padding: max(6px, env(safe-area-inset-top)) 12px 8px;
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   #mainView > .app-header > .search-bar-wrap .search-bar { width: min(100%, var(--content-width)); margin: 0 auto; }
   #mainView .menu-wrap { z-index: 31; }
